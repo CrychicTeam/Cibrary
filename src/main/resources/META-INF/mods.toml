@@ -33,6 +33,12 @@ mandatory=true
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+[[dependencies.${mod_id}]]
+modId="l2damagetracker"
+mandatory=false
+versionRange="[0.3.7,)"
+ordering="NONE"
+side="BOTH"
 #[[dependencies.${mod_id}]]
 #    modId="curios"
 #    mandatory=true

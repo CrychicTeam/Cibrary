@@ -200,6 +200,23 @@ dependencies {
         annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
     }
 
+    // Mixin extra
+    if (hasConfig("mixin_extras_version") && !config.mixin_extras_version.isEmpty()) {
+        implementation fg.deobf("com.github.llamalad7.mixinextras:mixinextras-forge:${config.mixin_extras_version}")
+        jarJar(group: 'com.github.llamalad7.mixinextras', name: 'mixinextras-forge', version: "[${config.mixin_extras_version},)")
+    }
+
+    // Libraries jarjar.
+    if (hasConfig("l2serial_version") && !config.l2serial_version.isEmpty()) {
+        implementation fg.deobf("dev.xkmc.l2serial:l2serial:${config.l2serial_version}")
+        jarJar(group: 'dev.xkmc', name: 'l2serial', version: "[${config.l2serial_version},)")
+    }
+
+    if (hasConfig("l2damagetracker_version") && !config.l2damagetracker_version.isEmpty()) {
+        implementation fg.deobf("dev.xkmc.l2damagetracker:l2damagetracker:${config.l2damagetracker_version}")
+        jarJar(group: 'dev.xkmc', name: 'l2damagetracker', version: "[${config.l2damagetracker_version},)")
+    }
+
     def libraries = new File(file("libraries"), "${config.mc_version}")
     if (!libraries.isDirectory()) libraries.mkdirs()
 
