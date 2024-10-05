@@ -1,32 +1,27 @@
 package org.crychicteam.cibrary.sound;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.entity.Entity;
+import org.crychicteam.cibrary.network.CibraryNetworkHandler;
+import org.crychicteam.cibrary.network.sound.CibrarySoundPacket;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@OnlyIn(Dist.CLIENT)
+/**
+ * Manages sound playback on the server side, sending appropriate packets to clients.
+ * This class is responsible for initiating sound effects on clients from the server,
+ * including playing, stopping, and managing fading and looping sounds.
+ *
+ * @author M1hono
+ */
 public class CibrarySoundManager {
     private static CibrarySoundManager instance;
-    private final SoundManager mcSoundManager;
     private final Map<ResourceLocation, LoopingSound> loopingSounds = new ConcurrentHashMap<>();
 
-    private CibrarySoundManager() {
-        this.mcSoundManager = Minecraft.getInstance().getSoundManager();
-        MinecraftForge.EVENT_BUS.register(this);
-    }
+    private CibrarySoundManager() {}
 
     public static CibrarySoundManager getInstance() {
         if (instance == null) {
@@ -35,118 +30,87 @@ public class CibrarySoundManager {
         return instance;
     }
 
-    public void playSound(Player player, SoundEvent sound, float volume, float pitch) {
-        SimpleSoundInstance instance = new SimpleSoundInstance(
-                sound,
-                SoundSource.PLAYERS,
-                volume,
-                pitch,
-                player.getRandom(),
-                player.getX(),
-                player.getY(),
-                player.getZ()
-        );
-        mcSoundManager.play(instance);
+    public void playSound(ServerPlayer player, SoundEvent sound, float volume, float pitch, float fadeInTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), volume, pitch, fadeInTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.PLAY);
+        CibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
     }
 
-    public void playLoopingSound(Player player, SoundEvent sound, float volume, float pitch, int loopCount) {
-        LoopingSound loopingSound = new LoopingSound(sound, player, volume, pitch, loopCount);
-        loopingSounds.put(sound.getLocation(), loopingSound);
-        loopingSound.play();
+    public void playLoopingSound(ServerPlayer player, SoundEvent sound, float volume, float pitch, int loopCount, float fadeInTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), volume, pitch, fadeInTime, loopCount);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.PLAY);
+        CibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
+        loopingSounds.put(sound.getLocation(), new LoopingSound(sound, player, volume, pitch, loopCount, fadeInTime));
     }
 
-    public void stopSound(SoundEvent sound) {
-        mcSoundManager.stop(sound.getLocation(), null);
-        LoopingSound loopingSound = loopingSounds.remove(sound.getLocation());
-        if (loopingSound != null) {
-            loopingSound.stop();
-        }
+    public void stopSound(ServerPlayer player, SoundEvent sound, float fadeOutTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), 0, 0, fadeOutTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.STOP);
+        CibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
+        loopingSounds.remove(sound.getLocation());
     }
 
-    public void stopAllSounds() {
-        mcSoundManager.stop();
-        for (LoopingSound loopingSound : loopingSounds.values()) {
-            loopingSound.stop();
-        }
+    public void stopAllSounds(ServerPlayer player, float fadeOutTime) {
+        SoundData soundData = new SoundData(null, 0, 0, fadeOutTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.STOP_ALL);
+        CibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
         loopingSounds.clear();
     }
 
-    public boolean isPlaying(SoundInstance sound) {
-        return mcSoundManager.isActive(sound);
+    public void crossFade(ServerPlayer player, SoundEvent oldSound, SoundEvent newSound, float volume, float pitch, float fadeTime) {
+        SoundData oldSoundData = new SoundData(oldSound.getLocation(), 0, 0, fadeTime, 0);
+        SoundData newSoundData = new SoundData(newSound.getLocation(), volume, pitch, fadeTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(oldSoundData, newSoundData, CibrarySoundPacket.PacketType.CROSS_FADE);
+        CibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
     }
 
-    public boolean isLoopingSoundPlaying(SoundEvent sound) {
-        LoopingSound loopingSound = loopingSounds.get(sound.getLocation());
-        return loopingSound != null && loopingSound.isPlaying();
+    public void playSoundToAll(SoundEvent sound, float volume, float pitch, float fadeInTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), volume, pitch, fadeInTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.PLAY);
+        CibraryNetworkHandler.HANDLER.toAllClient(packet);
     }
 
-    @SubscribeEvent
-    public void onSoundPlay(PlaySoundEvent event) {
-        if (event.getSound() instanceof SimpleSoundInstance sound) {
-            LoopingSound loopingSound = loopingSounds.get(sound.getLocation());
-
-            if (loopingSound != null && loopingSound.shouldLoop()) {
-                event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
-                loopingSound.playNextLoop();
-            }
-        }
+    public void playLoopingSoundToAll(SoundEvent sound, float volume, float pitch, int loopCount, float fadeInTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), volume, pitch, fadeInTime, loopCount);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.PLAY);
+        CibraryNetworkHandler.HANDLER.toAllClient(packet);
     }
 
-    private class LoopingSound {
+    public void stopSoundForAll(SoundEvent sound, float fadeOutTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), 0, 0, fadeOutTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.STOP);
+        CibraryNetworkHandler.HANDLER.toAllClient(packet);
+        loopingSounds.remove(sound.getLocation());
+    }
+
+    public void stopAllSoundsForAll(float fadeOutTime) {
+        SoundData soundData = new SoundData(null, 0, 0, fadeOutTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.STOP_ALL);
+        CibraryNetworkHandler.HANDLER.toAllClient(packet);
+        loopingSounds.clear();
+    }
+
+    public void playSoundToTracking(Entity entity, SoundEvent sound, float volume, float pitch, float fadeInTime) {
+        SoundData soundData = new SoundData(sound.getLocation(), volume, pitch, fadeInTime, 0);
+        CibrarySoundPacket packet = new CibrarySoundPacket(soundData, CibrarySoundPacket.PacketType.PLAY);
+        CibraryNetworkHandler.HANDLER.toTrackingPlayers(packet, entity);
+    }
+
+    private static class LoopingSound {
         private final SoundEvent sound;
-        private final Player player;
+        private final ServerPlayer player;
         private final float volume;
         private final float pitch;
         private final int totalLoops;
-        private int currentLoop;
-        private boolean stopped = false;
-        private SoundInstance currentInstance;
+        private final float fadeInTime;
 
-        LoopingSound(SoundEvent sound, Player player, float volume, float pitch, int loopCount) {
+        LoopingSound(SoundEvent sound, ServerPlayer player, float volume, float pitch, int loopCount, float fadeInTime) {
             this.sound = sound;
             this.player = player;
             this.volume = volume;
             this.pitch = pitch;
             this.totalLoops = loopCount;
-            this.currentLoop = 0;
-        }
-
-        void play() {
-            playNextLoop();
-        }
-
-        void playNextLoop() {
-            if (shouldLoop() && !stopped) {
-                currentInstance = new SimpleSoundInstance(
-                        sound,
-                        SoundSource.PLAYERS,
-                        volume,
-                        pitch,
-                        player.getRandom(),
-                        player.getX(),
-                        player.getY(),
-                        player.getZ()
-                );
-                mcSoundManager.play(currentInstance);
-                currentLoop++;
-            } else {
-                loopingSounds.remove(sound.getLocation());
-            }
-        }
-
-        boolean shouldLoop() {
-            return (totalLoops == -1 || currentLoop < totalLoops) && !stopped;
-        }
-
-        void stop() {
-            stopped = true;
-            if (currentInstance != null) {
-                mcSoundManager.stop(currentInstance);
-            }
-        }
-
-        boolean isPlaying() {
-            return currentInstance != null && mcSoundManager.isActive(currentInstance);
+            this.fadeInTime = fadeInTime;
         }
     }
 }

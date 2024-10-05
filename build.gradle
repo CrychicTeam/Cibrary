@@ -122,17 +122,28 @@ minecraft {
         }
 
         data {
-            workingDirectory project.file('run/client')
+            workingDirectory project.file('run/data')
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', config.mod_id
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             def args = new ArrayList()
+            args.add "--mod"
+            args.add config.mod_id
+            args.add "--all"
+            args.add "--output"
+            args.add file('src/generated/resources/').absolutePath
+            args.add "--existing"
+            args.add file('src/main/resources/').absolutePath
+
             args.add "--mixin"
             args.add "mixins.${config.mod_id}.json"
+
             setArgs(args)
+
             mods {
-                "${mod_id}" {
+                "${config.mod_id}" {
                     source sourceSets.main
                 }
             }
@@ -168,6 +179,10 @@ repositories {
             includeGroup "top.theillusivec4.curios"
         }
     }
+    maven {
+        name "KosmX's maven"
+        url 'https://maven.kosmx.dev/'
+    }
     flatDir { dirs "libraries/${config.mc_version}/all" }
     flatDir { dirs "libraries/${config.mc_version}/classpathOnly" }
     flatDir { dirs "libraries/${config.mc_version}/runtimeOnly" }
@@ -176,6 +191,7 @@ repositories {
 
 dependencies {
     minecraft "net.neoforged:forge:${config.mc_version}-${config.forge_version}"
+    compileOnly(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${config.mixin_extras_version}"))
 
     implementation fg.deobf("com.tterrag.registrate:Registrate:${config.registrate_version}")
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.20,MC1.21)")
@@ -196,6 +212,11 @@ dependencies {
         runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${config.curios_version}")
     }
 
+    if (hasConfig("playeranimator_version") && !config.playeranimator_version.isEmpty()) {
+        implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${config.playeranimator_version}")
+        runtimeOnly fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${config.bendylib_version}")
+    }
+
     if (hasConfig("enable_annotation") && Boolean.parseBoolean(config.enable_annotation)) {
         annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
     }
@@ -207,14 +228,15 @@ dependencies {
     }
 
     // Libraries jarjar.
-    if (hasConfig("l2serial_version") && !config.l2serial_version.isEmpty()) {
-        implementation fg.deobf("dev.xkmc.l2serial:l2serial:${config.l2serial_version}")
-        jarJar(group: 'dev.xkmc', name: 'l2serial', version: "[${config.l2serial_version},)")
-    }
 
     if (hasConfig("l2damagetracker_version") && !config.l2damagetracker_version.isEmpty()) {
         implementation fg.deobf("dev.xkmc.l2damagetracker:l2damagetracker:${config.l2damagetracker_version}")
         jarJar(group: 'dev.xkmc', name: 'l2damagetracker', version: "[${config.l2damagetracker_version},)")
+    }
+
+    if (hasConfig("l2serial_version") && !config.l2serial_version.isEmpty()) {
+        implementation fg.deobf("dev.xkmc.l2serial:l2serial:${config.l2serial_version}")
+        jarJar(group: 'dev.xkmc', name: 'l2serial', version: "[${config.l2serial_version},)")
     }
 
     def libraries = new File(file("libraries"), "${config.mc_version}")
@@ -310,6 +332,7 @@ jar {
                 "MixinConfigs"            : "mixins.${config.mod_id}.json"
         ])
     }
+    archiveClassifier.set('slim')
 }
 
 task deobfJar(type: Jar) {
@@ -584,7 +607,13 @@ tasks.register("incrementBuildVersionProperty") {
     doLast incrementBuild
 }
 
-// This piece of garbage will ensure that the build number is updated after build is executed.
 tasks.jarJar.finalizedBy('reobfJarJar')
-tasks.build.doLast incrementBuild
-tasks.buildAndUploadMod.doLast incrementBuild
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+tasks.jarJar.configure {
+    // remove '-all' from jarJar jar file
+    archiveClassifier.set('')
+}
