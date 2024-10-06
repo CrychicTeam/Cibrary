@@ -9,6 +9,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.crychicteam.cibrary.api.registry.armorset.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.ArmorSetAttackListener;
+import org.crychicteam.cibrary.content.armorset.ArmorSetExample;
 import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
 import org.crychicteam.cibrary.content.events.ArmorSetHandler;

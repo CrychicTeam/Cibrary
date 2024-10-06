@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
@@ -28,6 +29,7 @@ public class ArmorSet {
     private final SetEffect effect;
     private final Map<EquipmentSlot, Set<Item>> equipmentItems;
     private final Map<String, Integer> requiredCurios;
+    private static final Item EMPTY_SLOT_MARKER = null;
 
     public ArmorSet(String identifier, SetEffect effect) {
         this.identifier = identifier;
@@ -42,7 +44,12 @@ public class ArmorSet {
     }
 
     public void addEquipmentItem(EquipmentSlot slot, Item item) {
-        equipmentItems.get(slot).add(item);
+        if (item == Items.AIR) {
+            equipmentItems.get(slot).clear();
+            equipmentItems.get(slot).add(EMPTY_SLOT_MARKER);
+        } else {
+            equipmentItems.get(slot).add(item);
+        }
     }
 
     public void addRequiredCurio(String curioType, int count) {
@@ -81,7 +88,11 @@ public class ArmorSet {
     public boolean matches(LivingEntity entity) {
         for (Map.Entry<EquipmentSlot, Set<Item>> entry : equipmentItems.entrySet()) {
             ItemStack equippedItem = entity.getItemBySlot(entry.getKey());
-            if (!entry.getValue().isEmpty() && (equippedItem.isEmpty() || !entry.getValue().contains(equippedItem.getItem()))) {
+            if (entry.getValue().contains(EMPTY_SLOT_MARKER)) {
+                if (!equippedItem.isEmpty()) {
+                    return false;
+                }
+            } else if (!entry.getValue().isEmpty() && (equippedItem.isEmpty() || !entry.getValue().contains(equippedItem.getItem()))) {
                 return false;
             }
         }
@@ -112,14 +123,21 @@ public class ArmorSet {
 
     public void onCreateSource(CreateSourceEvent event) {}
 
-    public void applyEffectsAndAttributes(LivingEntity entity) {
+    public void applyMobEffects(LivingEntity entity) {
         for (Map.Entry<MobEffect, Integer> entry : effects.entrySet()) {
-            entity.addEffect(new MobEffectInstance(entry.getKey(), Integer.MAX_VALUE, entry.getValue(), false, false));
+            entity.addEffect(new MobEffectInstance(entry.getKey(), 600, entry.getValue(), false, false));
         }
+    }
 
+    public void applyAttributes(LivingEntity entity) {
         for (Map.Entry<Attribute, AttributeModifier> entry : attributes.entries()) {
-            entity.getAttribute(entry.getKey()).addTransientModifier(entry.getValue());
+            Objects.requireNonNull(entity.getAttribute(entry.getKey())).addTransientModifier(entry.getValue());
         }
+    }
+
+    public void applyEffectsAndAttributes(LivingEntity entity) {
+        applyMobEffects(entity);
+        applyAttributes(entity);
     }
 
     public void removeEffectsAndAttributes(LivingEntity entity) {

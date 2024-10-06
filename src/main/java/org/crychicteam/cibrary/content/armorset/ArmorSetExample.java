@@ -1,4 +1,4 @@
-package org.crychicteam.cibrary;
+package org.crychicteam.cibrary.content.armorset;
 
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -6,8 +6,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import org.crychicteam.cibrary.api.registry.armorset.ArmorSetBuilder;
-import org.crychicteam.cibrary.content.armorset.ArmorSet;
-import org.crychicteam.cibrary.content.armorset.DefaultSetEffect;
 
 public class ArmorSetExample {
     static {
@@ -15,7 +13,7 @@ public class ArmorSetExample {
                 .addEquipment(EquipmentSlot.HEAD, Items.DIAMOND_HELMET)
                 .addEquipment(EquipmentSlot.CHEST, Items.DIAMOND_CHESTPLATE)
                 .addEquipment(EquipmentSlot.LEGS, Items.DIAMOND_LEGGINGS)
-                .addEquipment(EquipmentSlot.FEET, Items.DIAMOND_BOOTS)
+                .addEquipment(EquipmentSlot.FEET, Items.AIR)
                 .addEffect(MobEffects.DAMAGE_BOOST, 1)
                 .addEffect(MobEffects.MOVEMENT_SPEED, 0)
                 .addAttribute(Attributes.MAX_HEALTH, "dragon_health_boost", 10.0, AttributeModifier.Operation.ADDITION)

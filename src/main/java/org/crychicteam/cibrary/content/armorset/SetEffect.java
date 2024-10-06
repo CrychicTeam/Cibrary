@@ -17,7 +17,6 @@ public interface SetEffect {
     void skillEffect(LivingEntity entity);
 
     /**
-     * Haven't achieved.
      * Trigger when the entity finish using an item with this kind of ArmorSet.
      * @param entity
      */
