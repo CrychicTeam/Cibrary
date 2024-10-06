@@ -7,8 +7,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
 import org.crychicteam.cibrary.CibraryClient;
-import org.crychicteam.cibrary.sound.CibrarySoundManagerHandler;
-import org.crychicteam.cibrary.sound.SoundData;
+import org.crychicteam.cibrary.content.sound.CibrarySoundManagerHandler;
+import org.crychicteam.cibrary.content.sound.SoundData;
 
 @SerialClass
 public class CibrarySoundPacket extends SerialPacketBase {

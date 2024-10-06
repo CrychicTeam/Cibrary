@@ -5,8 +5,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
-import org.crychicteam.cibrary.armorset.ArmorSet;
-import org.crychicteam.cibrary.armorset.SetEffect;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.SetEffect;
 
 public class ArmorSetBuilder {
     private final ArmorSet armorSet;

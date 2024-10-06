@@ -4,7 +4,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import org.crychicteam.cibrary.sound.CibrarySoundManagerHandler;
+import org.crychicteam.cibrary.content.sound.CibrarySoundManagerHandler;
 
 @Mod.EventBusSubscriber(modid = Cibrary.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CibraryClient {

@@ -8,13 +8,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.crychicteam.cibrary.api.registry.armorset.ArmorSetRegistry;
-import org.crychicteam.cibrary.armorset.ArmorSetAttackListener;
-import org.crychicteam.cibrary.armorset.ArmorSetManager;
-import org.crychicteam.cibrary.armorset.capability.ArmorSetCapability;
-import org.crychicteam.cibrary.armorset.events.ArmorSetHandler;
-import org.crychicteam.cibrary.armorset.integration.CuriosIntegration;
+import org.crychicteam.cibrary.content.armorset.ArmorSetAttackListener;
+import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.events.ArmorSetHandler;
+import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
-import org.crychicteam.cibrary.sound.CibrarySoundManager;
+import org.crychicteam.cibrary.content.sound.CibrarySoundManager;
 import org.slf4j.Logger;
 
 @Mod(Cibrary.MOD_ID)

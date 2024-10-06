@@ -6,8 +6,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import org.crychicteam.cibrary.api.registry.armorset.ArmorSetBuilder;
-import org.crychicteam.cibrary.armorset.ArmorSet;
-import org.crychicteam.cibrary.armorset.DefaultSetEffect;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.DefaultSetEffect;
 
 public class ArmorSetExample {
     static {

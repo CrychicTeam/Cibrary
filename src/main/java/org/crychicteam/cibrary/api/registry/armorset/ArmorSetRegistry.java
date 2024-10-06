@@ -1,7 +1,7 @@
 package org.crychicteam.cibrary.api.registry.armorset;
 
 import org.crychicteam.cibrary.Cibrary;
-import org.crychicteam.cibrary.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
