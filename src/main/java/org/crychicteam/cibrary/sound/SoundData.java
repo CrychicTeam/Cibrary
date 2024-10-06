@@ -2,11 +2,15 @@ package org.crychicteam.cibrary.sound;
 
 import dev.xkmc.l2serial.serialization.SerialClass;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 
 @SerialClass
 public class SoundData {
     @SerialClass.SerialField
     public ResourceLocation sound;
+
+    @SerialClass.SerialField
+    public SoundSource soundType;
 
     @SerialClass.SerialField
     public float volume;
@@ -22,8 +26,9 @@ public class SoundData {
 
     public SoundData() {}
 
-    public SoundData(ResourceLocation sound, float volume, float pitch, float fadeTime, int loopCount) {
+    public SoundData(ResourceLocation sound, SoundSource soundType, float volume, float pitch, float fadeTime, int loopCount) {
         this.sound = sound;
+        this.soundType = soundType;
         this.volume = volume;
         this.pitch = pitch;
         this.fadeTime = fadeTime;

@@ -193,7 +193,7 @@ dependencies {
     minecraft "net.neoforged:forge:${config.mc_version}-${config.forge_version}"
     compileOnly(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${config.mixin_extras_version}"))
 
-    implementation fg.deobf("com.tterrag.registrate:Registrate:${config.registrate_version}")
+    compileOnly fg.deobf("com.tterrag.registrate:Registrate:${config.registrate_version}")
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.20,MC1.21)")
 
     if (hasConfig("jei_version") && !config.jei_version.isEmpty()) {
@@ -226,6 +226,12 @@ dependencies {
         implementation fg.deobf("com.github.llamalad7.mixinextras:mixinextras-forge:${config.mixin_extras_version}")
         jarJar(group: 'com.github.llamalad7.mixinextras', name: 'mixinextras-forge', version: "[${config.mixin_extras_version},)")
     }
+
+    if (hasConfig("l2_library_version") && !config.l2_library_version.isEmpty()) {
+        implementation fg.deobf("dev.xkmc.l2library:l2library:${config.l2_library_version}")
+        jarJar(group: 'dev.xkmc', name: 'l2library', version: "[${config.l2_library_version},)")
+    }
+
 
     // Libraries jarjar.
 

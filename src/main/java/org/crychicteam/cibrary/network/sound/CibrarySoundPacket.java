@@ -2,11 +2,13 @@ package org.crychicteam.cibrary.network.sound;
 
 import dev.xkmc.l2serial.network.SerialPacketBase;
 import dev.xkmc.l2serial.serialization.SerialClass;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
+import org.crychicteam.cibrary.CibraryClient;
 import org.crychicteam.cibrary.sound.CibrarySoundManagerHandler;
 import org.crychicteam.cibrary.sound.SoundData;
-
-import net.minecraft.sounds.SoundEvent;
 
 @SerialClass
 public class CibrarySoundPacket extends SerialPacketBase {
@@ -14,7 +16,7 @@ public class CibrarySoundPacket extends SerialPacketBase {
     public SoundData soundData;
 
     @SerialClass.SerialField
-    public SoundData newSoundData; // For cross-fade
+    public SoundData newSoundData;
 
     @SerialClass.SerialField
     public PacketType packetType;
@@ -46,27 +48,29 @@ public class CibrarySoundPacket extends SerialPacketBase {
     }
 
     private void handleClientSide() {
-        CibrarySoundManagerHandler manager = CibrarySoundManagerHandler.getInstance();
-        SoundEvent sound = SoundEvent.createVariableRangeEvent(soundData.sound);
+        CibrarySoundManagerHandler manager = CibraryClient.CLIENT_SOUND_MANAGER;
+        Player clientPlayer = Minecraft.getInstance().player;
 
         switch (packetType) {
             case PLAY:
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(soundData.sound);
                 if (soundData.loopCount > 0) {
-                    manager.playLoopingSound(null, sound, soundData.volume, soundData.pitch, soundData.loopCount, soundData.fadeTime);
+                    manager.playLoopingSound(clientPlayer, sound, soundData.soundType, soundData.volume, soundData.pitch, soundData.loopCount, soundData.fadeTime);
                 } else {
-                    manager.playSound(null, sound, soundData.volume, soundData.pitch, soundData.fadeTime);
+                    manager.playSound(clientPlayer, sound, soundData.soundType, soundData.volume, soundData.pitch, soundData.fadeTime);
                 }
                 break;
             case STOP:
-                manager.stopSound(sound, soundData.fadeTime);
+                manager.stopSound(soundData.sound, soundData.fadeTime);
                 break;
             case STOP_ALL:
                 manager.stopAllSounds(soundData.fadeTime);
                 break;
             case CROSS_FADE:
                 if (newSoundData != null) {
+                    SoundEvent oldSound = SoundEvent.createVariableRangeEvent(soundData.sound);
                     SoundEvent newSound = SoundEvent.createVariableRangeEvent(newSoundData.sound);
-                    manager.crossFade(sound, newSound, null, newSoundData.volume, newSoundData.pitch, newSoundData.fadeTime);
+                    manager.crossFade(oldSound.getLocation(), newSound, clientPlayer, newSoundData.soundType, newSoundData.volume, newSoundData.pitch, newSoundData.fadeTime);
                 }
                 break;
         }
