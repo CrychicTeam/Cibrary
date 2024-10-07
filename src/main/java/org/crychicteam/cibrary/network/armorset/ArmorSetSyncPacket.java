@@ -1,0 +1,49 @@
+package org.crychicteam.cibrary.network.armorset;
+
+import dev.xkmc.l2serial.network.SerialPacketBase;
+import dev.xkmc.l2serial.serialization.SerialClass;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.network.NetworkEvent;
+import org.crychicteam.cibrary.Cibrary;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.DefaultArmorSet;
+import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+
+@SerialClass
+public class ArmorSetSyncPacket extends SerialPacketBase {
+    @SerialClass.SerialField
+    public String activeSetIdentifier;
+
+    public ArmorSetSyncPacket() {}
+
+    public ArmorSetSyncPacket(ArmorSetCapability cap) {
+        ArmorSet activeSet = cap.getActiveSet();
+        this.activeSetIdentifier = activeSet != null ? activeSet.getIdentifier() : "";
+    }
+
+    @Override
+    public void handle(NetworkEvent.Context context) {
+        context.enqueueWork(() -> {
+            if (context.getDirection().getReceptionSide().isClient()) {
+                handleClientSide();
+            }
+        });
+        context.setPacketHandled(true);
+    }
+
+    private void handleClientSide() {
+        Player clientPlayer = Minecraft.getInstance().player;
+        if (clientPlayer != null) {
+            clientPlayer.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap -> {
+                if (!activeSetIdentifier.isEmpty()) {
+                    ArmorSet activeSet = ArmorSetManager.getInstance().getArmorSetByIdentifier(activeSetIdentifier);
+                    cap.setActiveSet(activeSet);
+                } else {
+                    cap.setActiveSet(Cibrary.ARMOR_SET_MANAGER.getDefaultArmorSet());
+                }
+            });
+        }
+    }
+}

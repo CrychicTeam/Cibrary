@@ -17,16 +17,6 @@ public class DefaultSetEffect implements SetEffect{
     }
 
     @Override
-    public void skillEffect(LivingEntity entity) {
-
-    }
-
-    @Override
-    public void releaseEffect(LivingEntity entity) {
-
-    }
-
-    @Override
     public String getIdentifier() {
         return "";
     }

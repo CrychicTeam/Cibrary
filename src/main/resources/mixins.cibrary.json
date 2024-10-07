@@ -1,16 +1,18 @@
 {
- "required": true,
- "minVersion": "0.8.5",
- "package": "org.crychicteam.cibrary.mixin",
- "refmap": "mixins.modid.refmap.json",
- "target": "@env(DEFAULT)",
- "compatibilityLevel": "JAVA_17",
- "mixins": [
-  "PersistentEntitySectionManagerAccessor",
-  "ServerLevelAccessor"
- ],
- "client": [
- ],
- "server": [
- ]
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "org.crychicteam.cibrary.mixin",
+  "refmap": "mixins.modid.refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ItemStackMixin",
+    "PersistentEntitySectionManagerAccessor",
+    "LivingEntityMixin",
+    "ServerLevelAccessor"
+  ],
+  "client": [
+  ],
+  "server": [
+  ]
 }

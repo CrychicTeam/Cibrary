@@ -11,12 +11,24 @@ import org.crychicteam.cibrary.content.armorset.SetEffect;
 public class ArmorSetBuilder {
     private final ArmorSet armorSet;
 
-    private ArmorSetBuilder(String identifier, SetEffect effect) {
-        this.armorSet = new ArmorSet(identifier, effect);
+    private ArmorSetBuilder(ArmorSet armorSet) {
+        this.armorSet =  armorSet;
+    }
+
+    private ArmorSetBuilder(ArmorSet armorSet, SetEffect effect) {
+        this.armorSet = armorSet != null ? armorSet : new ArmorSet("default", effect);
+    }
+
+    public static ArmorSetBuilder create(String identifier) {
+        return new ArmorSetBuilder(new ArmorSet(identifier));
     }
 
     public static ArmorSetBuilder create(String identifier, SetEffect effect) {
-        return new ArmorSetBuilder(identifier, effect);
+        return new ArmorSetBuilder(new ArmorSet(identifier, effect), effect);
+    }
+
+    public static ArmorSetBuilder create(ArmorSet armorSet) {
+        return new ArmorSetBuilder(armorSet);
     }
 
     public ArmorSetBuilder addEquipment(EquipmentSlot slot, Item item) {
@@ -34,8 +46,8 @@ public class ArmorSetBuilder {
         return this;
     }
 
-    public ArmorSetBuilder addRequiredCurio(String curioType, int count) {
-        armorSet.addRequiredCurio(curioType, count);
+    public ArmorSetBuilder addRequiredCurio(Item item, int count) {
+        armorSet.addCurioItem(item, count);
         return this;
     }
 

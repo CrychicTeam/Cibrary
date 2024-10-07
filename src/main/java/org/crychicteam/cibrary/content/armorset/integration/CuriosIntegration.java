@@ -1,24 +1,23 @@
 package org.crychicteam.cibrary.content.armorset.integration;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
+import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Mod.EventBusSubscriber(modid = Cibrary.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CuriosIntegration {
-    private static boolean isCuriosLoaded = ModList.get().isLoaded("curios");
+    public static boolean isCuriosLoaded = ModList.get().isLoaded("curios");
     private static Class<?> curiosApiClass;
     private static Method getCuriosInventoryMethod;
     private static Method getStacksMethod;
@@ -63,52 +62,16 @@ public class CuriosIntegration {
         return Collections.emptyList();
     }
 
-    public static boolean isPresent(LivingEntity entity, Item item) {
-        if (!isCuriosLoaded) return false;
-        List<ItemStack> allItems = getAllItems(entity);
-        return allItems.stream().anyMatch(stack -> stack.getItem() == item);
-    }
-
-    public static Map<String, Integer> getEquippedCuriosTypesAndCounts(LivingEntity entity) {
-        if (!isCuriosLoaded) return Collections.emptyMap();
-        Map<String, Integer> curiosCounts = new HashMap<>();
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                Method getCuriosMethod = handler.getClass().getMethod("getCurios");
-                Map<String, ?> curios = (Map<String, ?>) getCuriosMethod.invoke(handler);
-                for (Map.Entry<String, ?> entry : curios.entrySet()) {
-                    String slotType = entry.getKey();
-                    int count = (int) streamStacks(entry.getValue()).filter(stack -> !stack.isEmpty()).count();
-                    if (count > 0) {
-                        curiosCounts.put(slotType, count);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return curiosCounts;
-    }
-
-    public static boolean matchesCurioRequirements(LivingEntity entity, Map<String, Integer> requiredCurios) {
+    public static boolean matchesCurioRequirements(LivingEntity entity, Map<Item, Integer> requiredCurios) {
         if (!isCuriosLoaded) return true;
         List<ItemStack> equippedCurios = getAllItems(entity);
         Map<Item, Integer> equippedCuriosCount = new HashMap<>();
         for (ItemStack stack : equippedCurios) {
             equippedCuriosCount.merge(stack.getItem(), 1, Integer::sum);
         }
-        for (Map.Entry<String, Integer> entry : requiredCurios.entrySet()) {
-            String itemId = entry.getKey();
+        for (Map.Entry<Item, Integer> entry : requiredCurios.entrySet()) {
+            Item requiredItem = entry.getKey();
             int requiredCount = entry.getValue();
-            Item requiredItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
-            if (requiredItem == null) {
-                Cibrary.LOGGER.warn("Required curio item not found in registry: {}. Skipping this requirement.", itemId);
-                continue;
-            }
 
             int equippedCount = equippedCuriosCount.getOrDefault(requiredItem, 0);
             if (equippedCount < requiredCount) {
@@ -123,11 +86,11 @@ public class CuriosIntegration {
         if (event.getClass().getName().equals("top.theillusivec4.curios.api.event.CurioChangeEvent")) {
             try {
                 Object entity = event.getClass().getMethod("getEntity").invoke(event);
-                if (entity instanceof LivingEntity) {
-                    LivingEntity livingEntity = (LivingEntity) entity;
+                if (entity instanceof ServerPlayer player) {
                     ArmorSetManager armorSetManager = Cibrary.ARMOR_SET_MANAGER;
                     if (armorSetManager != null) {
-                        armorSetManager.updateEntitySetEffect(livingEntity);
+                        armorSetManager.updateEntitySetEffect(player);
+                        ArmorSetHandler.syncArmorSet(player);
                     } else {
                         System.err.println("ArmorSetManager is null in CuriosIntegration.onGenericEvent");
                     }

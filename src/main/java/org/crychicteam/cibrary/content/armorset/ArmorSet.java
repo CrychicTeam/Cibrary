@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import dev.xkmc.l2damagetracker.contents.attack.AttackCache;
 import dev.xkmc.l2damagetracker.contents.attack.CreateSourceEvent;
 import dev.xkmc.l2damagetracker.contents.attack.PlayerAttackCache;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -28,7 +29,7 @@ public class ArmorSet {
     private final Multimap<Attribute, AttributeModifier> attributes;
     private final SetEffect effect;
     private final Map<EquipmentSlot, Set<Item>> equipmentItems;
-    private final Map<String, Integer> requiredCurios;
+    private final Map<Item, Integer> curioItems;
     private static final Item EMPTY_SLOT_MARKER = null;
 
     public ArmorSet(String identifier, SetEffect effect) {
@@ -40,7 +41,11 @@ public class ArmorSet {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             this.equipmentItems.put(slot, new HashSet<>());
         }
-        this.requiredCurios = new HashMap<>();
+        this.curioItems = new HashMap<>();
+    }
+
+    public ArmorSet(String identifier) {
+        this(identifier, new DefaultSetEffect());
     }
 
     public void addEquipmentItem(EquipmentSlot slot, Item item) {
@@ -52,8 +57,8 @@ public class ArmorSet {
         }
     }
 
-    public void addRequiredCurio(String curioType, int count) {
-        requiredCurios.put(curioType, count);
+    public void addCurioItem(Item item, int count) {
+        curioItems.put(item, count);
     }
 
     public void addEffect(MobEffect effect, int amplifier) {
@@ -96,32 +101,41 @@ public class ArmorSet {
                 return false;
             }
         }
-        return CuriosIntegration.matchesCurioRequirements(entity, requiredCurios);
+        return CuriosIntegration.matchesCurioRequirements(entity, curioItems);
     }
 
-    public void onPlayerAttack(PlayerAttackCache cache) {}
-
-    public boolean onCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
-        return false;
+    public Map<EquipmentSlot, ItemStack> getEquippedItems(ServerPlayer entity) {
+        Map<EquipmentSlot, ItemStack> equippedItems = new EnumMap<>(EquipmentSlot.class);
+        for (Map.Entry<EquipmentSlot, Set<Item>> entry : equipmentItems.entrySet()) {
+            ItemStack equippedItem = entity.getItemBySlot(entry.getKey());
+            if (entry.getValue().contains(equippedItem.getItem())) {
+                equippedItems.put(entry.getKey(), equippedItem);
+            }
+        }
+        return equippedItems;
     }
 
-    public void setupProfile(AttackCache attackCache, BiConsumer<LivingEntity, ItemStack> setupProfile) {}
+    public List<ItemStack> getEquippedCurioItems(ServerPlayer entity) {
+        List<ItemStack> equippedCurios = new ArrayList<>();
+        if (CuriosIntegration.isCuriosLoaded) {
+            List<ItemStack> allCurios = CuriosIntegration.getAllItems(entity);
+            for (ItemStack curioStack : allCurios) {
+                if (curioItems.containsKey(curioStack.getItem())) {
+                    equippedCurios.add(curioStack);
+                }
+            }
+        }
+        return equippedCurios;
+    }
 
-    public void onAttack(AttackCache cache, ItemStack weapon) {}
-
-    public void postAttack(AttackCache cache, LivingAttackEvent event, ItemStack weapon) {}
-
-    public void onHurt(AttackCache cache, ItemStack weapon) {}
-
-    public void onHurtMaximized(AttackCache cache, ItemStack weapon) {}
-
-    public void postHurt(AttackCache cache, LivingHurtEvent event, ItemStack weapon) {}
-
-    public void onDamage(AttackCache cache, ItemStack weapon) {}
-
-    public void onDamageFinalized(AttackCache cache, ItemStack weapon) {}
-
-    public void onCreateSource(CreateSourceEvent event) {}
+    public Map<EquipmentSlot, ItemStack> getAllEquippedItems(ServerPlayer entity) {
+        Map<EquipmentSlot, ItemStack> allEquipped = getEquippedItems(entity);
+        List<ItemStack> curios = getEquippedCurioItems(entity);
+        if (!curios.isEmpty()) {
+            allEquipped.put(EquipmentSlot.OFFHAND, curios.get(0));
+        }
+        return allEquipped;
+    }
 
     public void applyMobEffects(LivingEntity entity) {
         for (Map.Entry<MobEffect, Integer> entry : effects.entrySet()) {
@@ -140,13 +154,48 @@ public class ArmorSet {
         applyAttributes(entity);
     }
 
-    public void removeEffectsAndAttributes(LivingEntity entity) {
+    public void removeEffects(LivingEntity entity) {
         for (MobEffect effect : effects.keySet()) {
             entity.removeEffect(effect);
         }
+    }
 
+    public void removeAttributes(LivingEntity entity) {
         for (Map.Entry<Attribute, AttributeModifier> entry : attributes.entries()) {
             Objects.requireNonNull(entity.getAttribute(entry.getKey())).removeModifier(entry.getValue());
         }
     }
+
+    public void removeEffectsAndAttributes(LivingEntity entity) {
+        removeEffects(entity);
+        removeAttributes(entity);
+    }
+
+    public Map<Item, Integer> getCurioItems() {
+        return Collections.unmodifiableMap(curioItems);
+    }
+
+    public void onCreateSource(CreateSourceEvent event) {}
+
+    public void onPlayerAttack(PlayerAttackCache cache) {}
+
+    public boolean onCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
+        return false;
+    }
+
+    public void setupProfile(AttackCache cache, BiConsumer<LivingEntity, ItemStack> setupProfile) {}
+
+    public void onAttack(AttackCache cache, ItemStack weapon) {}
+
+    public void postAttack(AttackCache cache, LivingAttackEvent event, ItemStack weapon) {}
+
+    public void onHurt(AttackCache cache, ItemStack weapon) {}
+
+    public void onHurtMaximized(AttackCache cache, ItemStack weapon) {}
+
+    public void postHurt(AttackCache cache, LivingHurtEvent event, ItemStack weapon) {}
+
+    public void onDamage(AttackCache cache, ItemStack weapon) {}
+
+    public void onDamageFinalized(AttackCache cache, ItemStack weapon) {}
 }

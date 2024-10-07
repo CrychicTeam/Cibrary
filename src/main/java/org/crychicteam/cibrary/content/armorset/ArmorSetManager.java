@@ -1,12 +1,14 @@
 package org.crychicteam.cibrary.content.armorset;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 
 import java.util.*;
 
@@ -15,7 +17,7 @@ public class ArmorSetManager {
     private final Map<String, ArmorSet> armorSetMap = new HashMap<>();
     private final Map<Item, Set<ArmorSet>> itemToSetIndex = new Object2ObjectOpenHashMap<>();
     private static ArmorSetManager instance;
-    private final ArmorSet defaultArmorSet;
+    private static ArmorSet defaultArmorSet;
 
     private ArmorSetManager() {
         defaultArmorSet = new DefaultArmorSet();
@@ -57,35 +59,35 @@ public class ArmorSetManager {
         return armorSetMap.getOrDefault(identifier, defaultArmorSet);
     }
 
-    public ArmorSet getActiveArmorSet(Player player) {
-        if (player == null) {
-            return defaultArmorSet;
-        }
-        return player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY)
-                .map(ArmorSetCapability::getActiveSet)
-                .orElse(defaultArmorSet);
-    }
-
     public void syncCapability(Player player) {
         player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap -> {
             updateEntitySetEffect(player);
         });
     }
+    public ArmorSet getActiveArmorSet(Player player) {
+        if (player == null) {
+            return null;
+        }
+        return player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY)
+                .map(ArmorSetCapability::getActiveSet)
+                .orElse(null);
+    }
 
     public void updateEntitySetEffect(LivingEntity entity) {
-        if (!entity.level().isClientSide) {
-            entity.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(armorSetCap -> {
+        if (!entity.level().isClientSide && entity instanceof Player player) {
+            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(armorSetCap -> {
                 ArmorSet currentSet = armorSetCap.getActiveSet();
-                ArmorSet newMatchedSet = findMatchingArmorSet(entity);
+                ArmorSet newMatchedSet = findMatchingArmorSet(player);
 
                 if (currentSet != newMatchedSet) {
-                    if (currentSet != null && currentSet != defaultArmorSet) {
-                        removeArmorSetEffect(entity, currentSet);
+                    if (currentSet != null) {
+                        removeArmorSetEffect(player, currentSet);
                     }
-                    if (newMatchedSet != defaultArmorSet) {
-                        applyArmorSetEffect(entity, newMatchedSet);
+                    if (newMatchedSet != null) {
+                        applyArmorSetEffect(player, newMatchedSet);
                     }
                     armorSetCap.setActiveSet(newMatchedSet);
+                    CibraryNetworkHandler.sendArmorSetSync((ServerPlayer) player, armorSetCap);
                 }
             });
         }
@@ -126,4 +128,6 @@ public class ArmorSetManager {
             effect.removeEffect(entity);
         }
     }
+
+    public ArmorSet getDefaultArmorSet () { return defaultArmorSet; }
 }

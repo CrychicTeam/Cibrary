@@ -9,8 +9,11 @@ import org.crychicteam.cibrary.content.sound.CibrarySoundManagerHandler;
 @Mod.EventBusSubscriber(modid = Cibrary.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CibraryClient {
     public static CibrarySoundManagerHandler CLIENT_SOUND_MANAGER;
+
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        CLIENT_SOUND_MANAGER = CibrarySoundManagerHandler.getInstance();
+        event.enqueueWork(() -> {
+            CLIENT_SOUND_MANAGER = CibrarySoundManagerHandler.getInstance();
+        });
     }
 }
