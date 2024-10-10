@@ -59,18 +59,13 @@ public class ArmorSetManager {
         return armorSetMap.getOrDefault(identifier, defaultArmorSet);
     }
 
-    public void syncCapability(Player player) {
-        player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap -> {
-            updateEntitySetEffect(player);
-        });
-    }
     public ArmorSet getActiveArmorSet(Player player) {
         if (player == null) {
             return null;
         }
         return player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY)
                 .map(ArmorSetCapability::getActiveSet)
-                .orElse(null);
+                .orElse(defaultArmorSet);
     }
 
     public void updateEntitySetEffect(LivingEntity entity) {

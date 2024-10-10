@@ -1,8 +1,10 @@
 package org.crychicteam.cibrary.content.armorset.capability;
 
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -13,16 +15,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
 import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
 
@@ -31,11 +29,13 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
     public static final ResourceLocation ARMOR_SET_CAPABILITY_ID = new ResourceLocation(Cibrary.MOD_ID, "armor_set");
 
     private ArmorSet activeSet;
+    private ArmorSet.State state;
     private Map<Item, ArmorSet> itemSetMap = new HashMap<>();
     private Map<Item, ArmorSet> curioSetMap = new HashMap<>();
 
     public ArmorSetCapability() {
         this.activeSet = ArmorSetManager.getInstance().getDefaultArmorSet();
+        this.state = ArmorSet.State.NORMAL;
     }
 
     public ArmorSet getActiveSet() {
@@ -45,6 +45,15 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
     public void setActiveSet(ArmorSet set) {
         this.activeSet = set;
         updateItemSetMap();
+    }
+
+    public ArmorSet.State getState(ArmorSet set) {
+        return set.getState();
+    }
+
+    public void setState(ArmorSet.State state) {
+        activeSet.setState(state);
+        this.state = state;
     }
 
     public boolean isItemInActiveSet(ItemStack itemStack) {
@@ -70,7 +79,6 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
                     }
                 }
             }
-            // Add Curios items
             for (Map.Entry<Item, Integer> entry : activeSet.getCurioItems().entrySet()) {
                 curioSetMap.put(entry.getKey(), activeSet);
             }
@@ -108,6 +116,7 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
         CompoundTag nbt = new CompoundTag();
         if (activeSet != null) {
             nbt.putString("activeSet", activeSet.getIdentifier());
+            nbt.putString("state", state.name());
         }
         return nbt;
     }
@@ -116,6 +125,12 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
     public void deserializeNBT(CompoundTag nbt) {
         String identifier = nbt.getString("activeSet");
         this.activeSet = ArmorSetManager.getInstance().getArmorSetByIdentifier(identifier);
+        String stateName = nbt.getString("state");
+        try {
+            this.state = ArmorSet.State.valueOf(stateName);
+        } catch (IllegalArgumentException e) {
+            this.state = ArmorSet.State.NORMAL;
+        }
         updateItemSetMap();
     }
 

@@ -10,7 +10,7 @@ import org.crychicteam.cibrary.content.armorset.ArmorSet;
 
 public class ArmorSetRegistryExample {
     static {
-        ArmorSet DIAMOND = ArmorSetBuilder.create("diamond")
+        ArmorSet DIAMOND = ArmorSetBuilder.create("diamond", new ExampleSetEffect())
                 .addEquipment(EquipmentSlot.HEAD, Items.DIAMOND_HELMET)
                 .addEquipment(EquipmentSlot.CHEST, Items.DIAMOND_CHESTPLATE)
                 .addEquipment(EquipmentSlot.LEGS, Items.DIAMOND_LEGGINGS)

@@ -7,8 +7,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "ItemStackMixin",
-    "PersistentEntitySectionManagerAccessor",
     "LivingEntityMixin",
+    "PersistentEntitySectionManagerAccessor",
     "ServerLevelAccessor"
   ],
   "client": [

@@ -11,6 +11,7 @@ import org.crychicteam.cibrary.api.registry.armorset.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.ArmorSetAttackListener;
 import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.example.ArmorSetRegistryExample;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
 import org.crychicteam.cibrary.content.sound.GlobalCibrarySoundManager;
@@ -30,6 +31,7 @@ public class Cibrary
 		IEventBus bus = ctx.getModEventBus();
 		bus.addListener(this::onCommonSetup);
 		bus.addListener(this::initializeArmorSets);
+		MinecraftForge.EVENT_BUS.register(this);
 		MinecraftForge.EVENT_BUS.register(new ArmorSetHandler());;
 		MinecraftForge.EVENT_BUS.register(new CuriosIntegration());
 
@@ -45,4 +47,5 @@ public class Cibrary
 	public void onCommonSetup(FMLCommonSetupEvent event) {
 		CibraryNetworkHandler.init();
 	}
+
 }

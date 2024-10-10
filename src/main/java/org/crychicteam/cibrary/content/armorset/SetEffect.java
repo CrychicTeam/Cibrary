@@ -1,6 +1,7 @@
 package org.crychicteam.cibrary.content.armorset;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,6 +47,16 @@ public interface SetEffect {
      * @param entity
      */
     default void startSprintingEffect(LivingEntity entity) {}
+
+    /**
+     * Trigger when the entity stop sprinting.
+     * @param entity
+     */
+    default void stopSprintingEffect(LivingEntity entity) {}
+
+    default void sprintingEffect(LivingEntity entity) {}
+
+    default void workingEffect(LivingEntity entity) {}
 
     /**
      * Trigger when the entity jump.

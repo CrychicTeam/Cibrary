@@ -18,7 +18,6 @@ public class ExampleArmorSet extends ArmorSet {
 
     @Override
     public void onPlayerAttack(PlayerAttackCache cache) {
-        super.onPlayerAttack(cache);
         if (cache.getPlayerAttackEntityEvent().getTarget() != null) {
             cache.getPlayerAttackEntityEvent().getTarget().kill();
         }

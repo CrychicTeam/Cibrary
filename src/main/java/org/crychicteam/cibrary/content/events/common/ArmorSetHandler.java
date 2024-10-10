@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MilkBucketItem;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
@@ -51,6 +52,21 @@ public class ArmorSetHandler {
             player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(capability-> {
                 ArmorSet activeset = capability.getActiveSet();
                 activeset.getEffect().releaseEffect(player);
+            });
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.player instanceof ServerPlayer player && player.isSprinting()) {
+            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap-> {
+                ArmorSet set = cap.getActiveSet();
+                set.getEffect().sprintingEffect(player);
+            });
+        } else if (event.player instanceof ServerPlayer player && !player.isSprinting()){
+            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap-> {
+                ArmorSet set = cap.getActiveSet();
+                set.getEffect().workingEffect(player);
             });
         }
     }

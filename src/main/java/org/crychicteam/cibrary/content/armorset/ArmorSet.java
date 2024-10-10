@@ -30,7 +30,8 @@ public class ArmorSet {
     private final SetEffect effect;
     private final Map<EquipmentSlot, Set<Item>> equipmentItems;
     private final Map<Item, Integer> curioItems;
-    private static final Item EMPTY_SLOT_MARKER = null;
+    protected static final Item EMPTY_SLOT_MARKER = null;
+    protected State state;
 
     public ArmorSet(String identifier, SetEffect effect) {
         this.identifier = identifier;
@@ -42,10 +43,17 @@ public class ArmorSet {
             this.equipmentItems.put(slot, new HashSet<>());
         }
         this.curioItems = new HashMap<>();
+        this.state = State.NORMAL;
     }
 
     public ArmorSet(String identifier) {
         this(identifier, new DefaultSetEffect());
+    }
+
+    public enum State {
+        NORMAL,
+        ACTIVE,
+        INACTIVE
     }
 
     public void addEquipmentItem(EquipmentSlot slot, Item item) {
@@ -70,6 +78,10 @@ public class ArmorSet {
         attributes.put(attribute, modifier);
     }
 
+    public void setState(State state) {
+        this.state = state;
+    }
+
     public String getIdentifier() {
         return identifier;
     }
@@ -84,6 +96,10 @@ public class ArmorSet {
 
     public SetEffect getEffect() {
         return effect;
+    }
+
+    public State getState() {
+        return state;
     }
 
     public Map<EquipmentSlot, Set<Item>> getEquipmentItems() {

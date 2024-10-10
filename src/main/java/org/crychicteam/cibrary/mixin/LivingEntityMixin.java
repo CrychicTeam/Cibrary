@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LivingEntityMixin {
 
     @Inject(method = "setSprinting", at = @At("HEAD"))
-    private void setSprintingHook(boolean pSprinting, CallbackInfo ci) {
+    private void cibrary$setSprintingHook(boolean pSprinting, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer && pSprinting) {
             ServerPlayer player = (ServerPlayer) self;
@@ -23,11 +23,17 @@ public abstract class LivingEntityMixin {
                 ArmorSet activeSet = cap.getActiveSet();
                 activeSet.getEffect().startSprintingEffect(player);
             });
+        } else if (self instanceof ServerPlayer && !pSprinting) {
+            ServerPlayer player = (ServerPlayer) self;
+            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap -> {
+                ArmorSet activeSet = cap.getActiveSet();
+                activeSet.getEffect().stopSprintingEffect(player);
+            });
         }
     }
 
     @Inject(method = "jumpFromGround", at = @At("HEAD"))
-    private void jumpFromGroundHook(CallbackInfo ci) {
+    private void cibrary$jumpFromGroundHook(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) self;
@@ -43,13 +49,13 @@ public abstract class LivingEntityMixin {
     }
 
     @Inject(method = "checkFallDamage", at = @At("HEAD"))
-    private void checkFallDamageHook(double pY, boolean pOnGround, BlockState pState, BlockPos pPos, CallbackInfo ci) {
+    private void cibrary$checkFallDamageHook(double pY, boolean pOnGround, BlockState pState, BlockPos pPos, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer && pOnGround) {
             ServerPlayer player = (ServerPlayer) self;
             player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap -> {
                 ArmorSet activeSet = cap.getActiveSet();
-                activeSet.getEffect().landEffect(player, pY, pState, pPos);
+                activeSet.getEffect().landEffect(player, player.fallDistance, pState, pPos);
             });
         }
     }

@@ -18,6 +18,6 @@ public class DefaultSetEffect implements SetEffect{
 
     @Override
     public String getIdentifier() {
-        return "";
+        return "defaultSetEffect";
     }
 }
