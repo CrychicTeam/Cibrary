@@ -1,27 +1,6 @@
 package org.crychicteam.cibrary.content.event;
 
-public class ItemHurtEffectResult {
-    private final boolean cancelled;
-    private final int damage;
-    private final boolean destroyed;
-
-    public ItemHurtEffectResult(boolean cancelled, int damage, boolean destroyed) {
-        this.cancelled = cancelled;
-        this.damage = damage;
-        this.destroyed = destroyed;
-    }
-
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public boolean isDestroyed() {
-        return destroyed;
-    }
+public record ItemHurtEffectResult(boolean cancelled, int damage, boolean destroyed) {
 
     public static ItemHurtEffectResult unmodified() {
         return new ItemHurtEffectResult(false, -1, false);

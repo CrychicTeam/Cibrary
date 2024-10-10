@@ -11,7 +11,6 @@ import org.crychicteam.cibrary.api.registry.armorset.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.ArmorSetAttackListener;
 import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
-import org.crychicteam.cibrary.content.armorset.example.ArmorSetRegistryExample;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
 import org.crychicteam.cibrary.content.sound.GlobalCibrarySoundManager;

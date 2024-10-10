@@ -51,11 +51,6 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
         return set.getState();
     }
 
-    public void setState(ArmorSet.State state) {
-        activeSet.setState(state);
-        this.state = state;
-    }
-
     public boolean isItemInActiveSet(ItemStack itemStack) {
         return itemSetMap.containsKey(itemStack.getItem()) || curioSetMap.containsKey(itemStack.getItem());
     }
@@ -72,12 +67,10 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
         itemSetMap.clear();
         curioSetMap.clear();
         if (activeSet != null) {
-            for (Map.Entry<EquipmentSlot, Set<Item>> entry : activeSet.getEquipmentItems().entrySet()) {
-                for (Item item : entry.getValue()) {
-                    if (item != null) {
-                        itemSetMap.put(item, activeSet);
+            for (Map.Entry<EquipmentSlot, Item> entry : activeSet.getEquipmentItems().entrySet()) {
+                    if (entry.getValue() != null) {
+                        itemSetMap.put(entry.getValue(), activeSet);
                     }
-                }
             }
             for (Map.Entry<Item, Integer> entry : activeSet.getCurioItems().entrySet()) {
                 curioSetMap.put(entry.getKey(), activeSet);

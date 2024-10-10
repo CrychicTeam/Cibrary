@@ -28,7 +28,7 @@ public class ArmorSet {
     private final Map<MobEffect, Integer> effects;
     private final Multimap<Attribute, AttributeModifier> attributes;
     private final SetEffect effect;
-    private final Map<EquipmentSlot, Set<Item>> equipmentItems;
+    private final Map<EquipmentSlot, Item> equipmentItems;
     private final Map<Item, Integer> curioItems;
     protected static final Item EMPTY_SLOT_MARKER = null;
     protected State state;
@@ -40,7 +40,7 @@ public class ArmorSet {
         this.attributes = HashMultimap.create();
         this.equipmentItems = new EnumMap<>(EquipmentSlot.class);
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            this.equipmentItems.put(slot, new HashSet<>());
+            this.equipmentItems.put(slot, EMPTY_SLOT_MARKER);
         }
         this.curioItems = new HashMap<>();
         this.state = State.NORMAL;
@@ -58,12 +58,12 @@ public class ArmorSet {
 
     public void addEquipmentItem(EquipmentSlot slot, Item item) {
         if (item == Items.AIR) {
-            equipmentItems.get(slot).clear();
-            equipmentItems.get(slot).add(EMPTY_SLOT_MARKER);
+            equipmentItems.put(slot, EMPTY_SLOT_MARKER);
         } else {
-            equipmentItems.get(slot).add(item);
+            equipmentItems.put(slot, item);
         }
     }
+
 
     public void addCurioItem(Item item, int count) {
         curioItems.put(item, count);
@@ -102,33 +102,34 @@ public class ArmorSet {
         return state;
     }
 
-    public Map<EquipmentSlot, Set<Item>> getEquipmentItems() {
-        return Collections.unmodifiableMap(equipmentItems);
-    }
-
     public boolean matches(LivingEntity entity) {
-        for (Map.Entry<EquipmentSlot, Set<Item>> entry : equipmentItems.entrySet()) {
+        for (Map.Entry<EquipmentSlot, Item> entry : equipmentItems.entrySet()) {
             ItemStack equippedItem = entity.getItemBySlot(entry.getKey());
-            if (entry.getValue().contains(EMPTY_SLOT_MARKER)) {
+            Item expectedItem = entry.getValue();
+            if (expectedItem == EMPTY_SLOT_MARKER) {
                 if (!equippedItem.isEmpty()) {
                     return false;
                 }
-            } else if (!entry.getValue().isEmpty() && (equippedItem.isEmpty() || !entry.getValue().contains(equippedItem.getItem()))) {
+            } else if (!equippedItem.isEmpty() && equippedItem.getItem() != expectedItem) {
                 return false;
             }
         }
         return CuriosIntegration.matchesCurioRequirements(entity, curioItems);
     }
 
-    public Map<EquipmentSlot, ItemStack> getEquippedItems(ServerPlayer entity) {
-        Map<EquipmentSlot, ItemStack> equippedItems = new EnumMap<>(EquipmentSlot.class);
-        for (Map.Entry<EquipmentSlot, Set<Item>> entry : equipmentItems.entrySet()) {
+    public Map<EquipmentSlot, Item> getEquipmentItems() { // 返回 Item 而不是 ItemStack
+        return Collections.unmodifiableMap(equipmentItems);
+    }
+
+    public Map<EquipmentSlot, ItemStack> getEquipmentItems(ServerPlayer entity) {
+        Map<EquipmentSlot, ItemStack> allEquipped = new EnumMap<>(EquipmentSlot.class);
+        for (Map.Entry<EquipmentSlot, Item> entry : equipmentItems.entrySet()) {
             ItemStack equippedItem = entity.getItemBySlot(entry.getKey());
-            if (entry.getValue().contains(equippedItem.getItem())) {
-                equippedItems.put(entry.getKey(), equippedItem);
+            if (equippedItem.getItem() == entry.getValue()) {
+                allEquipped.put(entry.getKey(), equippedItem);
             }
         }
-        return equippedItems;
+        return allEquipped;
     }
 
     public List<ItemStack> getEquippedCurioItems(ServerPlayer entity) {
@@ -142,15 +143,6 @@ public class ArmorSet {
             }
         }
         return equippedCurios;
-    }
-
-    public Map<EquipmentSlot, ItemStack> getAllEquippedItems(ServerPlayer entity) {
-        Map<EquipmentSlot, ItemStack> allEquipped = getEquippedItems(entity);
-        List<ItemStack> curios = getEquippedCurioItems(entity);
-        if (!curios.isEmpty()) {
-            allEquipped.put(EquipmentSlot.OFFHAND, curios.get(0));
-        }
-        return allEquipped;
     }
 
     public void applyMobEffects(LivingEntity entity) {

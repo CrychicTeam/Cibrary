@@ -29,7 +29,7 @@ public class ExampleSetEffect implements SetEffect {
         if (entity instanceof ServerPlayer player) {
             player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap ->{
                 ArmorSet activateSet = cap.getActiveSet();
-                activateSet.getEquippedItems(player).forEach((slot,item)->{
+                activateSet.getEquipmentItems(player).forEach((slot,item)->{
                     if (item.is(Items.DIAMOND_HELMET)) {
                         player.getCooldowns().addCooldown(item.getItem(), 20);
                     }

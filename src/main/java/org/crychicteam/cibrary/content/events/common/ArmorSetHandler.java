@@ -79,8 +79,8 @@ public class ArmorSetHandler {
                 ArmorSet activeSet = capability.getActiveSet();
                 ItemStack damagedItem = event.getItemStack();
                 boolean isSetItem = false;
-                for (Map.Entry<EquipmentSlot, Set<Item>> entry : activeSet.getEquipmentItems().entrySet()) {
-                    if (entry.getValue().contains(damagedItem.getItem())) {
+                for (Map.Entry<EquipmentSlot, Item> entry : activeSet.getEquipmentItems().entrySet()) {
+                    if (entry.getValue() == damagedItem.getItem()) {
                         isSetItem = true;
                         break;
                     }
@@ -93,12 +93,12 @@ public class ArmorSetHandler {
                 }
                 if (isSetItem) {
                     ItemHurtEffectResult result = activeSet.getEffect().itemHurtEffect(player, damagedItem, event.getDamage());
-                    if (result.isCancelled()) {
+                    if (result.cancelled()) {
                         event.setCanceled(true);
-                    } else if (result.getDamage() != event.getDamage()) {
-                        event.setDamage(result.getDamage());
+                    } else if (result.damage() != event.getDamage()) {
+                        event.setDamage(result.damage());
                     }
-                    if (result.isDestroyed()) {
+                    if (result.destroyed()) {
                         damagedItem.setCount(0);
                     }
                     if (player instanceof ServerPlayer serverPlayer) {

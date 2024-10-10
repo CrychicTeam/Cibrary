@@ -6,6 +6,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
@@ -40,12 +41,15 @@ public class ArmorSetManager {
     }
 
     private void indexArmorSet(ArmorSet armorSet) {
-        for (Map.Entry<EquipmentSlot, Set<Item>> entry : armorSet.getEquipmentItems().entrySet()) {
-            for (Item item : entry.getValue()) {
+        for (Map.Entry<EquipmentSlot, Item> entry : armorSet.getEquipmentItems().entrySet()) {
+            Item item = entry.getValue();
+            if (item != ArmorSet.EMPTY_SLOT_MARKER) {
                 itemToSetIndex.computeIfAbsent(item, k -> new HashSet<>()).add(armorSet);
             }
         }
     }
+
+
 
     private boolean isExactSetExists(ArmorSet newSet) {
         return armorSets.stream().anyMatch(set -> areSetItemsIdentical(set, newSet));
