@@ -1,4 +1,4 @@
-package org.crychicteam.cibrary.content.armorset;
+package org.crychicteam.cibrary.content.armorset.capability;
 
 import dev.xkmc.l2damagetracker.contents.attack.AttackCache;
 import dev.xkmc.l2damagetracker.contents.attack.AttackListener;
@@ -11,6 +11,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import org.crychicteam.cibrary.Cibrary;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
 
 import java.util.function.BiConsumer;
 

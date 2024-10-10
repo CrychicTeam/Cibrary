@@ -18,19 +18,20 @@ import net.minecraft.world.item.Items;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import org.crychicteam.cibrary.content.armorset.defaults.DefaultSetEffect;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ArmorSet {
-    private final String identifier;
+    public String identifier;
+    public SetEffect effect;
     private final Map<MobEffect, Integer> effects;
     private final Multimap<Attribute, AttributeModifier> attributes;
-    private final SetEffect effect;
     private final Map<EquipmentSlot, Item> equipmentItems;
     private final Map<Item, Integer> curioItems;
-    protected static final Item EMPTY_SLOT_MARKER = null;
+    public static final Item EMPTY_SLOT_MARKER = null;
     protected State state;
 
     public ArmorSet(String identifier, SetEffect effect) {
@@ -50,6 +51,10 @@ public class ArmorSet {
         this(identifier, new DefaultSetEffect());
     }
 
+    public ArmorSet() {
+        this("Unnamed Set", new DefaultSetEffect());
+    }
+
     public enum State {
         NORMAL,
         ACTIVE,
@@ -63,7 +68,6 @@ public class ArmorSet {
             equipmentItems.put(slot, item);
         }
     }
-
 
     public void addCurioItem(Item item, int count) {
         curioItems.put(item, count);

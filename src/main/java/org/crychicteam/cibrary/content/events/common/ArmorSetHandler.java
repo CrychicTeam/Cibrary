@@ -18,7 +18,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
-import org.crychicteam.cibrary.content.armorset.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.capability.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.content.event.ItemDamageEvent;
@@ -26,7 +26,6 @@ import org.crychicteam.cibrary.content.event.ItemHurtEffectResult;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 
 import java.util.Map;
-import java.util.Set;
 
 public class ArmorSetHandler {
 

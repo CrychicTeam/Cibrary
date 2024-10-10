@@ -1,4 +1,4 @@
-package org.crychicteam.cibrary.content.armorset;
+package org.crychicteam.cibrary.content.armorset.capability;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.server.level.ServerPlayer;
@@ -6,9 +6,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import org.crychicteam.cibrary.Cibrary;
-import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.defaults.DefaultArmorSet;
+import org.crychicteam.cibrary.content.armorset.SetEffect;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 
 import java.util.*;
@@ -48,8 +49,6 @@ public class ArmorSetManager {
             }
         }
     }
-
-
 
     private boolean isExactSetExists(ArmorSet newSet) {
         return armorSets.stream().anyMatch(set -> areSetItemsIdentical(set, newSet));

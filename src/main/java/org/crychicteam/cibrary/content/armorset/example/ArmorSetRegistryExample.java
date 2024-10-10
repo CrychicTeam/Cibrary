@@ -7,10 +7,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import org.crychicteam.cibrary.api.registry.armorset.ArmorSetBuilder;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.defaults.DefaultSetEffect;
 
 public class ArmorSetRegistryExample {
     static {
-        ArmorSet DIAMOND = ArmorSetBuilder.create("diamond", new ExampleSetEffect())
+        ArmorSet DIAMOND = ArmorSetBuilder.create("diamond", new DefaultSetEffect())
                 .addEquipment(EquipmentSlot.HEAD, Items.DIAMOND_HELMET)
                 .addEquipment(EquipmentSlot.CHEST, Items.DIAMOND_CHESTPLATE)
                 .addEquipment(EquipmentSlot.LEGS, Items.DIAMOND_LEGGINGS)
