@@ -8,7 +8,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import org.crychicteam.cibrary.Cibrary;
-import org.crychicteam.cibrary.content.armorset.capability.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
 
 import java.lang.reflect.Method;

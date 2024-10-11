@@ -18,15 +18,24 @@ public class KubeJSArmorSet extends ArmorSet {
 
     private Consumer<CreateSourceEvent> createSourceEventConsumer = event -> {};
     private Consumer<PlayerAttackCache> playerAttackCacheConsumer = cache -> {};
-    private BiConsumer<PlayerAttackCache, CriticalHitEvent> criticalHitConsumer = (cache, event) -> {};
-    private BiConsumer<AttackCache, BiConsumer<LivingEntity, ItemStack>> setupProfileConsumer = (cache, setupProfile) -> {};
-    private BiConsumer<AttackCache, ItemStack> attackConsumer = (cache, weapon) -> {};
-    private BiConsumer<AttackCache, LivingAttackEvent> postAttackConsumer = (cache, event) -> {};
-    private BiConsumer<AttackCache, ItemStack> hurtConsumer = (cache, weapon) -> {};
-    private BiConsumer<AttackCache, ItemStack> hurtMaximizedConsumer = (cache, weapon) -> {};
-    private BiConsumer<AttackCache, LivingHurtEvent> postHurtConsumer = (cache, event) -> {};
-    private BiConsumer<AttackCache, ItemStack> damageConsumer = (cache, weapon) -> {};
-    private BiConsumer<AttackCache, ItemStack> damageFinalizedConsumer = (cache, weapon) -> {};
+    private BiConsumer<PlayerAttackCache, CriticalHitEvent> attackerCriticalHitConsumer = (cache, event) -> {};
+    private BiConsumer<PlayerAttackCache, CriticalHitEvent> targetCriticalHitConsumer = (cache, event) -> {};
+    private BiConsumer<AttackCache, BiConsumer<LivingEntity, ItemStack>> attackerSetupProfileConsumer = (cache, setupProfile) -> {};
+    private BiConsumer<AttackCache, BiConsumer<LivingEntity, ItemStack>> targetSetupProfileConsumer = (cache, setupProfile) -> {};
+    private BiConsumer<AttackCache, ItemStack> attackerAttackConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> targetAttackConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, LivingAttackEvent> attackerPostAttackConsumer = (cache, event) -> {};
+    private BiConsumer<AttackCache, LivingAttackEvent> targetPostAttackConsumer = (cache, event) -> {};
+    private BiConsumer<AttackCache, ItemStack> attackerHurtConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> targetHurtConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> attackerHurtMaximizedConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> targetHurtMaximizedConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, LivingHurtEvent> attackerPostHurtConsumer = (cache, event) -> {};
+    private BiConsumer<AttackCache, LivingHurtEvent> targetPostHurtConsumer = (cache, event) -> {};
+    private BiConsumer<AttackCache, ItemStack> attackerDamageConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> targetDamageConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> attackerDamageFinalizedConsumer = (cache, weapon) -> {};
+    private BiConsumer<AttackCache, ItemStack> targetDamageFinalizedConsumer = (cache, weapon) -> {};
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
@@ -44,40 +53,76 @@ public class KubeJSArmorSet extends ArmorSet {
         this.playerAttackCacheConsumer = consumer;
     }
 
-    public void setCriticalHitConsumer(BiConsumer<PlayerAttackCache, CriticalHitEvent> consumer) {
-        this.criticalHitConsumer = consumer;
+    public void setAttackerCriticalHitConsumer(BiConsumer<PlayerAttackCache, CriticalHitEvent> consumer) {
+        this.attackerCriticalHitConsumer = consumer;
     }
 
-    public void setSetupProfileConsumer(BiConsumer<AttackCache, BiConsumer<LivingEntity, ItemStack>> consumer) {
-        this.setupProfileConsumer = consumer;
+    public void setTargetCriticalHitConsumer(BiConsumer<PlayerAttackCache, CriticalHitEvent> consumer) {
+        this.targetCriticalHitConsumer = consumer;
     }
 
-    public void setAttackConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
-        this.attackConsumer = consumer;
+    public void setAttackerSetupProfileConsumer(BiConsumer<AttackCache, BiConsumer<LivingEntity, ItemStack>> consumer) {
+        this.attackerSetupProfileConsumer = consumer;
     }
 
-    public void setPostAttackConsumer(BiConsumer<AttackCache, LivingAttackEvent> consumer) {
-        this.postAttackConsumer = consumer;
+    public void setTargetSetupProfileConsumer(BiConsumer<AttackCache, BiConsumer<LivingEntity, ItemStack>> consumer) {
+        this.targetSetupProfileConsumer = consumer;
     }
 
-    public void setHurtConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
-        this.hurtConsumer = consumer;
+    public void setAttackerAttackConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.attackerAttackConsumer = consumer;
     }
 
-    public void setHurtMaximizedConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
-        this.hurtMaximizedConsumer = consumer;
+    public void setTargetAttackConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.targetAttackConsumer = consumer;
     }
 
-    public void setPostHurtConsumer(BiConsumer<AttackCache, LivingHurtEvent> consumer) {
-        this.postHurtConsumer = consumer;
+    public void setAttackerPostAttackConsumer(BiConsumer<AttackCache, LivingAttackEvent> consumer) {
+        this.attackerPostAttackConsumer = consumer;
     }
 
-    public void setDamageConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
-        this.damageConsumer = consumer;
+    public void setTargetPostAttackConsumer(BiConsumer<AttackCache, LivingAttackEvent> consumer) {
+        this.targetPostAttackConsumer = consumer;
     }
 
-    public void setDamageFinalizedConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
-        this.damageFinalizedConsumer = consumer;
+    public void setAttackerHurtConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.attackerHurtConsumer = consumer;
+    }
+
+    public void setTargetHurtConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.targetHurtConsumer = consumer;
+    }
+
+    public void setAttackerHurtMaximizedConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.attackerHurtMaximizedConsumer = consumer;
+    }
+
+    public void setTargetHurtMaximizedConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.targetHurtMaximizedConsumer = consumer;
+    }
+
+    public void setAttackerPostHurtConsumer(BiConsumer<AttackCache, LivingHurtEvent> consumer) {
+        this.attackerPostHurtConsumer = consumer;
+    }
+
+    public void setTargetPostHurtConsumer(BiConsumer<AttackCache, LivingHurtEvent> consumer) {
+        this.targetPostHurtConsumer = consumer;
+    }
+
+    public void setAttackerDamageConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.attackerDamageConsumer = consumer;
+    }
+
+    public void setTargetDamageConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.targetDamageConsumer = consumer;
+    }
+
+    public void setAttackerDamageFinalizedConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.attackerDamageFinalizedConsumer = consumer;
+    }
+
+    public void setTargetDamageFinalizedConsumer(BiConsumer<AttackCache, ItemStack> consumer) {
+        this.targetDamageFinalizedConsumer = consumer;
     }
 
     @Override
@@ -91,48 +136,94 @@ public class KubeJSArmorSet extends ArmorSet {
     }
 
     @Override
-    public boolean onCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
-        criticalHitConsumer.accept(cache, event);
+    public boolean attackerOnCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
+        attackerCriticalHitConsumer.accept(cache, event);
         return false;
     }
 
     @Override
-    public void setupProfile(AttackCache cache, BiConsumer<LivingEntity, ItemStack> setupProfile) {
-        setupProfileConsumer.accept(cache, setupProfile);
+    public boolean targetOnCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
+        targetCriticalHitConsumer.accept(cache, event);
+        return false;
     }
 
     @Override
-    public void onAttack(AttackCache cache, ItemStack weapon) {
-        attackConsumer.accept(cache, weapon);
+    public void attackerSetupProfile(AttackCache cache, BiConsumer<LivingEntity, ItemStack> setupProfile) {
+        attackerSetupProfileConsumer.accept(cache, setupProfile);
     }
 
     @Override
-    public void postAttack(AttackCache cache, LivingAttackEvent event, ItemStack weapon) {
-        postAttackConsumer.accept(cache, event);
+    public void targetSetupProfile(AttackCache cache, BiConsumer<LivingEntity, ItemStack> setupProfile) {
+        targetSetupProfileConsumer.accept(cache, setupProfile);
     }
 
     @Override
-    public void onHurt(AttackCache cache, ItemStack weapon) {
-        hurtConsumer.accept(cache, weapon);
+    public void attackerOnAttack(AttackCache cache, ItemStack weapon) {
+        attackerAttackConsumer.accept(cache, weapon);
     }
 
     @Override
-    public void onHurtMaximized(AttackCache cache, ItemStack weapon) {
-        hurtMaximizedConsumer.accept(cache, weapon);
+    public void targetOnAttack(AttackCache cache, ItemStack weapon) {
+        targetAttackConsumer.accept(cache, weapon);
     }
 
     @Override
-    public void postHurt(AttackCache cache, LivingHurtEvent event, ItemStack weapon) {
-        postHurtConsumer.accept(cache, event);
+    public void attackerPostAttack(AttackCache cache, LivingAttackEvent event, ItemStack weapon) {
+        attackerPostAttackConsumer.accept(cache, event);
     }
 
     @Override
-    public void onDamage(AttackCache cache, ItemStack weapon) {
-        damageConsumer.accept(cache, weapon);
+    public void targetPostAttack(AttackCache cache, LivingAttackEvent event, ItemStack weapon) {
+        targetPostAttackConsumer.accept(cache, event);
     }
 
     @Override
-    public void onDamageFinalized(AttackCache cache, ItemStack weapon) {
-        damageFinalizedConsumer.accept(cache, weapon);
+    public void attackerOnHurt(AttackCache cache, ItemStack weapon) {
+        attackerHurtConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void targetOnHurt(AttackCache cache, ItemStack weapon) {
+        targetHurtConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void attackerOnHurtMaximized(AttackCache cache, ItemStack weapon) {
+        attackerHurtMaximizedConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void targetOnHurtMaximized(AttackCache cache, ItemStack weapon) {
+        targetHurtMaximizedConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void attackerPostHurt(AttackCache cache, LivingHurtEvent event, ItemStack weapon) {
+        attackerPostHurtConsumer.accept(cache, event);
+    }
+
+    @Override
+    public void targetPostHurt(AttackCache cache, LivingHurtEvent event, ItemStack weapon) {
+        targetPostHurtConsumer.accept(cache, event);
+    }
+
+    @Override
+    public void attackerOnDamage(AttackCache cache, ItemStack weapon) {
+        attackerDamageConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void targetOnDamage(AttackCache cache, ItemStack weapon) {
+        targetDamageConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void attackerOnDamageFinalized(AttackCache cache, ItemStack weapon) {
+        attackerDamageFinalizedConsumer.accept(cache, weapon);
+    }
+
+    @Override
+    public void targetOnDamageFinalized(AttackCache cache, ItemStack weapon) {
+        targetDamageFinalizedConsumer.accept(cache, weapon);
     }
 }

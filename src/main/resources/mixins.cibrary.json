@@ -2,10 +2,11 @@
   "required": true,
   "minVersion": "0.8.5",
   "package": "org.crychicteam.cibrary.mixin",
-  "refmap": "mixins.modid.refmap.json",
+  "refmap": "mixins.cibrary.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "EntityMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
     "PersistentEntitySectionManagerAccessor",

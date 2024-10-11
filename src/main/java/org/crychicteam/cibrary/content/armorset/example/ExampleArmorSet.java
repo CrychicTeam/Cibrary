@@ -11,9 +11,9 @@ public class ExampleArmorSet extends ArmorSet {
     }
 
     @Override
-    public boolean onCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
+    public boolean attackerOnCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
         event.setResult(CriticalHitEvent.Result.DENY);
-        return super.onCriticalHit(cache, event);
+        return super.attackerOnCriticalHit(cache, event);
     }
 
     @Override

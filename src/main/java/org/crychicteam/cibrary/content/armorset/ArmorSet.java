@@ -2,9 +2,6 @@ package org.crychicteam.cibrary.content.armorset;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import dev.xkmc.l2damagetracker.contents.attack.AttackCache;
-import dev.xkmc.l2damagetracker.contents.attack.CreateSourceEvent;
-import dev.xkmc.l2damagetracker.contents.attack.PlayerAttackCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -15,24 +12,29 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import org.crychicteam.cibrary.content.armorset.defaults.DefaultSetEffect;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
-public class ArmorSet {
+public class ArmorSet extends ArmorSetAttackHandler {
+    public static final Item EMPTY_SLOT_MARKER = null;
+
     public String identifier;
-    public SetEffect effect;
     private final Map<MobEffect, Integer> effects;
     private final Multimap<Attribute, AttributeModifier> attributes;
-    private final Map<EquipmentSlot, Item> equipmentItems;
+    protected SetEffect effect;
+    private final Map<EquipmentSlot, Set<Item>> equipmentItems;
     private final Map<Item, Integer> curioItems;
-    public static final Item EMPTY_SLOT_MARKER = null;
     protected State state;
+    protected String skillState;
+
+    public enum State {
+        NORMAL,
+        ACTIVE,
+        INACTIVE,
+        CURSED
+    }
 
     public ArmorSet(String identifier, SetEffect effect) {
         this.identifier = identifier;
@@ -41,10 +43,11 @@ public class ArmorSet {
         this.attributes = HashMultimap.create();
         this.equipmentItems = new EnumMap<>(EquipmentSlot.class);
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            this.equipmentItems.put(slot, EMPTY_SLOT_MARKER);
+            this.equipmentItems.put(slot, new HashSet<>());
         }
         this.curioItems = new HashMap<>();
         this.state = State.NORMAL;
+        this.skillState = "none";
     }
 
     public ArmorSet(String identifier) {
@@ -52,20 +55,66 @@ public class ArmorSet {
     }
 
     public ArmorSet() {
-        this("Unnamed Set", new DefaultSetEffect());
+        this("no_name");
     }
 
-    public enum State {
-        NORMAL,
-        ACTIVE,
-        INACTIVE
+    // Getters
+    public String getIdentifier() {
+        return identifier;
     }
 
+    public Map<MobEffect, Integer> getEffects() {
+        return Collections.unmodifiableMap(effects);
+    }
+
+    public Multimap<Attribute, AttributeModifier> getAttributes() {
+        return attributes;
+    }
+
+    public SetEffect getEffect() {
+        return effect;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public String getSkillState() {
+        return skillState;
+    }
+
+    public Map<EquipmentSlot, Set<Item>> getEquipmentItems() {
+        return Collections.unmodifiableMap(equipmentItems);
+    }
+
+    public Map<Item, Integer> getCurioItems() {
+        return Collections.unmodifiableMap(curioItems);
+    }
+
+    // Setters
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void setSkillState(String skillState) {
+        this.skillState = skillState;
+    }
+
+    public void setEffect(SetEffect effect) {
+        this.effect = effect;
+    }
+
+    // Add methods
     public void addEquipmentItem(EquipmentSlot slot, Item item) {
         if (item == Items.AIR) {
-            equipmentItems.put(slot, EMPTY_SLOT_MARKER);
+            equipmentItems.get(slot).clear();
+            equipmentItems.get(slot).add(EMPTY_SLOT_MARKER);
         } else {
-            equipmentItems.put(slot, item);
+            equipmentItems.get(slot).add(item);
         }
     }
 
@@ -82,58 +131,30 @@ public class ArmorSet {
         attributes.put(attribute, modifier);
     }
 
-    public void setState(State state) {
-        this.state = state;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public Map<MobEffect, Integer> getEffects() {
-        return effects;
-    }
-
-    public Multimap<Attribute, AttributeModifier> getAttributes() {
-        return attributes;
-    }
-
-    public SetEffect getEffect() {
-        return effect;
-    }
-
-    public State getState() {
-        return state;
-    }
-
+    // Other methods
     public boolean matches(LivingEntity entity) {
-        for (Map.Entry<EquipmentSlot, Item> entry : equipmentItems.entrySet()) {
+        for (Map.Entry<EquipmentSlot, Set<Item>> entry : equipmentItems.entrySet()) {
             ItemStack equippedItem = entity.getItemBySlot(entry.getKey());
-            Item expectedItem = entry.getValue();
-            if (expectedItem == EMPTY_SLOT_MARKER) {
+            if (entry.getValue().contains(EMPTY_SLOT_MARKER)) {
                 if (!equippedItem.isEmpty()) {
                     return false;
                 }
-            } else if (!equippedItem.isEmpty() && equippedItem.getItem() != expectedItem) {
+            } else if (!entry.getValue().isEmpty() && (equippedItem.isEmpty() || !entry.getValue().contains(equippedItem.getItem()))) {
                 return false;
             }
         }
         return CuriosIntegration.matchesCurioRequirements(entity, curioItems);
     }
 
-    public Map<EquipmentSlot, Item> getEquipmentItems() { // 返回 Item 而不是 ItemStack
-        return Collections.unmodifiableMap(equipmentItems);
-    }
-
-    public Map<EquipmentSlot, ItemStack> getEquipmentItems(ServerPlayer entity) {
-        Map<EquipmentSlot, ItemStack> allEquipped = new EnumMap<>(EquipmentSlot.class);
-        for (Map.Entry<EquipmentSlot, Item> entry : equipmentItems.entrySet()) {
+    public Map<EquipmentSlot, ItemStack> getEquippedItems(ServerPlayer entity) {
+        Map<EquipmentSlot, ItemStack> equippedItems = new EnumMap<>(EquipmentSlot.class);
+        for (Map.Entry<EquipmentSlot, Set<Item>> entry : equipmentItems.entrySet()) {
             ItemStack equippedItem = entity.getItemBySlot(entry.getKey());
-            if (equippedItem.getItem() == entry.getValue()) {
-                allEquipped.put(entry.getKey(), equippedItem);
+            if (entry.getValue().contains(equippedItem.getItem())) {
+                equippedItems.put(entry.getKey(), equippedItem);
             }
         }
-        return allEquipped;
+        return equippedItems;
     }
 
     public List<ItemStack> getEquippedCurioItems(ServerPlayer entity) {
@@ -149,9 +170,30 @@ public class ArmorSet {
         return equippedCurios;
     }
 
-    public void applyMobEffects(LivingEntity entity) {
+    public Map<EquipmentSlot, ItemStack> getAllEquippedItems(ServerPlayer entity) {
+        Map<EquipmentSlot, ItemStack> allEquipped = getEquippedItems(entity);
+        List<ItemStack> curios = getEquippedCurioItems(entity);
+        if (!curios.isEmpty()) {
+            allEquipped.put(EquipmentSlot.OFFHAND, curios.get(0));
+        }
+        return allEquipped;
+    }
+
+    public boolean shouldUpdateMobEffects(LivingEntity entity) {
         for (Map.Entry<MobEffect, Integer> entry : effects.entrySet()) {
-            entity.addEffect(new MobEffectInstance(entry.getKey(), 600, entry.getValue(), false, false));
+            MobEffectInstance currentEffect = entity.getEffect(entry.getKey());
+            if (currentEffect == null || currentEffect.getAmplifier() < entry.getValue()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void applyMobEffects(LivingEntity entity) {
+        if (shouldUpdateMobEffects(entity)) {
+            for (Map.Entry<MobEffect, Integer> entry : effects.entrySet()) {
+                entity.addEffect(new MobEffectInstance(entry.getKey(), 600, entry.getValue(), false, false));
+            }
         }
     }
 
@@ -182,32 +224,4 @@ public class ArmorSet {
         removeEffects(entity);
         removeAttributes(entity);
     }
-
-    public Map<Item, Integer> getCurioItems() {
-        return Collections.unmodifiableMap(curioItems);
-    }
-
-    public void onCreateSource(CreateSourceEvent event) {}
-
-    public void onPlayerAttack(PlayerAttackCache cache) {}
-
-    public boolean onCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
-        return false;
-    }
-
-    public void setupProfile(AttackCache cache, BiConsumer<LivingEntity, ItemStack> setupProfile) {}
-
-    public void onAttack(AttackCache cache, ItemStack weapon) {}
-
-    public void postAttack(AttackCache cache, LivingAttackEvent event, ItemStack weapon) {}
-
-    public void onHurt(AttackCache cache, ItemStack weapon) {}
-
-    public void onHurtMaximized(AttackCache cache, ItemStack weapon) {}
-
-    public void postHurt(AttackCache cache, LivingHurtEvent event, ItemStack weapon) {}
-
-    public void onDamage(AttackCache cache, ItemStack weapon) {}
-
-    public void onDamageFinalized(AttackCache cache, ItemStack weapon) {}
 }

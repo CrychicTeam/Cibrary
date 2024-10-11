@@ -1,12 +1,14 @@
 package org.crychicteam.cibrary.content.armorset;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.ItemStackedOnOtherEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import org.crychicteam.cibrary.content.event.ItemHurtEffectResult;
+import org.crychicteam.cibrary.content.event.StandOnFluidEvent;
 
 public interface SetEffect {
     /**
@@ -87,4 +89,31 @@ public interface SetEffect {
     default void onTargetedEffect(LivingEntity entity, LivingChangeTargetEvent changer) {}
 
     String getIdentifier();
+
+    /**
+     * Trigger when the entity is blocking.
+     *
+     * @param entity
+     */
+    default void blockingEffect(LivingEntity entity) {}
+
+    /**
+     * Trigger when the entity is sneaking.
+     * @param entity
+     */
+    default void crouchingEffect(LivingEntity entity) {}
+
+    /**
+     * Trigger when the entity is standing on a fluid.
+     * @param entity
+     * @param event
+     */
+    default void onStandOnFluidEffect(LivingEntity entity, StandOnFluidEvent event) {};
+
+    /**
+     * Trigger when items are stacked on other items.
+     * @param entity
+     * @param event
+     */
+    default void stackedOnOther(LivingEntity entity, ItemStackedOnOtherEvent event) {};
 }

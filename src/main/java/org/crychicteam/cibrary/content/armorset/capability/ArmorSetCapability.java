@@ -28,28 +28,44 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
     public static final ResourceLocation ARMOR_SET_CAPABILITY_ID = new ResourceLocation(Cibrary.MOD_ID, "armor_set");
 
     private ArmorSet activeSet;
-    private ArmorSet.State state;
-    private Map<Item, ArmorSet> itemSetMap = new HashMap<>();
-    private Map<Item, ArmorSet> curioSetMap = new HashMap<>();
+    private Map<Item, ArmorSet> itemSetMap;
+    private Map<Item, ArmorSet> curioSetMap;
 
     public ArmorSetCapability() {
-        this.activeSet = ArmorSetManager.getInstance().getDefaultArmorSet();
-        this.state = ArmorSet.State.NORMAL;
+        this.activeSet = Cibrary.ARMOR_SET_MANAGER.getDefaultArmorSet();
+        this.itemSetMap = new HashMap<>();
+        this.curioSetMap = new HashMap<>();
+        updateItemSetMaps();
     }
 
+    // Getters
     public ArmorSet getActiveSet() {
-        return activeSet != null ? activeSet : ArmorSetManager.getInstance().getDefaultArmorSet();
+        return activeSet != null ? activeSet : Cibrary.ARMOR_SET_MANAGER.getDefaultArmorSet();
     }
 
+    public ArmorSet.State getState() {
+        return activeSet.getState();
+    }
+
+    public String getSkillState() {
+        return activeSet.getSkillState();
+    }
+
+    // Setters
     public void setActiveSet(ArmorSet set) {
         this.activeSet = set;
-        updateItemSetMap();
+        updateItemSetMaps();
     }
 
-    public ArmorSet.State getState(ArmorSet set) {
-        return set.getState();
+    public void setState(ArmorSet.State state) {
+        activeSet.setState(state);
     }
 
+    public void setSkillState(String state) {
+        activeSet.setSkillState(state);
+    }
+
+    // Item and Set related methods
     public boolean isItemInActiveSet(ItemStack itemStack) {
         return itemSetMap.containsKey(itemStack.getItem()) || curioSetMap.containsKey(itemStack.getItem());
     }
@@ -59,17 +75,19 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
         if (set == null) {
             set = curioSetMap.get(itemStack.getItem());
         }
-        return set != null ? set : ArmorSetManager.getInstance().getDefaultArmorSet();
+        return set != null ? set : Cibrary.ARMOR_SET_MANAGER.getDefaultArmorSet();
     }
 
-    private void updateItemSetMap() {
+    private void updateItemSetMaps() {
         itemSetMap.clear();
         curioSetMap.clear();
         if (activeSet != null) {
-            for (Map.Entry<EquipmentSlot, Item> entry : activeSet.getEquipmentItems().entrySet()) {
-                    if (entry.getValue() != null) {
-                        itemSetMap.put(entry.getValue(), activeSet);
+            for (Map.Entry<EquipmentSlot, Set<Item>> entry : activeSet.getEquipmentItems().entrySet()) {
+                for (Item item : entry.getValue()) {
+                    if (item != null) {
+                        itemSetMap.put(item, activeSet);
                     }
+                }
             }
             for (Map.Entry<Item, Integer> entry : activeSet.getCurioItems().entrySet()) {
                 curioSetMap.put(entry.getKey(), activeSet);
@@ -77,38 +95,43 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
         }
     }
 
+    // Tooltip generation
     public List<Component> getAdditionalTooltip(ItemStack itemStack) {
         List<Component> tooltip = new ArrayList<>();
         if (activeSet != null && isItemInActiveSet(itemStack)) {
-
-            if (!activeSet.getEffects().isEmpty()) {
-                for (Map.Entry<MobEffect, Integer> entry : activeSet.getEffects().entrySet()) {
-                    tooltip.add(Component.translatable("tooltip.armorset.effect",
-                            Component.translatable(entry.getKey().getDescriptionId()),
-                            entry.getValue() + 1));
-                }
-            }
-
-            if (!activeSet.getAttributes().isEmpty()) {
-                for (Map.Entry<Attribute, AttributeModifier> entry : activeSet.getAttributes().entries()) {
-                    AttributeModifier modifier = entry.getValue();
-                    double amount = modifier.getAmount();
-                    String operation = modifier.getOperation() == AttributeModifier.Operation.ADDITION ? "+" : "×";
-                    tooltip.add(Component.translatable("tooltip.armorset.attribute",
-                            Component.translatable(entry.getKey().getDescriptionId()),
-                            operation + String.format("%.2f", amount)));
-                }
-            }
+            addEffectsToTooltip(tooltip);
+            addAttributesToTooltip(tooltip);
         }
         return tooltip;
     }
 
+    private void addEffectsToTooltip(List<Component> tooltip) {
+        for (Map.Entry<MobEffect, Integer> entry : activeSet.getEffects().entrySet()) {
+            tooltip.add(Component.translatable("tooltip.armorset.effect",
+                    Component.translatable(entry.getKey().getDescriptionId()),
+                    entry.getValue() + 1));
+        }
+    }
+
+    private void addAttributesToTooltip(List<Component> tooltip) {
+        for (Map.Entry<Attribute, AttributeModifier> entry : activeSet.getAttributes().entries()) {
+            AttributeModifier modifier = entry.getValue();
+            double amount = modifier.getAmount();
+            String operation = modifier.getOperation() == AttributeModifier.Operation.ADDITION ? "+" : "×";
+            tooltip.add(Component.translatable("tooltip.armorset.attribute",
+                    Component.translatable(entry.getKey().getDescriptionId()),
+                    operation + String.format("%.2f", amount)));
+        }
+    }
+
+    // NBT serialization
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         if (activeSet != null) {
             nbt.putString("activeSet", activeSet.getIdentifier());
-            nbt.putString("state", state.name());
+            nbt.putString("state", activeSet.getState().name());
+            nbt.putString("skillState", activeSet.getSkillState());
         }
         return nbt;
     }
@@ -116,16 +139,19 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         String identifier = nbt.getString("activeSet");
-        this.activeSet = ArmorSetManager.getInstance().getArmorSetByIdentifier(identifier);
-        String stateName = nbt.getString("state");
-        try {
-            this.state = ArmorSet.State.valueOf(stateName);
-        } catch (IllegalArgumentException e) {
-            this.state = ArmorSet.State.NORMAL;
+        this.activeSet = Cibrary.ARMOR_SET_MANAGER.getArmorSetByIdentifier(identifier);
+        if (this.activeSet != null) {
+            try {
+                this.activeSet.setState(ArmorSet.State.valueOf(nbt.getString("state")));
+            } catch (IllegalArgumentException e) {
+                this.activeSet.setState(ArmorSet.State.NORMAL);
+            }
+            this.activeSet.setSkillState(nbt.getString("skillState"));
         }
-        updateItemSetMap();
+        updateItemSetMaps();
     }
 
+    // Capability registration
     public static void register(RegisterCapabilitiesEvent event) {
         event.register(ArmorSetCapability.class);
     }
@@ -135,6 +161,7 @@ public class ArmorSetCapability implements INBTSerializable<CompoundTag>, ICapab
         return ARMOR_SET_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> this));
     }
 
+    // Network synchronization
     public void syncToClient(Player player) {
         if (!player.level().isClientSide() && player instanceof ServerPlayer) {
             CibraryNetworkHandler.sendArmorSetSync((ServerPlayer) player, this);

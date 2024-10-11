@@ -4,9 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.ItemStackedOnOtherEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import org.crychicteam.cibrary.content.armorset.SetEffect;
 import org.crychicteam.cibrary.content.event.ItemHurtEffectResult;
+import org.crychicteam.cibrary.content.event.StandOnFluidEvent;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -27,6 +29,9 @@ public class KubeJSSetEffect implements SetEffect {
     private QuadConsumer<LivingEntity, Double, BlockState, BlockPos> landEffectConsumer = (entity, distance, landingBlock, pos) -> {};
     private Consumer<LivingEntity> sprintingJumpEffectConsumer = entity -> {};
     private BiConsumer<LivingEntity, LivingChangeTargetEvent> onTargetedEffectConsumer = (entity, changer) -> {};
+    private BiConsumer<LivingEntity, StandOnFluidEvent> onStandOnFluidEffect = (entity, event) -> {};
+    private BiConsumer<LivingEntity, ItemStackedOnOtherEvent> stackedOnOther = (entity, event) -> {};
+
 
     public void setApplyEffectConsumer(Consumer<LivingEntity> consumer) {
         this.applyEffectConsumer = consumer;
@@ -78,6 +83,14 @@ public class KubeJSSetEffect implements SetEffect {
 
     public void setOnTargetedEffectConsumer(BiConsumer<LivingEntity, LivingChangeTargetEvent> consumer) {
         this.onTargetedEffectConsumer = consumer;
+    }
+
+    public void setOnStandOnFluidEffect(BiConsumer<LivingEntity, StandOnFluidEvent> consumer) {
+        this.onStandOnFluidEffect = consumer;
+    }
+
+    public void setStackedOnOther(BiConsumer<LivingEntity, ItemStackedOnOtherEvent> consumer) {
+        this.stackedOnOther = consumer;
     }
 
     public void setIdentifier(String identifier) {
@@ -147,6 +160,16 @@ public class KubeJSSetEffect implements SetEffect {
     @Override
     public void onTargetedEffect(LivingEntity entity, LivingChangeTargetEvent changer) {
         onTargetedEffectConsumer.accept(entity, changer);
+    }
+
+    @Override
+    public void onStandOnFluidEffect(LivingEntity entity, StandOnFluidEvent event) {
+        onStandOnFluidEffect.accept(entity, event);
+    }
+
+    @Override
+    public void stackedOnOther(LivingEntity entity, ItemStackedOnOtherEvent event) {
+        stackedOnOther.accept(entity, event);
     }
 
     @Override

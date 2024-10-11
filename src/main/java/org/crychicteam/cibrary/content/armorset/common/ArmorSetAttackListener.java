@@ -1,16 +1,16 @@
-package org.crychicteam.cibrary.content.armorset.capability;
+package org.crychicteam.cibrary.content.armorset.common;
 
 import dev.xkmc.l2damagetracker.contents.attack.AttackCache;
 import dev.xkmc.l2damagetracker.contents.attack.AttackListener;
 import dev.xkmc.l2damagetracker.contents.attack.CreateSourceEvent;
 import dev.xkmc.l2damagetracker.contents.attack.PlayerAttackCache;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
-import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
 
 import java.util.function.BiConsumer;
@@ -40,17 +40,21 @@ public class ArmorSetAttackListener implements AttackListener {
             return;
         }
         ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
-        if (activeSet != null) {
-            activeSet.onPlayerAttack(cache);
-        }
-        Cibrary.LOGGER.info("Player attack");
+        activeSet.onPlayerAttack(cache);
     }
 
     @Override
     public boolean onCriticalHit(PlayerAttackCache cache, CriticalHitEvent event) {
-        Player player = (Player) cache.getAttacker();
-        ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
-        return activeSet != null && activeSet.onCriticalHit(cache, event);
+        LivingEntity attacker = cache.getAttacker();
+        Entity target = event.getTarget();
+        if (attacker instanceof Player player) {
+            ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
+            return activeSet.attackerOnCriticalHit(cache, event);
+        } else if (target instanceof  Player player) {
+            ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
+            return activeSet.targetOnCriticalHit(cache, event);
+        }
+        return false;
     }
 
     @Override
@@ -59,14 +63,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.setupProfile(cache, setupProfile);
-            }
+            activeSet.attackerSetupProfile(cache, setupProfile);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.setupProfile(cache, setupProfile);
-            }
+            activeSet.targetSetupProfile(cache, setupProfile);
         }
     }
 
@@ -76,13 +76,11 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.onAttack(cache, weapon);
-            }
+            activeSet.attackerOnAttack(cache, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
             if (activeSet != null) {
-                activeSet.onAttack(cache, weapon);
+                activeSet.targetOnAttack(cache, weapon);
             }
         }
     }
@@ -93,14 +91,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.postAttack(cache, event, weapon);
-            }
+            activeSet.attackerPostAttack(cache, event, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.postAttack(cache, event, weapon);
-            }
+            activeSet.targetPostAttack(cache, event, weapon);
         }
     }
 
@@ -110,14 +104,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.onHurt(cache, weapon);
-            }
+            activeSet.attackerOnHurt(cache, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.onHurt(cache, weapon);
-            }
+            activeSet.targetOnHurt(cache, weapon);
         }
     }
 
@@ -127,14 +117,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.onHurtMaximized(cache, weapon);
-            }
+            activeSet.attackerOnHurtMaximized(cache, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.onHurtMaximized(cache, weapon);
-            }
+            activeSet.targetOnHurtMaximized(cache, weapon);
         }
     }
 
@@ -144,14 +130,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.postHurt(cache, event, weapon);
-            }
+            activeSet.attackerPostHurt(cache, event, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.postHurt(cache, event, weapon);
-            }
+            activeSet.targetPostHurt(cache, event, weapon);
         }
     }
 
@@ -161,14 +143,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.onDamage(cache, weapon);
-            }
+            activeSet.attackerOnDamage(cache, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.onDamage(cache, weapon);
-            }
+            activeSet.targetOnDamage(cache, weapon);
         }
     }
 
@@ -178,14 +156,10 @@ public class ArmorSetAttackListener implements AttackListener {
         LivingEntity target = cache.getAttackTarget();
         if (attacker instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) attacker);
-            if (activeSet != null) {
-                activeSet.onDamageFinalized(cache, weapon);
-            }
+            activeSet.attackerOnDamageFinalized(cache, weapon);
         } else if (target instanceof Player) {
             ArmorSet activeSet = armorSetManager.getActiveArmorSet((Player) target);
-            if (activeSet != null) {
-                activeSet.onDamageFinalized(cache, weapon);
-            }
+            activeSet.targetOnDamageFinalized(cache, weapon);
         }
     }
 }

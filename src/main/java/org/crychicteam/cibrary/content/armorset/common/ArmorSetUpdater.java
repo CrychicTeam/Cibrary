@@ -1,74 +1,21 @@
-package org.crychicteam.cibrary.content.armorset.capability;
+package org.crychicteam.cibrary.content.armorset.common;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
-import org.crychicteam.cibrary.content.armorset.defaults.DefaultArmorSet;
 import org.crychicteam.cibrary.content.armorset.SetEffect;
+import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ArmorSetManager {
-    private final List<ArmorSet> armorSets = new ArrayList<>();
-    private final Map<String, ArmorSet> armorSetMap = new HashMap<>();
-    private final Map<Item, Set<ArmorSet>> itemToSetIndex = new Object2ObjectOpenHashMap<>();
-    private static ArmorSetManager instance;
-    private static ArmorSet defaultArmorSet;
-
-    private ArmorSetManager() {
-        defaultArmorSet = new DefaultArmorSet();
-    }
-
-    public static ArmorSetManager getInstance() {
-        if (instance == null) {
-            instance = new ArmorSetManager();
-        }
-        return instance;
-    }
-
-    public void registerArmorSet(ArmorSet armorSet) {
-        if (!isExactSetExists(armorSet)) {
-            armorSets.add(armorSet);
-            armorSetMap.put(armorSet.getIdentifier(), armorSet);
-            indexArmorSet(armorSet);
-        }
-        Cibrary.LOGGER.info("Loaded armor set: " + armorSet.getIdentifier());
-    }
-
-    private void indexArmorSet(ArmorSet armorSet) {
-        for (Map.Entry<EquipmentSlot, Item> entry : armorSet.getEquipmentItems().entrySet()) {
-            Item item = entry.getValue();
-            if (item != ArmorSet.EMPTY_SLOT_MARKER) {
-                itemToSetIndex.computeIfAbsent(item, k -> new HashSet<>()).add(armorSet);
-            }
-        }
-    }
-
-    private boolean isExactSetExists(ArmorSet newSet) {
-        return armorSets.stream().anyMatch(set -> areSetItemsIdentical(set, newSet));
-    }
-
-    private boolean areSetItemsIdentical(ArmorSet set1, ArmorSet set2) {
-        return Objects.equals(set1.getEquipmentItems(), set2.getEquipmentItems());
-    }
-
-    public ArmorSet getArmorSetByIdentifier(String identifier) {
-        return armorSetMap.getOrDefault(identifier, defaultArmorSet);
-    }
-
-    public ArmorSet getActiveArmorSet(Player player) {
-        if (player == null) {
-            return null;
-        }
-        return player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY)
-                .map(ArmorSetCapability::getActiveSet)
-                .orElse(defaultArmorSet);
+public class ArmorSetUpdater extends ArmorSetRegistry {
+    protected ArmorSetUpdater() {
+        super();
     }
 
     public void updateEntitySetEffect(LivingEntity entity) {
@@ -126,6 +73,4 @@ public class ArmorSetManager {
             effect.removeEffect(entity);
         }
     }
-
-    public ArmorSet getDefaultArmorSet () { return defaultArmorSet; }
 }

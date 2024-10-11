@@ -8,11 +8,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.crychicteam.cibrary.api.registry.armorset.ArmorSetRegistry;
-import org.crychicteam.cibrary.content.armorset.capability.ArmorSetAttackListener;
-import org.crychicteam.cibrary.content.armorset.capability.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetAttackListener;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.example.ArmorSetRegistryExample;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
+import org.crychicteam.cibrary.content.events.common.SetEffectHandler;
 import org.crychicteam.cibrary.content.sound.GlobalCibrarySoundManager;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 import org.slf4j.Logger;
@@ -31,11 +33,13 @@ public class Cibrary
 		bus.addListener(this::onCommonSetup);
 		bus.addListener(this::initializeArmorSets);
 		MinecraftForge.EVENT_BUS.register(this);
-		MinecraftForge.EVENT_BUS.register(new ArmorSetHandler());;
+		MinecraftForge.EVENT_BUS.register(new ArmorSetHandler());
+		MinecraftForge.EVENT_BUS.register(new SetEffectHandler());
 		MinecraftForge.EVENT_BUS.register(new CuriosIntegration());
 
 		AttackEventHandler.register(4000, new ArmorSetAttackListener(ARMOR_SET_MANAGER));
 		CuriosIntegration.init();
+		ArmorSetRegistryExample.init();
 		bus.addListener(ArmorSetCapability::register);
 	}
 
