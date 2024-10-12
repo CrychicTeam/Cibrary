@@ -12,7 +12,7 @@ import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
-import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.content.event.ItemDamageEvent;
 import org.crychicteam.cibrary.content.event.ItemHurtEffectResult;
@@ -24,41 +24,32 @@ import java.util.Set;
 import static org.crychicteam.cibrary.content.events.common.ArmorSetHandler.syncArmorSet;
 
 public class SetEffectHandler {
+    private final ArmorSetManager armorSetManager = ArmorSetManager.getInstance();
+
     @SubscribeEvent
     public void onEntityFinishUsingItem(LivingEntityUseItemEvent.Finish event) {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player) {
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(capability-> {
-                ArmorSet activeset = capability.getActiveSet();
-                activeset.getEffect().releaseEffect(player);
-            });
+            ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
+            activeSet.getEffect().releaseEffect(player);
         }
     }
 
     @SubscribeEvent
     public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.player instanceof ServerPlayer player && player.isSprinting()) {
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap-> {
-                ArmorSet set = cap.getActiveSet();
+        if (event.player instanceof ServerPlayer player) {
+            ArmorSet set = armorSetManager.getActiveArmorSet(player);
+            if (player.isSprinting()) {
                 set.getEffect().sprintingEffect(player);
-            });
-        } else if (event.player instanceof ServerPlayer player && !player.isSprinting()){
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap-> {
-                ArmorSet set = cap.getActiveSet();
-                set.getEffect().workingEffect(player);
-            });
-        }
-        if (event.player instanceof ServerPlayer player && !player.isBlocking()){
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap-> {
-                ArmorSet set = cap.getActiveSet();
+            } else {
+                set.getEffect().normalTickingEffect(player);
+            }
+            if (!player.isBlocking()) {
                 set.getEffect().blockingEffect(player);
-            });
-        }
-        if (event.player instanceof ServerPlayer player && !player.isCrouching()){
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(cap-> {
-                ArmorSet set = cap.getActiveSet();
+            }
+            if (!player.isCrouching()) {
                 set.getEffect().crouchingEffect(player);
-            });
+            }
         }
     }
 
@@ -66,37 +57,35 @@ public class SetEffectHandler {
     public void onItemHurt(ItemDamageEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player) {
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(capability -> {
-                ArmorSet activeSet = capability.getActiveSet();
-                ItemStack damagedItem = event.getItemStack();
-                boolean isSetItem = false;
-                for (Map.Entry<EquipmentSlot, Set<Item>> entry : activeSet.getEquipmentItems().entrySet()) {
-                    if (entry.getValue().contains(damagedItem.getItem())) {
-                        isSetItem = true;
-                        break;
-                    }
+            ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
+            ItemStack damagedItem = event.getItemStack();
+            boolean isSetItem = false;
+            for (Map.Entry<EquipmentSlot, Set<Item>> entry : activeSet.getEquipmentItems().entrySet()) {
+                if (entry.getValue().contains(damagedItem.getItem())) {
+                    isSetItem = true;
+                    break;
                 }
-                if (!isSetItem && CuriosIntegration.isCuriosLoaded) {
-                    isSetItem = activeSet.getCurioItems().containsKey(damagedItem.getItem());
+            }
+            if (!isSetItem && CuriosIntegration.isCuriosLoaded) {
+                isSetItem = activeSet.getCurioItems().containsKey(damagedItem.getItem());
+            }
+            if (!isSetItem) {
+                isSetItem = damagedItem == player.getMainHandItem() || damagedItem == player.getOffhandItem();
+            }
+            if (isSetItem) {
+                ItemHurtEffectResult result = activeSet.getEffect().itemHurtEffect(player, damagedItem, event.getDamage());
+                if (result.cancelled()) {
+                    event.setCanceled(true);
+                } else if (result.damage() != event.getDamage()) {
+                    event.setDamage(result.damage());
                 }
-                if (!isSetItem) {
-                    isSetItem = damagedItem == player.getMainHandItem() || damagedItem == player.getOffhandItem();
+                if (result.destroyed()) {
+                    damagedItem.setCount(0);
                 }
-                if (isSetItem) {
-                    ItemHurtEffectResult result = activeSet.getEffect().itemHurtEffect(player, damagedItem, event.getDamage());
-                    if (result.cancelled()) {
-                        event.setCanceled(true);
-                    } else if (result.damage() != event.getDamage()) {
-                        event.setDamage(result.damage());
-                    }
-                    if (result.destroyed()) {
-                        damagedItem.setCount(0);
-                    }
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        syncArmorSet(serverPlayer);
-                    }
+                if (player instanceof ServerPlayer serverPlayer) {
+                    syncArmorSet(serverPlayer);
                 }
-            });
+            }
         }
     }
 
@@ -104,10 +93,8 @@ public class SetEffectHandler {
     public void onLivingTargetChange(LivingChangeTargetEvent event) {
         LivingEntity target = event.getNewTarget();
         if (target instanceof Player player) {
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(capability -> {
-                ArmorSet activeSet = capability.getActiveSet();
-                activeSet.getEffect().onTargetedEffect(player, event);
-            });
+            ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
+            activeSet.getEffect().onTargetedEffect(player, event);
         }
     }
 
@@ -115,18 +102,14 @@ public class SetEffectHandler {
     public void onStandOnLiquid(StandOnFluidEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player) {
-            player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(capability -> {
-                ArmorSet activeSet = capability.getActiveSet();
-                activeSet.getEffect().onStandOnFluidEffect(player, event);
-            });
+            ArmorSet activeSet = armorSetManager.getActiveArmorSet(player);
+            activeSet.getEffect().onStandOnFluidEffect(player, event);
         }
     }
 
     @SubscribeEvent
-    public void stackedOnOther(ItemStackedOnOtherEvent event){
-            event.getPlayer().getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).ifPresent(capability -> {
-                ArmorSet activeSet = capability.getActiveSet();
-                activeSet.getEffect().stackedOnOther(event.getPlayer(), event);
-            });
+    public void stackedOnOther(ItemStackedOnOtherEvent event) {
+        ArmorSet activeSet = armorSetManager.getActiveArmorSet(event.getPlayer());
+        activeSet.getEffect().stackedOnOther(event.getPlayer(), event);
     }
 }

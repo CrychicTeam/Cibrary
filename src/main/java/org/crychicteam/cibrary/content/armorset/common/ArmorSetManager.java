@@ -4,6 +4,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.capability.IArmorSetCapability;
 
 import java.util.Optional;
 
@@ -26,12 +27,12 @@ public class ArmorSetManager extends ArmorSetUpdater {
             return null;
         }
         return player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY)
-                .map(ArmorSetCapability::getActiveSet)
+                .map(IArmorSetCapability::getActiveSet)
                 .orElse(defaultArmorSet);
     }
 
     public ArmorSet.State getArmorSetState(Player player) {
-        return getArmorSetCapability(player).map(ArmorSetCapability::getState).orElse(ArmorSet.State.NORMAL);
+        return getArmorSetCapability(player).map(IArmorSetCapability::getState).orElse(ArmorSet.State.NORMAL);
     }
 
     public void setArmorSetState(Player player, ArmorSet.State state) {
@@ -39,7 +40,7 @@ public class ArmorSetManager extends ArmorSetUpdater {
     }
 
     public String getArmorSetSkillState(Player player) {
-        return getArmorSetCapability(player).map(ArmorSetCapability::getSkillState).orElse("none");
+        return getArmorSetCapability(player).map(IArmorSetCapability::getSkillState).orElse("none");
     }
 
     public void setArmorSetSkillState(Player player, String skillState) {
@@ -58,7 +59,7 @@ public class ArmorSetManager extends ArmorSetUpdater {
                 .orElse(defaultArmorSet);
     }
 
-    private Optional<ArmorSetCapability> getArmorSetCapability(Player player) {
+    private Optional<IArmorSetCapability> getArmorSetCapability(Player player) {
         return player.getCapability(ArmorSetCapability.ARMOR_SET_CAPABILITY).resolve();
     }
 }

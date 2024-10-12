@@ -7,8 +7,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
-import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.capability.IArmorSetCapability;
 
 @SerialClass
 public class ArmorSetSyncPacket extends SerialPacketBase {
@@ -17,7 +18,7 @@ public class ArmorSetSyncPacket extends SerialPacketBase {
 
     public ArmorSetSyncPacket() {}
 
-    public ArmorSetSyncPacket(ArmorSetCapability cap) {
+    public ArmorSetSyncPacket(IArmorSetCapability cap) {
         ArmorSet activeSet = cap.getActiveSet();
         this.activeSetIdentifier = activeSet != null ? activeSet.getIdentifier() : "";
     }

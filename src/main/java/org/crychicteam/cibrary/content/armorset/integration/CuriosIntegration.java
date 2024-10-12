@@ -10,65 +10,25 @@ import net.minecraftforge.fml.ModList;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.event.CurioChangeEvent;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CuriosIntegration {
     public static boolean isCuriosLoaded = ModList.get().isLoaded("curios");
-    private static Class<?> curiosApiClass;
-    private static Method getCuriosInventoryMethod;
-    private static Method getStacksMethod;
-    private static Method getSlotsMethod;
-    private static Method getStackInSlotMethod;
-    private static Method findMethod;
-    private static Method getEquippedCuriosMethod;
-    private static Method getCuriosMethod;
-    private static Method setEquippedCurioMethod;
-    private static Method getSlotHelperMethod;
-
-    public static void init() {
-        if (isCuriosLoaded) {
-            try {
-                curiosApiClass = Class.forName("top.theillusivec4.curios.api.CuriosApi");
-                getCuriosInventoryMethod = curiosApiClass.getMethod("getCuriosInventory", LivingEntity.class);
-                Class<?> iCurioStacksHandlerClass = Class.forName("top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler");
-                getStacksMethod = iCurioStacksHandlerClass.getMethod("getStacks");
-                Class<?> iDynamicStackHandlerClass = Class.forName("top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler");
-                getSlotsMethod = iDynamicStackHandlerClass.getMethod("getSlots");
-                getStackInSlotMethod = iDynamicStackHandlerClass.getMethod("getStackInSlot", int.class);
-                findMethod = iDynamicStackHandlerClass.getMethod("find", Item.class);
-                getEquippedCuriosMethod = Class.forName("top.theillusivec4.curios.api.type.capability.ICuriosItemHandler").getMethod("getEquippedCurios");
-                getCuriosMethod = Class.forName("top.theillusivec4.curios.api.type.capability.ICuriosItemHandler").getMethod("getCurios");
-                setEquippedCurioMethod = Class.forName("top.theillusivec4.curios.api.type.capability.ICuriosItemHandler").getMethod("setEquippedCurio", String.class, int.class, ItemStack.class);
-                getSlotHelperMethod = curiosApiClass.getMethod("getSlotHelper");
-            } catch (Exception e) {
-                e.printStackTrace();
-                isCuriosLoaded = false;
-            }
-        }
-    }
 
     public static List<ItemStack> getAllItems(LivingEntity entity) {
         if (!isCuriosLoaded) return Collections.emptyList();
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                Method getCuriosMethod = handler.getClass().getMethod("getCurios");
-                Map<String, ?> curios = (Map<String, ?>) getCuriosMethod.invoke(handler);
-                return curios.values().stream()
-                        .flatMap(stacksHandler -> streamStacks(stacksHandler))
+        return CuriosApi.getCuriosInventory(entity).resolve()
+                .map(handler -> handler.getCurios().values().stream()
+                        .flatMap(CuriosIntegration::streamStacks)
                         .filter(stack -> !stack.isEmpty())
-                        .collect(Collectors.toList());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     public static boolean matchesCurioRequirements(LivingEntity entity, Map<Item, Integer> requiredCurios) {
@@ -81,7 +41,6 @@ public class CuriosIntegration {
         for (Map.Entry<Item, Integer> entry : requiredCurios.entrySet()) {
             Item requiredItem = entry.getKey();
             int requiredCount = entry.getValue();
-
             int equippedCount = equippedCuriosCount.getOrDefault(requiredItem, 0);
             if (equippedCount < requiredCount) {
                 return false;
@@ -91,55 +50,34 @@ public class CuriosIntegration {
     }
 
     @SubscribeEvent
-    public void onGenericEvent(Event event) {
-        if (event.getClass().getName().equals("top.theillusivec4.curios.api.event.CurioChangeEvent")) {
-            try {
-                Object entity = event.getClass().getMethod("getEntity").invoke(event);
-                if (entity instanceof ServerPlayer player) {
-                    ArmorSetManager armorSetManager = Cibrary.ARMOR_SET_MANAGER;
-                    if (armorSetManager != null) {
-                        armorSetManager.updateEntitySetEffect(player);
-                        ArmorSetHandler.syncArmorSet(player);
-                    } else {
-                        System.err.println("ArmorSetManager is null in CuriosIntegration.onGenericEvent");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    public void onCurioChangeEvent(CurioChangeEvent event) {
+        if (!isCuriosLoaded) return;
+
+        if (event.getEntity() instanceof ServerPlayer player) {
+            if (Cibrary.ARMOR_SET_MANAGER != null) {
+                Cibrary.ARMOR_SET_MANAGER.updateEntitySetEffect(player);
+                ArmorSetHandler.syncArmorSet(player);
+            } else {
+                System.err.println("ArmorSetManager is null in CuriosIntegration.onCurioChangeEvent");
             }
         }
     }
-
-    private static java.util.stream.Stream<ItemStack> streamStacks(Object stacksHandler) {
-        try {
-            Object stacks = getStacksMethod.invoke(stacksHandler);
-            int slots = (int) getSlotsMethod.invoke(stacks);
-            List<ItemStack> itemStacks = new ArrayList<>();
-            for (int i = 0; i < slots; i++) {
-                itemStacks.add((ItemStack) getStackInSlotMethod.invoke(stacks, i));
-            }
-            return itemStacks.stream();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return java.util.stream.Stream.empty();
+    private static java.util.stream.Stream<ItemStack> streamStacks(ICurioStacksHandler stacksHandler) {
+        IDynamicStackHandler stacks = stacksHandler.getStacks();
+        int slots = stacks.getSlots();
+        List<ItemStack> itemStacks = new ArrayList<>();
+        for (int i = 0; i < slots; i++) {
+            itemStacks.add(stacks.getStackInSlot(i));
         }
+        return itemStacks.stream();
     }
 
     public static int getSlot(LivingEntity entity, Item item) {
         if (!isCuriosLoaded) return -1;
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                Object equippedCurios = getEquippedCuriosMethod.invoke(handler);
-                return (int) findMethod.invoke(equippedCurios, item);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
+        return CuriosApi.getCuriosInventory(entity).resolve()
+                .flatMap(handler -> handler.findFirstCurio(item))
+                .map(slotResult -> slotResult.slotContext().index())
+                .orElse(-1);
     }
 
     public static boolean isPresent(LivingEntity entity, Item item) {
@@ -148,84 +86,44 @@ public class CuriosIntegration {
 
     public static int getSlotByIdentifier(LivingEntity entity, Item item, String identifier) {
         if (!isCuriosLoaded) return -1;
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                Map<String, ?> curios = (Map<String, ?>) getCuriosMethod.invoke(handler);
-                Object stacksHandler = curios.get(identifier);
-                if (stacksHandler != null) {
-                    Object stacks = getStacksMethod.invoke(stacksHandler);
-                    return (int) findMethod.invoke(stacks, item);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
+        return CuriosApi.getCuriosInventory(entity).resolve()
+                .flatMap(handler -> Optional.ofNullable(handler.getCurios().get(identifier)))
+                .map(stacksHandler -> {
+                    IDynamicStackHandler stacks = stacksHandler.getStacks();
+                    for (int i = 0; i < stacks.getSlots(); i++) {
+                        if (stacks.getStackInSlot(i).getItem() == item) {
+                            return i;
+                        }
+                    }
+                    return -1;
+                })
+                .orElse(-1);
     }
 
     public static int getEmptySlotByIdentifier(LivingEntity entity, String identifier) {
-        return getSlotByIdentifier(entity, Item.byId(0), identifier); // 0 is the ID for air
+        return getSlotByIdentifier(entity, Item.byId(0), identifier);
     }
 
     public static int getTotalSlotsByIdentifier(LivingEntity entity, String identifier) {
         if (!isCuriosLoaded) return 0;
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                Map<String, ?> curios = (Map<String, ?>) getCuriosMethod.invoke(handler);
-                Object stacksHandler = curios.get(identifier);
-                if (stacksHandler != null) {
-                    Object stacks = getStacksMethod.invoke(stacksHandler);
-                    return (int) getSlotsMethod.invoke(stacks);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return CuriosApi.getCuriosInventory(entity).resolve()
+                .flatMap(handler -> Optional.ofNullable(handler.getCurios().get(identifier)))
+                .map(stacksHandler -> stacksHandler.getStacks().getSlots())
+                .orElse(0);
     }
 
     public static ItemStack getStackInSlotByIdentifier(LivingEntity entity, String identifier, int slot) {
         if (!isCuriosLoaded) return ItemStack.EMPTY;
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                Map<String, ?> curios = (Map<String, ?>) getCuriosMethod.invoke(handler);
-                Object stacksHandler = curios.get(identifier);
-                if (stacksHandler != null) {
-                    Object stacks = getStacksMethod.invoke(stacksHandler);
-                    return (ItemStack) getStackInSlotMethod.invoke(stacks, slot);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ItemStack.EMPTY;
+        return CuriosApi.getCuriosInventory(entity).resolve()
+                .flatMap(handler -> Optional.ofNullable(handler.getCurios().get(identifier)))
+                .map(stacksHandler -> stacksHandler.getStacks().getStackInSlot(slot))
+                .orElse(ItemStack.EMPTY);
     }
 
     public static void setStackInSlotByIdentifier(LivingEntity entity, String identifier, int slot, ItemStack itemStack) {
         if (!isCuriosLoaded) return;
-        try {
-            Object curioInventory = getCuriosInventoryMethod.invoke(null, entity);
-            Method resolveMethod = curioInventory.getClass().getMethod("resolve");
-            Optional<?> resolvedInventory = (Optional<?>) resolveMethod.invoke(curioInventory);
-            if (resolvedInventory.isPresent()) {
-                Object handler = resolvedInventory.get();
-                setEquippedCurioMethod.invoke(handler, identifier, slot, itemStack);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        CuriosApi.getCuriosInventory(entity).resolve()
+                .ifPresent(handler -> handler.setEquippedCurio(identifier, slot, itemStack));
     }
 
     public static Map<String, Object> getCurioInfo(LivingEntity entity, String id) {
@@ -233,6 +131,8 @@ public class CuriosIntegration {
         result.put("hasItem", false);
         result.put("count", 0);
         result.put("slots", new ArrayList<Integer>());
+
+        if (!isCuriosLoaded) return result;
 
         List<ItemStack> curiosItems = getAllItems(entity);
         for (int i = 0; i < curiosItems.size(); i++) {
@@ -248,6 +148,8 @@ public class CuriosIntegration {
     }
 
     public static List<Map<String, Object>> getUniqueCuriosItems(LivingEntity entity) {
+        if (!isCuriosLoaded) return Collections.emptyList();
+
         List<ItemStack> curiosItems = getAllItems(entity);
         Map<String, Map<String, Object>> uniqueItems = new HashMap<>();
 
@@ -269,6 +171,7 @@ public class CuriosIntegration {
     }
 
     public static boolean isWearing(LivingEntity entity, Object item) {
+        if (!isCuriosLoaded) return false;
         if (item instanceof String) {
             return (boolean) getCurioInfo(entity, (String) item).get("hasItem");
         } else if (item instanceof Item) {
@@ -302,45 +205,6 @@ public class CuriosIntegration {
         } catch (Exception e) {
             e.printStackTrace();
             return ItemStack.EMPTY;
-        }
-    }
-
-    public static void slotOperation(String method, String slot, LivingEntity entity, int amount) {
-        if (!isCuriosLoaded) return;
-        try {
-            Object slotHelper = getSlotHelperMethod.invoke(null);
-            Method operationMethod;
-            switch (method) {
-                case "shrink":
-                    operationMethod = slotHelper.getClass().getMethod("shrinkSlotType", String.class, int.class, LivingEntity.class);
-                    operationMethod.invoke(slotHelper, slot, amount, entity);
-                    break;
-                case "grow":
-                    operationMethod = slotHelper.getClass().getMethod("growSlotType", String.class, int.class, LivingEntity.class);
-                    operationMethod.invoke(slotHelper, slot, amount, entity);
-                    break;
-                case "getfor":
-                    operationMethod = slotHelper.getClass().getMethod("getSlotsForType", LivingEntity.class, String.class);
-                    int result = (int) operationMethod.invoke(slotHelper, entity, slot);
-                    // Handle the result as needed
-                    break;
-                case "setfor":
-                    operationMethod = slotHelper.getClass().getMethod("setSlotsForType", String.class, LivingEntity.class, int.class);
-                    operationMethod.invoke(slotHelper, slot, entity, amount);
-                    break;
-                case "unlock":
-                    operationMethod = slotHelper.getClass().getMethod("unlockSlotType", String.class, LivingEntity.class);
-                    operationMethod.invoke(slotHelper, slot, entity);
-                    break;
-                case "lock":
-                    operationMethod = slotHelper.getClass().getMethod("lockSlotType", String.class, LivingEntity.class);
-                    operationMethod.invoke(slotHelper, slot, entity);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid method: " + method);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

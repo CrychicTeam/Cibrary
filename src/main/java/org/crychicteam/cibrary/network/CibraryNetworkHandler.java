@@ -7,7 +7,7 @@ import net.minecraftforge.network.NetworkDirection;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.network.sound.CibrarySoundPacket;
 import org.crychicteam.cibrary.network.armorset.ArmorSetSyncPacket;
-import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
+import org.crychicteam.cibrary.content.armorset.capability.IArmorSetCapability;
 
 public class CibraryNetworkHandler {
     public static final BasePacketHandler HANDLER = new BasePacketHandler(
@@ -21,7 +21,7 @@ public class CibraryNetworkHandler {
         HANDLER.registerPackets();
     }
 
-    public static void sendArmorSetSync(ServerPlayer player, ArmorSetCapability cap) {
+    public static void sendArmorSetSync(ServerPlayer player, IArmorSetCapability cap) {
         HANDLER.toClientPlayer(new ArmorSetSyncPacket(cap), player);
     }
 }

@@ -58,7 +58,7 @@ public interface SetEffect {
 
     default void sprintingEffect(LivingEntity entity) {}
 
-    default void workingEffect(LivingEntity entity) {}
+    default void normalTickingEffect(LivingEntity entity) {}
 
     /**
      * Trigger when the entity jump.

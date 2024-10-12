@@ -24,7 +24,7 @@ public class KubeJSSetEffect implements SetEffect {
     private Consumer<LivingEntity> startSprintingEffectConsumer = entity -> {};
     private Consumer<LivingEntity> stopSprintingEffectConsumer = entity -> {};
     private Consumer<LivingEntity> sprintingEffectConsumer = entity -> {};
-    private Consumer<LivingEntity> workingEffectConsumer = entity -> {};
+    private Consumer<LivingEntity> normalTickingEffectEffectConsumer = entity -> {};
     private Consumer<LivingEntity> jumpEffectConsumer = entity -> {};
     private QuadConsumer<LivingEntity, Double, BlockState, BlockPos> landEffectConsumer = (entity, distance, landingBlock, pos) -> {};
     private Consumer<LivingEntity> sprintingJumpEffectConsumer = entity -> {};
@@ -65,8 +65,8 @@ public class KubeJSSetEffect implements SetEffect {
         this.sprintingEffectConsumer = consumer;
     }
 
-    public void setWorkingEffectConsumer(Consumer<LivingEntity> consumer) {
-        this.workingEffectConsumer = consumer;
+    public void setNormalTickingEffectEffectConsumerEffectConsumer(Consumer<LivingEntity> consumer) {
+        this.normalTickingEffectEffectConsumer = consumer;
     }
 
     public void setJumpEffectConsumer(Consumer<LivingEntity> consumer) {
@@ -138,8 +138,8 @@ public class KubeJSSetEffect implements SetEffect {
     }
 
     @Override
-    public void workingEffect(LivingEntity entity) {
-        workingEffectConsumer.accept(entity);
+    public void normalTickingEffect(LivingEntity entity) {
+        normalTickingEffectEffectConsumer.accept(entity);
     }
 
     @Override
