@@ -11,7 +11,6 @@ import org.crychicteam.cibrary.api.registry.armorset.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
 import org.crychicteam.cibrary.content.armorset.common.ArmorSetAttackListener;
 import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
-import org.crychicteam.cibrary.content.armorset.example.ArmorSetRegistryExample;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.crychicteam.cibrary.content.events.common.ArmorSetHandler;
 import org.crychicteam.cibrary.content.events.common.SetEffectHandler;
@@ -39,7 +38,6 @@ public class Cibrary
 
 		AttackEventHandler.register(4000, new ArmorSetAttackListener(ARMOR_SET_MANAGER));
 		CuriosIntegration.init();
-		ArmorSetRegistryExample.init();
 		bus.addListener(ArmorSetCapability::register);
 	}
 

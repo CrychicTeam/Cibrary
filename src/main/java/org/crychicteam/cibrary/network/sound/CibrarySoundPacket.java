@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
-import org.crychicteam.cibrary.CibraryClient;
 import org.crychicteam.cibrary.content.sound.CibrarySoundManagerHandler;
 import org.crychicteam.cibrary.content.sound.SoundData;
 
@@ -48,7 +47,7 @@ public class CibrarySoundPacket extends SerialPacketBase {
     }
 
     private void handleClientSide() {
-        CibrarySoundManagerHandler manager = CibraryClient.CLIENT_SOUND_MANAGER;
+        CibrarySoundManagerHandler manager = CibrarySoundManagerHandler.getInstance();
         Player clientPlayer = Minecraft.getInstance().player;
 
         switch (packetType) {
