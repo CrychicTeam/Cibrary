@@ -183,6 +183,27 @@ repositories {
         name "KosmX's maven"
         url 'https://maven.kosmx.dev/'
     }
+    maven {
+        name = "Curseforge"
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        // Shedaniel's maven (Architectury API)
+        url = "https://maven.architectury.dev"
+        content {
+            includeGroup "dev.architectury"
+        }
+    }
+    maven {
+        name = "Lat's Maven"
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
     flatDir { dirs "libraries/${config.mc_version}/all" }
     flatDir { dirs "libraries/${config.mc_version}/classpathOnly" }
     flatDir { dirs "libraries/${config.mc_version}/runtimeOnly" }
@@ -245,6 +266,15 @@ dependencies {
         implementation fg.deobf("dev.xkmc.l2serial:l2serial:${config.l2serial_version}")
         jarJar(group: 'dev.xkmc', name: 'l2serial', version: "[${config.l2serial_version},)")
     }
+
+    if (hasConfig("reference_projects") && !config.reference_projects.isEmpty()) {
+        compileOnly fg.deobf("curse.maven:forgeendertech-244844:6030567")
+        compileOnly fg.deobf("curse.maven:advanced-hook-launchers-244849:5829843")
+    }
+
+    compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${config.kubejs_version}")
+    compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${config.rhino_version}")
+    implementation fg.deobf("dev.architectury:architectury-forge:${config.architectury_version}")
 
     def libraries = new File(file("libraries"), "${config.mc_version}")
     if (!libraries.isDirectory()) libraries.mkdirs()

@@ -13,6 +13,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.crychicteam.cibrary.api.common.GlobalCibrarySoundManager;
 import org.crychicteam.cibrary.api.registry.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.SkillKey;
@@ -45,14 +46,16 @@ public class Cibrary {
 	public Cibrary() {
 		FMLJavaModLoadingContext ctx = FMLJavaModLoadingContext.get();
 		IEventBus modEventBus = ctx.getModEventBus();
-		modEventBus.addListener(EventPriority.LOW, this::initializeKeySystem);
-		modEventBus.addListener(this::onClientSetup);
+		keySetUp();
 
 		initializeRegistries(modEventBus);
 		registerEventListeners();
 		initializeArmorSets(modEventBus);
-		SkillKey.init();
-		ArmorSetRegistryExample.init();
+//		ArmorSetRegistryExample.init();
+	}
+
+	public static boolean isLoaded(String mod) {
+		return ModList.get().isLoaded(mod);
 	}
 
 	private void initializeRegistries(IEventBus modEventBus) {
@@ -74,15 +77,13 @@ public class Cibrary {
 		modEventBus.addListener(ArmorSetCapability::register);
 	}
 
-	private void initializeKeySystem(FMLClientSetupEvent event) {
+	public void onCommonSetup(FMLCommonSetupEvent event) {
+		CibraryNetworkHandler.init();
 		event.enqueueWork(KeyRegistry::init);
 	}
 
-	public void onCommonSetup(FMLCommonSetupEvent event) {
-		CibraryNetworkHandler.init();
-	}
-
-	public void onClientSetup(FMLClientSetupEvent event) {
+	public void keySetUp() {
 		DefaultKey.register();
+		SkillKey.init();
 	}
 }

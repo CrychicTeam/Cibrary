@@ -5,20 +5,20 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.settings.KeyConflictContext;
 
-public class KeyConfig {
+public class ConfiguredKey {
     public final ResourceLocation id;
     public final KeyMapping keyMapping;
     public final float maxPower;
     public final boolean enableCharging;
     public final boolean showDebugMessage;
 
-    private KeyConfig(Builder builder) {
+    private ConfiguredKey(Builder builder) {
         this.id = builder.id;
         this.keyMapping = builder.existingKeyMapping != null ?
                 builder.existingKeyMapping :
                 new KeyMapping(
                         "key." + builder.id.getNamespace() + "." + builder.id.getPath(),
-                        KeyConflictContext.IN_GAME,
+                        builder.type == null ? KeyConflictContext.IN_GAME : builder.type,
                         InputConstants.Type.KEYSYM,
                         builder.defaultKey,
                         "key.category." + builder.id.getNamespace() + "." + builder.category
@@ -31,6 +31,7 @@ public class KeyConfig {
     public static class Builder {
         private final ResourceLocation id;
         private final int defaultKey;
+        private KeyConflictContext type;
         private KeyMapping existingKeyMapping;
         private String category = "default";
         private float maxPower = 2.0f;
@@ -93,11 +94,11 @@ public class KeyConfig {
         }
 
         /**
-         * Build {@link KeyConfig} instance.
-         * @return {@link KeyConfig}
+         * Build {@link ConfiguredKey} instance.
+         * @return {@link ConfiguredKey}
          */
-        public KeyConfig build() {
-            return new KeyConfig(this);
+        public ConfiguredKey build() {
+            return new ConfiguredKey(this);
         }
     }
 

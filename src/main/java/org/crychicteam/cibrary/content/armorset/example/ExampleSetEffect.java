@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
@@ -62,6 +63,18 @@ public class ExampleSetEffect implements ISetEffect {
     @Override
     public void onSkillPress(ServerPlayer player) {
         ISetEffect.super.onSkillPress(player);
+        player.level().explode(player,player.getX(),player.getY(),player.getZ(),10,false, Level.ExplosionInteraction.NONE);
+    }
+
+    @Override
+    public void onSkillCharging(ServerPlayer player, float power) {
+        player.addDeltaMovement(new Vec3(player.getViewVector(2).scale(0.1).x, player.getDeltaMovement().y > 0 ? - 0.01 : player.getDeltaMovement().y , player.getViewVector(2).scale(0.1).z));
+        player.hurtMarked = true;
+    }
+
+    @Override
+    public void onSkillRelease(ServerPlayer player, float power) {
+        ISetEffect.super.onSkillRelease(player, power);
         player.level().explode(player,player.getX(),player.getY(),player.getZ(),10,false, Level.ExplosionInteraction.NONE);
     }
 

@@ -10,7 +10,7 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import org.crychicteam.cibrary.Cibrary;
-import org.crychicteam.cibrary.content.key.KeyConfig;
+import org.crychicteam.cibrary.content.key.ConfiguredKey;
 import org.crychicteam.cibrary.content.key.KeyData;
 import org.crychicteam.cibrary.content.key.KeyRegistry;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
@@ -24,8 +24,6 @@ import java.util.Optional;
  * ClientKeyHandler manages custom key bindings in Minecraft's client-side environment.
  * <p>
  * Data Structures:
- * <p>
- * - Uses HashMap for O(1) access to key states and related timing data
  * <p>
  * - KEY_STATES: Maps ResourceLocation to KeyData for current key states
  * <p>
@@ -58,24 +56,14 @@ import java.util.Optional;
  * <p>
  *    - Optimized to send updates only on state changes
  * <p>
- * <p>
- * Performance Considerations:
- * <p>
- * - O(1) lookup time for all key states and timings
- * <p>
- * - O(n) processing time per tick where n is number of registered keys
- * <p>
- * - Memory usage scales linearly with number of registered keys
- * <p>
  * @author M1hono
  */
 @EventBusSubscriber(value = Dist.CLIENT)
-@OnlyIn(Dist.CLIENT)
 public class ClientKeyHandler {
-    private static final Map<ResourceLocation, KeyData> KEY_STATES = new HashMap<>();
-    private static final Map<ResourceLocation, Boolean> PREVIOUS_STATES = new HashMap<>();
-    private static final Map<ResourceLocation, Long> PRESS_START_TIMES = new HashMap<>();
-    private static final Map<ResourceLocation, KeyData.KeyState> LAST_SENT_STATE = new HashMap<>();
+    public static final Map<ResourceLocation, KeyData> KEY_STATES = new HashMap<>();
+    public static final Map<ResourceLocation, Boolean> PREVIOUS_STATES = new HashMap<>();
+    public static final Map<ResourceLocation, Long> PRESS_START_TIMES = new HashMap<>();
+    public static final Map<ResourceLocation, KeyData.KeyState> LAST_SENT_STATE = new HashMap<>();
 
     /** Minimum hold duration (ms) to trigger charging state */
     public static final long CHARGE_THRESHOLD = 100;
@@ -84,38 +72,6 @@ public class ClientKeyHandler {
     public static final float LEAST_RELEASE_TIME = 0.5f;
 
     /**
-     * Registers a new key binding in the handler's state management system.
-     * <p>
-     * Implementation Details:
-     * <p>
-     * 1. Performs duplicate registration check (O(1))
-     * <p>
-     * 2. Initializes all state maps with default values
-     * <p>
-     * Memory Impact:
-     * <p>
-     * - Adds entries to tracking maps
-     * <p>
-     *
-     * @param config Configuration object containing key binding parameters
-     */
-    public static void registerKey(KeyConfig config) {
-        if (KEY_STATES.containsKey(config.id)) {
-            Cibrary.LOGGER.warn("Duplicate key registration attempt: {}", config.id);
-            return;
-        }
-        KEY_STATES.put(config.id, new KeyData(config.id));
-        PREVIOUS_STATES.put(config.id, false);
-        PRESS_START_TIMES.put(config.id, 0L);
-        LAST_SENT_STATE.put(config.id, KeyData.KeyState.IDLE);
-        Cibrary.LOGGER.debug("Registered key: {}", config.id);
-    }
-
-    /**
-     * Core tick processing loop for key state management.
-     * <p>
-     * Algorithm Overview:
-     * <p>
      * For each registered key:
      * <p>
      *    - Retrieve current and previous states
@@ -125,10 +81,6 @@ public class ClientKeyHandler {
      *    - Update state based on timing conditions
      * <p>
      *    - Trigger network sync if state changed
-     * <p>
-     * Time Complexity: O(n) where n is number of registered keys
-     * <p>
-     * Space Complexity: O(1) additional memory per tick
      * <p>
      * State Transition Logic:
      * - IDLE -> CHARGING: Hold duration > CHARGE_THRESHOLD
@@ -147,7 +99,7 @@ public class ClientKeyHandler {
 
         long currentTime = System.currentTimeMillis();
 
-        for (KeyConfig config : KeyRegistry.getAllConfigs()) {
+        for (ConfiguredKey config : KeyRegistry.getAllConfigs()) {
             ResourceLocation keyId = config.id;
             KeyData keyData = KEY_STATES.get(keyId);
             Boolean prevPressed = PREVIOUS_STATES.get(keyId);
@@ -187,7 +139,7 @@ public class ClientKeyHandler {
      * <p>
      * Space Complexity: O(1)
      */
-    private static void updateKeyState(ResourceLocation keyId, KeyConfig config, KeyData keyData,
+    private static void updateKeyState(ResourceLocation keyId, ConfiguredKey config, KeyData keyData,
                                        boolean isPressed, boolean prevPressed, long currentTime) {
         if (isPressed) {
             handleKeyPress(keyId, config, keyData, currentTime, prevPressed);
@@ -208,7 +160,7 @@ public class ClientKeyHandler {
      * Time Complexity: O(1)
      * Memory Usage: Constant
      */
-    private static void handleKeyPress(ResourceLocation keyId, KeyConfig config, KeyData keyData,
+    private static void handleKeyPress(ResourceLocation keyId, ConfiguredKey config, KeyData keyData,
                                        long currentTime, boolean prevPressed) {
         if (!prevPressed) {
             PRESS_START_TIMES.put(keyId, currentTime);
@@ -240,7 +192,7 @@ public class ClientKeyHandler {
      * Time Complexity: O(1)
      * Memory Impact: Updates timestamp storage
      */
-    private static void handleKeyRelease(ResourceLocation keyId, KeyConfig config, KeyData keyData, long currentTime) {
+    private static void handleKeyRelease(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
         if (keyData.state == KeyData.KeyState.CHARGING) {
             if (keyData.power < LEAST_RELEASE_TIME) {
                 keyData.state = KeyData.KeyState.PRESSED;
@@ -268,7 +220,7 @@ public class ClientKeyHandler {
      * Time Complexity: O(1)
      * Network Impact: Updates sent only on 0.1 unit changes
      */
-    private static void updateChargePower(ResourceLocation keyId, KeyConfig config, KeyData keyData, long currentTime) {
+    private static void updateChargePower(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
         long holdDuration = currentTime - PRESS_START_TIMES.get(keyId);
         float oldPower = keyData.power;
         keyData.power = Math.min((float) holdDuration / 1000.0f, config.maxPower);
@@ -295,7 +247,7 @@ public class ClientKeyHandler {
     /**
      * Displays debug information in client chat.
      */
-    private static void showDebugMessage(String message, KeyConfig config) {
+    private static void showDebugMessage(String message, ConfiguredKey config) {
         if (config.showDebugMessage) {
             var player = Minecraft.getInstance().player;
             if (player != null) {
