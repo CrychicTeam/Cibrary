@@ -204,6 +204,7 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
+    maven { url "https://maven.mihono.cn/repository/pickaid/" }
     flatDir { dirs "libraries/${config.mc_version}/all" }
     flatDir { dirs "libraries/${config.mc_version}/classpathOnly" }
     flatDir { dirs "libraries/${config.mc_version}/runtimeOnly" }
@@ -604,13 +605,18 @@ publishing {
 
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
-
             }
         }
     }
     repositories {
         maven {
             url config.maven_url
+            if (hasConfig("maven_user") && !config.maven_user.isEmpty()) {
+                credentials {
+                    username = config.maven_user
+                    password = config.maven_passwd
+                }
+            }
         }
     }
 }

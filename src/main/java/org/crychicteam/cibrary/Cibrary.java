@@ -5,15 +5,11 @@ import com.tterrag.registrate.Registrate;
 import dev.xkmc.l2damagetracker.contents.attack.AttackEventHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.crychicteam.cibrary.api.common.GlobalCibrarySoundManager;
 import org.crychicteam.cibrary.api.registry.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.SkillKey;
@@ -34,7 +30,6 @@ import org.slf4j.Logger;
 public class Cibrary {
 	public static final String MOD_ID = "cibrary";
 	public static Logger LOGGER = LogUtils.getLogger();
-	public static final ArmorSetManager ARMOR_SET_MANAGER = ArmorSetManager.getInstance();
 	public static final GlobalCibrarySoundManager SOUND_MANAGER = GlobalCibrarySoundManager.getInstance();
 	public static final ServerKeyHandler KEY_HANDLER = ServerKeyHandler.getInstance();
 	public static final Registrate CI_REGISTRATE = Registrate.create(MOD_ID);
@@ -73,7 +68,7 @@ public class Cibrary {
 	}
 
 	private void initializeArmorSets(IEventBus modEventBus) {
-		AttackEventHandler.register(4000, new ArmorSetAttackListener(ARMOR_SET_MANAGER));
+		AttackEventHandler.register(4000, new ArmorSetAttackListener());
 		modEventBus.addListener(ArmorSetCapability::register);
 	}
 

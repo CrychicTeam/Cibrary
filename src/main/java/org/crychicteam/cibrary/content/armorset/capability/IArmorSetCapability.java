@@ -17,11 +17,11 @@ public interface IArmorSetCapability extends INBTSerializable<CompoundTag> {
     ArmorSet getActiveSet();
     ArmorSet.State getState();
     String getSkillState();
+    void setSkillCooldown(int cooldown);
+    int getSkillCooldown();
     void setActiveSet(ArmorSet set);
     void setState(ArmorSet.State state);
     void setSkillState(String state);
-    boolean isItemInActiveSet(ItemStack itemStack);
-    ArmorSet getSetForItem(ItemStack itemStack);
     List<Component> getAdditionalTooltip(ItemStack itemStack);
     void syncToClient(Player player);
 }

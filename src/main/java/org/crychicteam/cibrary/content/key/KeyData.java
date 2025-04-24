@@ -15,16 +15,12 @@ public class KeyData {
     public float power;
 
     @SerialClass.SerialField
-    public long lastClickTime;
-
-    @SerialClass.SerialField
-    public int clickCount;
+    public float remainingTime;
 
     public KeyData() {
         this.state = KeyState.IDLE;
         this.power = 0;
-        this.lastClickTime = 0;
-        this.clickCount = 0;
+        this.remainingTime = 0;
     }
 
     public KeyData(ResourceLocation keyId) {
@@ -35,7 +31,6 @@ public class KeyData {
     public void reset() {
         this.state = KeyState.IDLE;
         this.power = 0;
-        this.clickCount = 0;
     }
 
     @SerialClass

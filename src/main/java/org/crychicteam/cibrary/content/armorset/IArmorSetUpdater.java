@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import org.crychicteam.cibrary.Cibrary;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +17,7 @@ public interface IArmorSetUpdater extends IArmorSetChecker {
 
     default boolean shouldUpdateMobEffects(LivingEntity entity) {
         if (!(entity instanceof Player player)) return false;
-        ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(player);
+        ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
         Map<MobEffect, Integer> effects = armorSet.getEffects();
         for (Map.Entry<MobEffect, Integer> entry : effects.entrySet()) {
             MobEffectInstance currentEffect = entity.getEffect(entry.getKey());
@@ -30,7 +31,7 @@ public interface IArmorSetUpdater extends IArmorSetChecker {
     default void applyMobEffects(LivingEntity entity) {
         if (!(entity instanceof Player player)) return;
         if (shouldUpdateMobEffects(player)) {
-            ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(player);
+            ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
             if (armorSet == null) return;
 
             Map<MobEffect, Integer> effects = armorSet.getEffects();
@@ -42,7 +43,7 @@ public interface IArmorSetUpdater extends IArmorSetChecker {
 
     default void applyAttributes(LivingEntity entity) {
         if (!(entity instanceof Player player)) return;
-        ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(player);
+        ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
         Multimap<Attribute, AttributeModifier> attributes = armorSet.getAttributes();
         for (Map.Entry<Attribute, AttributeModifier> entry : attributes.entries()) {
             Objects.requireNonNull(player.getAttribute(entry.getKey())).addTransientModifier(entry.getValue());
@@ -51,7 +52,7 @@ public interface IArmorSetUpdater extends IArmorSetChecker {
 
     default void removeEffects(LivingEntity entity) {
         if (!(entity instanceof Player player)) return;
-        ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(player);
+        ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
         Map<MobEffect, Integer> effects = armorSet.getEffects();
         for (MobEffect effect : effects.keySet()) {
             player.removeEffect(effect);
@@ -60,7 +61,7 @@ public interface IArmorSetUpdater extends IArmorSetChecker {
 
     default void removeAttributes(LivingEntity entity) {
         if (!(entity instanceof Player player)) return;
-        ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(player);
+        ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
         Multimap<Attribute, AttributeModifier> attributes = armorSet.getAttributes();
         for (Map.Entry<Attribute, AttributeModifier> entry : attributes.entries()) {
             Objects.requireNonNull(player.getAttribute(entry.getKey())).removeModifier(entry.getValue());

@@ -68,8 +68,6 @@ public class ArmorSetRegistry {
      * Deep equality check for armor set contents.
      * <p>
      * Validates equipment slots, items, and curio items.
-     * <p>
-     * Time Complexity: O(m) where m is total number of items in both sets
      */
     private static boolean areSetItemsIdentical(ArmorSet set1, ArmorSet set2) {
         Map<EquipmentSlot, Set<Item>> items1 = set1.getEquipmentItems();
@@ -145,9 +143,6 @@ public class ArmorSetRegistry {
      * Indexes an armor set for O(1) lookup by item.
      * <p>
      * Updates both equipment and curio indices.
-     * <p>
-     * Time Complexity: O(i) where i is total items in set
-     * <p>
      */
     private static void indexArmorSet(ArmorSet armorSet) {
         for (Map.Entry<EquipmentSlot, Set<Item>> entry : armorSet.getEquipmentItems().entrySet()) {

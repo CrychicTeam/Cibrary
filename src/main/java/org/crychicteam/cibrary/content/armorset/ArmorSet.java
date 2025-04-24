@@ -2,12 +2,14 @@ package org.crychicteam.cibrary.content.armorset;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -26,11 +28,14 @@ import java.util.*;
  */
 public class ArmorSet implements IArmorSetUpdater, IArmorSetAttackHandler, IArmorSetChecker {
     public static final Item EMPTY_SLOT_MARKER = null;
-    private final Map<MobEffect, Integer> effects;
-    private final Multimap<Attribute, AttributeModifier> attributes;
+
     protected ISetEffect effect;
-    private final Map<EquipmentSlot, Set<Item>> equipmentItems;
-    private final Map<Item, Integer> curioItems;
+    protected final Map<MobEffect, Integer> effects;
+    protected final Multimap<Attribute, AttributeModifier> attributes;
+    protected final Map<EquipmentSlot, Set<Item>> equipmentItems;
+    protected final Map<Item, Integer> curioItems;
+    protected int skillCooldown;
+
     protected State state;
     protected String skillState;
 
@@ -60,6 +65,8 @@ public class ArmorSet implements IArmorSetUpdater, IArmorSetAttackHandler, IArmo
         this.curioItems = new HashMap<>();
         this.state = State.NORMAL;
         this.skillState = "none";
+        this.skillCooldown = 0;
+
     }
 
     /**
@@ -120,6 +127,24 @@ public class ArmorSet implements IArmorSetUpdater, IArmorSetAttackHandler, IArmo
     }
 
     /**
+     * Gets the skill cooldown of the armor set.
+     *
+     * @return The skill cooldown of the armor set.
+     */
+    public int getSkillCooldown() {
+        return skillCooldown;
+    }
+
+    /**
+     * Sets the skill cooldown of the armor set.
+     *
+     * @param skillCooldown The new skill cooldown of the armor set.
+     */
+    public void setSkillCooldown(int skillCooldown) {
+        this.skillCooldown = skillCooldown;
+    }
+
+    /**
      * Gets the equipment items of the armor set.
      *
      * @return An unmodifiable map of equipment items.
@@ -135,6 +160,14 @@ public class ArmorSet implements IArmorSetUpdater, IArmorSetAttackHandler, IArmo
      */
     public Map<Item, Integer> getCurioItems() {
         return Collections.unmodifiableMap(curioItems);
+    }
+
+    public Component getDescription(Player player, ItemStack itemStack) {
+        return Component.empty();
+    }
+
+    public boolean checkDescription(Player player, ItemStack itemStack) {
+        return false;
     }
 
     // Setters
@@ -163,6 +196,10 @@ public class ArmorSet implements IArmorSetUpdater, IArmorSetAttackHandler, IArmo
      */
     public void setEffect(ISetEffect effect) {
         this.effect = effect;
+    }
+
+    public ISetEffect checkEffect(Player player) {
+        return effect;
     }
 
     // Add methods

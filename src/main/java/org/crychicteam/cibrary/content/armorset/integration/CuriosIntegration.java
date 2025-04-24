@@ -6,7 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import org.crychicteam.cibrary.Cibrary;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetUpdater;
 import org.crychicteam.cibrary.content.events.server.ArmorSetHandler;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
@@ -52,12 +52,8 @@ public class CuriosIntegration {
         if (!isCuriosLoaded) return;
 
         if (event.getEntity() instanceof ServerPlayer player) {
-            if (Cibrary.ARMOR_SET_MANAGER != null) {
-                Cibrary.ARMOR_SET_MANAGER.updateEntityISetEffect(player);
-                ArmorSetHandler.syncArmorSet(player);
-            } else {
-                System.err.println("ArmorSetManager is null in CuriosIntegration.onCurioChangeEvent");
-            }
+           ArmorSetUpdater.updateEntityISetEffect(player);
+           ArmorSetHandler.syncArmorSet(player);
         }
     }
     private static java.util.stream.Stream<ItemStack> streamStacks(ICurioStacksHandler stacksHandler) {

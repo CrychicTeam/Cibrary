@@ -15,13 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-    private final ArmorSetManager cibrary$armorSetManager = Cibrary.ARMOR_SET_MANAGER;
-
     @Inject(method = "setSprinting", at = @At("HEAD"))
     private void cibrary$setSprintingHook(boolean pSprinting, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
-            ArmorSet activeSet = cibrary$armorSetManager.getActiveArmorSet(player);
+            ArmorSet activeSet = ArmorSetManager.getActiveArmorSet(player);
             if (pSprinting) {
                 activeSet.getEffect().startSprintingEffect(player);
             } else {
@@ -34,7 +32,7 @@ public abstract class LivingEntityMixin {
     private void cibrary$jumpFromGroundHook(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
-            ArmorSet activeSet = cibrary$armorSetManager.getActiveArmorSet(player);
+            ArmorSet activeSet = ArmorSetManager.getActiveArmorSet(player);
             if (player.isSprinting()) {
                 activeSet.getEffect().sprintingJumpEffect(player);
             } else {
@@ -47,7 +45,7 @@ public abstract class LivingEntityMixin {
     private void cibrary$checkFallDamageHook(double pY, boolean pOnGround, BlockState pState, BlockPos pPos, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player && pOnGround) {
-            ArmorSet activeSet = cibrary$armorSetManager.getActiveArmorSet(player);
+            ArmorSet activeSet = ArmorSetManager.getActiveArmorSet(player);
             activeSet.getEffect().landEffect(player, player.fallDistance, pState, pPos);
         }
     }

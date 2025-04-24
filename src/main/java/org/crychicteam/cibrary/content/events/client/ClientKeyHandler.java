@@ -134,10 +134,6 @@ public class ClientKeyHandler {
      * 1. Press Detection -> handleKeyPress()
      * <p>
      * 2. Release Detection -> handleKeyRelease()
-     * <p>
-     * Time Complexity: O(1)
-     * <p>
-     * Space Complexity: O(1)
      */
     private static void updateKeyState(ResourceLocation keyId, ConfiguredKey config, KeyData keyData,
                                        boolean isPressed, boolean prevPressed, long currentTime) {
@@ -156,9 +152,6 @@ public class ClientKeyHandler {
      * 2. Hold duration calculation
      * 3. Charge state transition check
      * 4. Power level update for charging keys
-     *
-     * Time Complexity: O(1)
-     * Memory Usage: Constant
      */
     private static void handleKeyPress(ResourceLocation keyId, ConfiguredKey config, KeyData keyData,
                                        long currentTime, boolean prevPressed) {
@@ -188,9 +181,6 @@ public class ClientKeyHandler {
      *    - Power >= LEAST_RELEASE_TIME -> RELEASED
      * 2. Normal Release:
      *    - Transitions to PRESSED state
-     *
-     * Time Complexity: O(1)
-     * Memory Impact: Updates timestamp storage
      */
     private static void handleKeyRelease(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
         if (keyData.state == KeyData.KeyState.CHARGING) {
@@ -211,23 +201,21 @@ public class ClientKeyHandler {
 
     /**
      * Updates power level for charging keys.
-     *
-     * Power Calculation:
-     * - Linear scaling based on hold duration
-     * - Capped by config.maxPower
-     * - Granularity: 0.1 units for network optimization
-     *
-     * Time Complexity: O(1)
-     * Network Impact: Updates sent only on 0.1 unit changes
      */
     private static void updateChargePower(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
         long holdDuration = currentTime - PRESS_START_TIMES.get(keyId);
         float oldPower = keyData.power;
         keyData.power = Math.min((float) holdDuration / 1000.0f, config.maxPower);
+        keyData.remainingTime = config.maxPower - keyData.power;
 
-        if ((int)(oldPower * 10) != (int)(keyData.power * 10)) {
+        if (oldPower != keyData.power) {
             showDebugMessage(String.format("Charging %s: %.1f", keyId.getPath(), keyData.power), config);
             sendKeyState(keyData);
+        }
+        if (keyData.power >= config.maxPower) {
+            keyData.state = KeyData.KeyState.RELEASED;
+            config.keyMapping.setDown(false);
+            showDebugMessage("Key Released: " + keyId.getPath(), config);
         }
     }
 

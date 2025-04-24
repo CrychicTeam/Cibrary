@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.crychicteam.cibrary.Cibrary;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.armorset.integration.CuriosIntegration;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +17,7 @@ public interface IArmorSetChecker {
     boolean matches(LivingEntity entity);
 
     default Map<EquipmentSlot, ItemStack> getEquippedItems(ServerPlayer entity) {
-        ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(entity);
+        ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(entity);
         return getEquipmentSlotItemStackMap(entity, armorSet.getEquipmentItems());
     }
 
@@ -33,7 +34,7 @@ public interface IArmorSetChecker {
     }
 
     default List<ItemStack> getEquippedCurioItems(ServerPlayer entity) {
-        ArmorSet armorSet = Cibrary.ARMOR_SET_MANAGER.getActiveArmorSet(entity);
+        ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(entity);
         return getItemStacks(entity, armorSet.getCurioItems());
     }
 

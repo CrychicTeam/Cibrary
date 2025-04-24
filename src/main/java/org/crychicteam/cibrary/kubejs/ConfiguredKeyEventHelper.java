@@ -13,11 +13,11 @@ public class ConfiguredKeyEventHelper {
 
     public static void charging(Player player, KeyData keyData) {
         var kjs_charging_event = new ConfiguredKeyEventJS.Charginng(player, keyData);
-        CiEventS.PRESSED.post(kjs_charging_event);
+        CiEventS.CHARGING.post(kjs_charging_event);
     }
 
     public static void released(Player player, KeyData keyData) {
         var kjs_released_event = new ConfiguredKeyEventJS.Released(player, keyData);
-        CiEventS.PRESSED.post(kjs_released_event);
+        CiEventS.RELEASED.post(kjs_released_event);
     }
 }

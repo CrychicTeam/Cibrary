@@ -19,14 +19,9 @@ import java.util.*;
 
 public class ArmorSetCapabilityHandler implements IArmorSetCapability {
     private ArmorSet activeSet;
-    private Map<Item, ArmorSet> itemSetMap;
-    private Map<Item, ArmorSet> curioSetMap;
 
     public ArmorSetCapabilityHandler() {
         this.activeSet = ArmorSetRegistry.EMPTY_SET.get();
-        this.itemSetMap = new HashMap<>();
-        this.curioSetMap = new HashMap<>();
-        updateItemSetMaps();
     }
 
     @Override
@@ -45,9 +40,18 @@ public class ArmorSetCapabilityHandler implements IArmorSetCapability {
     }
 
     @Override
+    public void setSkillCooldown(int cooldown) {
+        this.activeSet.setSkillCooldown(cooldown);
+    }
+
+    @Override
+    public int getSkillCooldown() {
+        return activeSet.getSkillCooldown();
+    }
+
+    @Override
     public void setActiveSet(ArmorSet set) {
         this.activeSet = set != null ? set : ArmorSetRegistry.EMPTY_SET.get();
-        updateItemSetMaps();
     }
 
     @Override
@@ -61,40 +65,10 @@ public class ArmorSetCapabilityHandler implements IArmorSetCapability {
     }
 
     @Override
-    public boolean isItemInActiveSet(ItemStack itemStack) {
-        return itemSetMap.containsKey(itemStack.getItem()) || curioSetMap.containsKey(itemStack.getItem());
-    }
-
-    @Override
-    public ArmorSet getSetForItem(ItemStack itemStack) {
-        ArmorSet set = itemSetMap.get(itemStack.getItem());
-        if (set == null) {
-            set = curioSetMap.get(itemStack.getItem());
-        }
-        return set != null ? set : ArmorSetRegistry.EMPTY_SET.get();
-    }
-
-    private void updateItemSetMaps() {
-        itemSetMap.clear();
-        curioSetMap.clear();
-        if (activeSet != null) {
-            for (Map.Entry<EquipmentSlot, Set<Item>> entry : activeSet.getEquipmentItems().entrySet()) {
-                for (Item item : entry.getValue()) {
-                    if (item != null) {
-                        itemSetMap.put(item, activeSet);
-                    }
-                }
-            }
-            for (Map.Entry<Item, Integer> entry : activeSet.getCurioItems().entrySet()) {
-                curioSetMap.put(entry.getKey(), activeSet);
-            }
-        }
-    }
-
-    @Override
     public List<Component> getAdditionalTooltip(ItemStack itemStack) {
         List<Component> tooltip = new ArrayList<>();
-        if (activeSet != null && isItemInActiveSet(itemStack)) {
+        if (activeSet != null) {
+
             addEffectsToTooltip(tooltip);
             addAttributesToTooltip(tooltip);
         }
@@ -155,7 +129,6 @@ public class ArmorSetCapabilityHandler implements IArmorSetCapability {
         } else {
             this.activeSet = ArmorSetRegistry.EMPTY_SET.get();
         }
-        updateItemSetMaps();
     }
 
     @Override

@@ -6,7 +6,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.NetworkEvent;
 import org.crychicteam.cibrary.Cibrary;
-import org.crychicteam.cibrary.content.event.ConfiguredKeyEvent;
+import org.crychicteam.cibrary.api.event.ConfiguredKeyEvent;
+import org.crychicteam.cibrary.content.armorset.ArmorSet;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.key.KeyData;
 import org.crychicteam.cibrary.kubejs.ConfiguredKeyEventHelper;
 
@@ -27,6 +29,7 @@ public class KeyStatePacket extends SerialPacketBase {
             if (context.getDirection().getReceptionSide().isServer()) {
                 ServerPlayer player = context.getSender();
                 if (player != null) {
+                    ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
                     Cibrary.KEY_HANDLER.updateKeyState(player, keyData);
                     if (keyData.state.equals(KeyData.KeyState.PRESSED)) {
                         var pressed_event = new ConfiguredKeyEvent.Pressed(player, keyData);
@@ -34,18 +37,14 @@ public class KeyStatePacket extends SerialPacketBase {
                         if (Cibrary.isLoaded("kubejs")) {
                             ConfiguredKeyEventHelper.pressed(player, keyData);
                         }
-                    } else if (keyData.state.equals(KeyData.KeyState.CHARGING)) {
-                        var charging_event = new ConfiguredKeyEvent.Charging(player, keyData);
-                        MinecraftForge.EVENT_BUS.post(charging_event);
-                        if (Cibrary.isLoaded("kubejs")) {
-                            ConfiguredKeyEventHelper.charging(player, keyData);
-                        }
+                        armorSet.getEffect().onSkillPress(player, keyData);
                     } else if (keyData.state.equals(KeyData.KeyState.RELEASED)) {
                         var released_event = new ConfiguredKeyEvent.Released(player, keyData);
                         MinecraftForge.EVENT_BUS.post(released_event);
                         if (Cibrary.isLoaded("kubejs")) {
                             ConfiguredKeyEventHelper.released(player, keyData);
                         }
+                        armorSet.getEffect().onSkillRelease(player, keyData);
                     }
                 }
             }

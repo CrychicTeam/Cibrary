@@ -10,7 +10,6 @@ import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.api.registry.ArmorSetRegistry;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
 import org.crychicteam.cibrary.content.armorset.defaults.DefaultSetEffect;
-import org.crychicteam.cibrary.content.armorset.integration.KubeJSSetEffect;
 
 public class ArmorSetRegistryExample {
     public static final RegistryObject<ArmorSet> DEFERRED_REGISTER_EXAMPLE;
@@ -18,15 +17,6 @@ public class ArmorSetRegistryExample {
     public static final RegistryObject<ArmorSet> COMPLEX_EXAMPLE;
     public static final TagKey<ArmorSet> TEST;
     static {
-        /**
-         * Example for KubeJSSetEffect Registry.
-         */
-        var effect = new KubeJSSetEffect();
-        effect.setApplyEffectConsumer(entity -> {
-            entity.setSprinting(true);
-        });
-        effect.setIdentifier("test_effect");
-
         /**
          * Example for ArmorSetCustomRegistry.
          */

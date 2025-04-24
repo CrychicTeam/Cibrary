@@ -1,14 +1,18 @@
 package org.crychicteam.cibrary.content.armorset;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.ItemStackedOnOtherEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import org.crychicteam.cibrary.content.event.ItemHurtEffectResult;
-import org.crychicteam.cibrary.content.event.StandOnFluidEvent;
+import org.crychicteam.cibrary.api.event.ItemHurtEffectResult;
+import org.crychicteam.cibrary.api.event.StandOnFluidEvent;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
+import org.crychicteam.cibrary.content.key.KeyData;
 
 public interface ISetEffect {
     /**
@@ -117,29 +121,38 @@ public interface ISetEffect {
      */
     default void stackedOnOther(LivingEntity entity, ItemStackedOnOtherEvent event) {};
 
+    default boolean checkCooldownForSkillCharging(ServerPlayer player) {
+        var set = ArmorSetManager.getActiveArmorSet(player);
+        return set.getSkillCooldown() <= 0;
+    }
+
     /**
      * Trigger when the entity press skill key.
+     *
      * @param player
+     * @param keyData
      */
-    default void onSkillPress(ServerPlayer player) {}
+    default void onSkillPress(ServerPlayer player, KeyData keyData) {}
 
     /**
      * Trigger when the entity is charging skill.
      * @param player
      * @param power
      */
-    default void onSkillCharging(ServerPlayer player, float power) {};
+    default void onSkillCharging(ServerPlayer player, KeyData power) {};
 
     /**
      * Trigger when the entity release skill.
      * @param player
      * @param power
      */
-    default void onSkillRelease(ServerPlayer player, float power) {};
+    default void onSkillRelease(ServerPlayer player, KeyData power) {};
 
-    /**
-     * Trigger when the entity double click skill key.
-     * @param player
-     */
-    default void onSkillDoubleClick(ServerPlayer player) {};
+    default Component getDescription(Player player, ItemStack stack) {
+        return Component.translatable("tooltip.cibrary.armorset." + getIdentifier() + ".description");
+    };
+
+    default boolean checkDescription(Player player, ItemStack stack) {
+        return false;
+    }
 }

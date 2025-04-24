@@ -13,14 +13,14 @@ import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
 import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetUpdater;
 import org.crychicteam.cibrary.network.CibraryNetworkHandler;
 
 public class ArmorSetHandler {
-    private final ArmorSetManager armorSetManager = Cibrary.ARMOR_SET_MANAGER;
 
     @SubscribeEvent
     public void onLivingEquipmentChange(LivingEquipmentChangeEvent event) {
-        armorSetManager.updateEntityISetEffect(event.getEntity());
+        ArmorSetUpdater.updateEntityISetEffect(event.getEntity());
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             syncArmorSet(serverPlayer);
         }
@@ -37,7 +37,7 @@ public class ArmorSetHandler {
     public void potionEffectUpdate(TickEvent.PlayerTickEvent event) {
         LivingEntity entity = event.player;
         if (entity instanceof ServerPlayer serverPlayer) {
-            ArmorSet armorSet = armorSetManager.getActiveArmorSet(serverPlayer);
+            ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(serverPlayer);
             armorSet.applyMobEffects(serverPlayer);
         }
     }
@@ -51,7 +51,7 @@ public class ArmorSetHandler {
                 newCap.setActiveSet(oldCap.getActiveSet());
                 newCap.setState(oldCap.getState());
                 newCap.setSkillState(oldCap.getSkillState());
-                armorSetManager.updateEntityISetEffect(newPlayer);
+                ArmorSetUpdater.updateEntityISetEffect(newPlayer);
                 if (newPlayer instanceof ServerPlayer serverPlayer) {
                     syncArmorSet(serverPlayer);
                 }

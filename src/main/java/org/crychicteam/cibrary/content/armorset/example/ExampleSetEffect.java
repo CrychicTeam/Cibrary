@@ -16,7 +16,8 @@ import org.crychicteam.cibrary.Cibrary;
 import org.crychicteam.cibrary.content.armorset.ArmorSet;
 import org.crychicteam.cibrary.content.armorset.ISetEffect;
 import org.crychicteam.cibrary.content.armorset.capability.ArmorSetCapability;
-import org.crychicteam.cibrary.content.event.ItemHurtEffectResult;
+import org.crychicteam.cibrary.api.event.ItemHurtEffectResult;
+import org.crychicteam.cibrary.content.armorset.common.ArmorSetManager;
 import org.crychicteam.cibrary.content.key.KeyData;
 
 public class ExampleSetEffect implements ISetEffect {
@@ -41,8 +42,9 @@ public class ExampleSetEffect implements ISetEffect {
 
     @Override
     public void landEffect(LivingEntity entity, double distance, BlockState landingBlock, BlockPos pos) {
-        if (distance > 5 && entity.isSprinting()){
+        if (entity.getPersistentData().getBoolean("skillCharging")) {
             entity.level().explode(entity,entity.getX(),entity.getY(),entity.getZ(),10,false, Level.ExplosionInteraction.NONE);
+            entity.getPersistentData().putBoolean("skillCharging", false);
         }
     }
 
@@ -61,21 +63,32 @@ public class ExampleSetEffect implements ISetEffect {
     }
 
     @Override
-    public void onSkillPress(ServerPlayer player) {
-        ISetEffect.super.onSkillPress(player);
-        player.level().explode(player,player.getX(),player.getY(),player.getZ(),10,false, Level.ExplosionInteraction.NONE);
-    }
+    public void onSkillPress(ServerPlayer player, KeyData keyData) {}
 
     @Override
-    public void onSkillCharging(ServerPlayer player, float power) {
-        player.addDeltaMovement(new Vec3(player.getViewVector(2).scale(0.1).x, player.getDeltaMovement().y > 0 ? - 0.01 : player.getDeltaMovement().y , player.getViewVector(2).scale(0.1).z));
+    public void onSkillCharging(ServerPlayer player, KeyData data) {
+        var set = ArmorSetManager.getActiveArmorSet(player);
+        if (!checkCooldownForSkillCharging(player)) {
+            return;
+        }
+        double scale = data.power > 3.0 ? 0.2 : 0.4;
+        double y;
+        if (data.power > 3.0 && data.power < 3.2) {
+            y = 0.3;
+        } else if (data.power > 3.2 && player.fallDistance > 0.1) {
+            y = - data.power + 2.0;
+            player.getPersistentData().putBoolean("skillCharging", true);
+        } else {
+            y = player.getDeltaMovement().y;
+        }
+        player.setDeltaMovement(new Vec3(player.getViewVector(2).scale(scale).x, y , player.getViewVector(2).scale(scale).z));
         player.hurtMarked = true;
     }
 
     @Override
-    public void onSkillRelease(ServerPlayer player, float power) {
-        ISetEffect.super.onSkillRelease(player, power);
-        player.level().explode(player,player.getX(),player.getY(),player.getZ(),10,false, Level.ExplosionInteraction.NONE);
+    public void onSkillRelease(ServerPlayer player, KeyData data) {
+//        player.level().explode(player,player.getX(),player.getY(),player.getZ(),10,false, Level.ExplosionInteraction.NONE);
+        ArmorSetManager.getActiveArmorSet(player).setSkillCooldown(100);
     }
 
     @Override
