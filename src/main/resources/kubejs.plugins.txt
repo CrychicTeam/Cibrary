@@ -1,1 +1,1 @@
-org.crychicteam.cibrary.kubejs.CiJSPlugin
+org.pickaid.pibrary.kubejs.PiJSPlugin

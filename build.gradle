@@ -596,8 +596,9 @@ afterEvaluate {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = config.maven_group
-            artifactId = config.archive_name + "-" + config.mc_version
+            groupId = config.maven_group + (config.mc_version ? "." + config.mc_version.replace('.', '') : "")
+            artifactId = config.archive_name
+            version = config.mod_version
 
             artifact reobfArtifact
             artifact srcJar
