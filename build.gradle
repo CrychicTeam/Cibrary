@@ -596,13 +596,21 @@ afterEvaluate {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = config.maven_group + (config.mc_version ? "." + config.mc_version.replace('.', '') : "")
+            groupId = config.maven_group
             artifactId = config.archive_name
-            version = config.mod_version
+            version = config.mc_version.replace('.', '') + "-" + config.mod_version
 
-            artifact reobfArtifact
-            artifact srcJar
-            artifact deobfJar
+            artifact(reobfArtifact) {
+                classifier = config.mod_version
+            }
+
+            artifact(srcJar) {
+                classifier = config.mod_version + '-sources'
+            }
+
+            artifact(deobfJar) {
+                classifier = config.mod_version + '-deobf'
+            }
 
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
