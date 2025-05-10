@@ -596,25 +596,7 @@ afterEvaluate {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = config.maven_group
-            artifactId = config.archive_name
-            version = config.mc_version.replace('.', '') + "-" + config.mod_version
-
-            artifact(reobfArtifact) {
-                classifier = config.mod_version
-            }
-
-            artifact(srcJar) {
-                classifier = config.mod_version + '-sources'
-            }
-
-            artifact(deobfJar) {
-                classifier = config.mod_version + '-deobf'
-            }
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-            }
+            artifact jar
         }
     }
     repositories {
@@ -663,10 +645,8 @@ tasks.build.dependsOn tasks.incrementBuildVersionProperty
 tasks.jarJar.finalizedBy('reobfJarJar')
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.encoding = 'UTF-8'
 }
-
 tasks.jarJar.configure {
-    // remove '-all' from jarJar jar file
     archiveClassifier.set('')
 }
