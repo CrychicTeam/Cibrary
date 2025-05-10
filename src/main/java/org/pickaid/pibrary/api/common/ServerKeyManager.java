@@ -5,12 +5,17 @@ import net.minecraft.resources.ResourceLocation;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.content.key.KeyData;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * Provides API methods for querying key states of players on the server.
  */
 public class ServerKeyManager {
+    public static List<ResourceLocation> chargingKeys = new ArrayList<>();
+    public static List<ResourceLocation> heldClickKeys = new ArrayList<>();
 
     /**
      * Checks if the specified key for the player was just pressed.
@@ -32,6 +37,16 @@ public class ServerKeyManager {
      */
     public static boolean isCharging(ServerPlayer player, ResourceLocation keyId) {
         return getKeyState(player, keyId) == KeyData.KeyState.CHARGING;
+    }
+
+    /**
+     * Checks if the specified key for the player is in a held state.
+     *
+     * @param player The player to check.
+     * @param keyId The key identifier.
+     */
+    public static boolean isHeld(ServerPlayer player, ResourceLocation keyId) {
+        return getKeyState(player, keyId) == KeyData.KeyState.HELD;
     }
 
     /**

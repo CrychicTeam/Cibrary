@@ -6,11 +6,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.NetworkEvent;
 import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.api.common.ServerKeyManager;
 import org.pickaid.pibrary.api.event.ConfiguredKeyEvent;
-import org.pickaid.pibrary.content.armorset.ArmorSet;
-import org.pickaid.pibrary.content.armorset.common.ArmorSetManager;
 import org.pickaid.pibrary.content.key.KeyData;
-import org.pickaid.pibrary.kubejs.ConfiguredKeyEventHelper;
 
 @SerialClass
 public class KeyStatePacket extends SerialPacketBase {
@@ -29,24 +27,49 @@ public class KeyStatePacket extends SerialPacketBase {
             if (context.getDirection().getReceptionSide().isServer()) {
                 ServerPlayer player = context.getSender();
                 if (player != null) {
-                    ArmorSet armorSet = ArmorSetManager.getActiveArmorSet(player);
                     Pibrary.KEY_HANDLER.updateKeyState(player, keyData);
-                    if (keyData.state.equals(KeyData.KeyState.PRESSED)) {
-                        var pressed_event = new ConfiguredKeyEvent.Pressed(player, keyData);
-                        MinecraftForge.EVENT_BUS.post(pressed_event);
-                        if (Pibrary.isLoaded("kubejs")) {
-                            ConfiguredKeyEventHelper.pressed(player, keyData);
-                        }
-                        armorSet.getEffect().onSkillPress(player, keyData);
-                    } else if (keyData.state.equals(KeyData.KeyState.RELEASED)) {
-                        var released_event = new ConfiguredKeyEvent.Released(player, keyData);
-                        MinecraftForge.EVENT_BUS.post(released_event);
-                        if (Pibrary.isLoaded("kubejs")) {
-                            ConfiguredKeyEventHelper.released(player, keyData);
-                        }
-                        armorSet.getEffect().onSkillRelease(player, keyData);
+
+                    switch (keyData.state) {
+                        case PRESSED:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Pressed(player, keyData));
+                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            break;
+                        case RELEASED:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Released(player, keyData));
+                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            break;
+                        case FINISHED:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Finished(player, keyData));
+                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            break;
+                        case RAPID_CLICK:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClick(player, keyData));
+                            break;
+                        case RAPID_FINISH:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClickFinish(player, keyData));
+                            break;
+                        case TIMEOUT:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.TimeOut(player, keyData));
+                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            break;
+                        case CHARGING:
+                            if (!ServerKeyManager.chargingKeys.contains(keyData.keyId)) {
+                                ServerKeyManager.chargingKeys.add(keyData.keyId);
+                            }
+                            break;
+                        case HELD:
+                            if (!ServerKeyManager.heldClickKeys.contains(keyData.keyId)) {
+                                ServerKeyManager.heldClickKeys.add(keyData.keyId);
+                            }
+                        case IDLE:
+                            break;
+                        default:
+                            Pibrary.LOGGER.warn("Received unknown state: {}", keyData.state);
+                            break;
                     }
                 }
+            } else if (context.getDirection().getReceptionSide().isClient()) {
+                
             }
         });
     }

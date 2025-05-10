@@ -1,6 +1,8 @@
 package org.pickaid.pibrary.content.key;
 
 import net.minecraft.client.Minecraft;
+import org.pickaid.pibrary.content.key.registry.ConfiguredKey;
+import org.pickaid.pibrary.content.key.registry.KeyRegistry;
 
 public class DefaultKey {
     public static final ConfiguredKey FORWARD_KEY;

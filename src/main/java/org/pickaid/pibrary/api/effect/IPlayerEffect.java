@@ -1,38 +1,26 @@
-package org.pickaid.pibrary.content.armorset;
+package org.pickaid.pibrary.api.effect;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.ItemStackedOnOtherEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import org.pickaid.pibrary.api.event.ItemHurtEffectResult;
 import org.pickaid.pibrary.api.event.StandOnFluidEvent;
-import org.pickaid.pibrary.content.armorset.common.ArmorSetManager;
-import org.pickaid.pibrary.content.key.KeyData;
 
-public interface ISetEffect {
+public interface IPlayerEffect extends IEffect {
     /**
-     * Trigger when Apply this kind of  Armor Set.
+     * Trigger when Apply this kind of Effect.
      * @param entity
      */
     void applyEffect(LivingEntity entity);
 
     /**
-     * Trigger when Remove this kind of Armor Set.
+     * Trigger when Remove this kind of Effect.
      * @param entity
      */
     void removeEffect(LivingEntity entity);
-
-    /**
-     * For the user to set up a default skill of this kind of ArmorSet.
-     *
-     * @param entity
-     */
-    default void skillEffect(LivingEntity entity) {}
 
     /**
      * Trigger when the entity finish using an item with this kind of ArmorSet.
@@ -120,39 +108,4 @@ public interface ISetEffect {
      * @param event
      */
     default void stackedOnOther(LivingEntity entity, ItemStackedOnOtherEvent event) {};
-
-    default boolean checkCooldownForSkillCharging(ServerPlayer player) {
-        var set = ArmorSetManager.getActiveArmorSet(player);
-        return set.getSkillCooldown() <= 0;
-    }
-
-    /**
-     * Trigger when the entity press skill key.
-     *
-     * @param player
-     * @param keyData
-     */
-    default void onSkillPress(ServerPlayer player, KeyData keyData) {}
-
-    /**
-     * Trigger when the entity is charging skill.
-     * @param player
-     * @param power
-     */
-    default void onSkillCharging(ServerPlayer player, KeyData power) {};
-
-    /**
-     * Trigger when the entity release skill.
-     * @param player
-     * @param power
-     */
-    default void onSkillRelease(ServerPlayer player, KeyData power) {};
-
-    default Component getDescription(Player player, ItemStack stack) {
-        return Component.translatable("tooltip.pibrary.armorset." + getIdentifier() + ".description");
-    };
-
-    default boolean checkDescription(Player player, ItemStack stack) {
-        return false;
-    }
 }

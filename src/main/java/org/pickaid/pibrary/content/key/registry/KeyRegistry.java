@@ -1,16 +1,21 @@
-package org.pickaid.pibrary.content.key;
+package org.pickaid.pibrary.content.key.registry;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.content.events.client.ClientKeyHandler;
+import org.pickaid.pibrary.content.key.KeyData;
 
 import java.util.*;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = Pibrary.MOD_ID, value = Dist.CLIENT)
 public class KeyRegistry {
     private static final Map<ResourceLocation, ConfiguredKey> REGISTERED_KEYS = new LinkedHashMap<>();
     private static boolean isInitialized = false;
@@ -36,13 +41,8 @@ public class KeyRegistry {
         return Collections.unmodifiableCollection(REGISTERED_KEYS.values());
     }
 
-    public static void init() {
-        var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(KeyRegistry::onKeyMappingRegister);
-        modEventBus.addListener(KeyRegistry::onClientSetup);
-    }
-
-    private static void onKeyMappingRegister(RegisterKeyMappingsEvent event) {
+    @SubscribeEvent
+    public static void onKeyMappingRegister(RegisterKeyMappingsEvent event) {
         KeyMapping[] existingMappings = Minecraft.getInstance().options.keyMappings;
         Set<String> existingMappingNames = new HashSet<>();
         for (KeyMapping existing : existingMappings) {
@@ -58,7 +58,8 @@ public class KeyRegistry {
         }
     }
 
-    private static void onClientSetup(FMLClientSetupEvent event) {
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
         for (ConfiguredKey config : REGISTERED_KEYS.values()) {
             registerKey(config);
         }
