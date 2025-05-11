@@ -35,8 +35,8 @@ issue_tracker_url=https://github.com/PickAID/pibrary/issues
 maven_group=com.mihono.pickaid
 maven_url=https://maven.mihono.cn/repository/pickaid1201/
 
-maven_user=admin
-maven_passwd=Amd030321***
+maven_user=
+maven_passwd=
 
 # MC Info
 mc_version=1.20.1
