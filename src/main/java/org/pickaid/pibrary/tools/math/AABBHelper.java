@@ -14,10 +14,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-/**
- * Provides utility methods for working with Minecraft Axis-Aligned Bounding Boxes (AABB)
- * and spatial calculations for blocks and entities.
- */
 public class AABBHelper {
     public static final AABB EMPTY_BOUNDS = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     public static final AABB FULL_BLOCK_BOUNDS = new AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);

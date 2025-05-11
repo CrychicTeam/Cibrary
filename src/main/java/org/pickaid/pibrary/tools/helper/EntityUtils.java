@@ -3,14 +3,19 @@ package org.pickaid.pibrary.tools.helper;
 import com.endertech.minecraft.forge.math.AABBHelper;
 import com.endertech.minecraft.forge.math.Vect3d;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.pickaid.pibrary.tools.math.GameUtils;
@@ -35,6 +40,10 @@ public class EntityUtils {
         return !entity.getType().getCategory().isFriendly();
     }
 
+    public static boolean canAttack(LivingEntity entity) {
+        return entity.getAttributeValue(Attributes.ATTACK_DAMAGE) > 0;
+    }
+
     public static Vect3d getCenteredPosTo(BlockPos pos) {
         return LevelReaderUtils.getBlockCenter(pos).withY((double)pos.getY());
     }
@@ -53,6 +62,25 @@ public class EntityUtils {
 
     public static ResourceLocation getRegistryName(Entity entity) {
         return ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+    }
+
+    public static boolean isInBiome(Entity entity, ResourceLocation biome) {
+        return entity.level().getBiome(entity.blockPosition()).is(biome);
+    }
+
+    public static boolean isInBiome(Entity entity, TagKey<Biome> biome) {
+        return entity.level().getBiome(entity.blockPosition()).is(biome);
+    }
+
+    public static boolean isInBiome(Entity entity, String biome) {
+        return isInBiome(entity, new ResourceLocation(biome))|| isInBiome(entity, TagKey.create(Registries.BIOME, new ResourceLocation(biome)));
+    }
+
+    public static boolean isInStructure(Entity entity, ResourceLocation structure) {
+        if (entity.level() instanceof ServerLevel level) {
+           return StructureUtils.isPointInAnyStructure(level, entity.blockPosition(), structure);
+        }
+        return false;
     }
 
     public static Vect3d getMotion(Entity entity) {

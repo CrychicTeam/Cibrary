@@ -5,17 +5,14 @@ import net.minecraft.resources.ResourceLocation;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.content.key.KeyData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Provides API methods for querying key states of players on the server.
  */
 public class ServerKeyManager {
-    public static List<ResourceLocation> chargingKeys = new ArrayList<>();
-    public static List<ResourceLocation> heldClickKeys = new ArrayList<>();
+    public static Set<ResourceLocation> chargingKeys = new HashSet<>();
+    public static Set<ResourceLocation> heldClickKeys = new HashSet<>();
 
     /**
      * Checks if the specified key for the player was just pressed.
