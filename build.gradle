@@ -361,7 +361,7 @@ jar {
     manifest {
         attributes([
                 "Specification-Title"     : config.mod_id,
-                "Specification-Vendor"    : "Zeitheron",
+                "Specification-Vendor"    : "PickAID",
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : archiveVersion,
@@ -371,6 +371,25 @@ jar {
         ])
     }
     archiveClassifier.set('slim')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url config.maven_url
+            if (hasConfig("maven_user") && !config.maven_user.isEmpty()) {
+                credentials {
+                    username = config.maven_user
+                    password = config.maven_passwd
+                }
+            }
+        }
+    }
 }
 
 task deobfJar(type: Jar) {
@@ -593,43 +612,6 @@ afterEvaluate {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = config.maven_group
-            artifactId = config.archive_name
-            version = config.mc_version.replace('.', '') + "-" + config.mod_version
-
-            artifact(reobfArtifact) {
-                classifier = config.mod_version
-            }
-
-            artifact(srcJar) {
-                classifier = config.mod_version + '-sources'
-            }
-
-            artifact(deobfJar) {
-                classifier = config.mod_version + '-deobf'
-            }
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-            }
-        }
-    }
-    repositories {
-        maven {
-            url config.maven_url
-            if (hasConfig("maven_user") && !config.maven_user.isEmpty()) {
-                credentials {
-                    username = config.maven_user
-                    password = config.maven_passwd
-                }
-            }
-        }
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
@@ -637,7 +619,7 @@ tasks.withType(JavaCompile).configureEach {
 import java.nio.file.Files
 
 def incrementBuild = {
-    if (hasConfig("formal_version") || Boolean.parseBoolean(config.formal_version)) {
+    if (hasConfig("formal_version") && Boolean.parseBoolean(config.formal_version)) {
         def buildTxt = configFile.toPath()
         List<String> lines = Files.readAllLines buildTxt
         lines.replaceAll { String ln ->
@@ -663,10 +645,8 @@ tasks.build.dependsOn tasks.incrementBuildVersionProperty
 tasks.jarJar.finalizedBy('reobfJarJar')
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.encoding = 'UTF-8'
 }
-
 tasks.jarJar.configure {
-    // remove '-all' from jarJar jar file
     archiveClassifier.set('')
 }

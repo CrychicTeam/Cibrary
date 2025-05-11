@@ -4,12 +4,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.pickaid.pibrary.content.armorset.ArmorSet;
-import org.pickaid.pibrary.content.armorset.common.ArmorSetManager;
+import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.api.effect.IPlayerEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Map;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -18,11 +20,14 @@ public abstract class LivingEntityMixin {
     private void cibrary$setSprintingHook(boolean pSprinting, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
-            ArmorSet activeSet = ArmorSetManager.getActiveArmorSet(player);
-            if (pSprinting) {
-                activeSet.getEffect().startSprintingEffect(player);
-            } else {
-                activeSet.getEffect().stopSprintingEffect(player);
+            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+                if (entry.getKey().equals(self)) {
+                    if (player.isSprinting()) {
+                        entry.getValue().startSprintingEffect(player);
+                    } else {
+                        entry.getValue().stopSprintingEffect(player);
+                    }
+                }
             }
         }
     }
@@ -31,11 +36,14 @@ public abstract class LivingEntityMixin {
     private void cibrary$jumpFromGroundHook(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
-            ArmorSet activeSet = ArmorSetManager.getActiveArmorSet(player);
-            if (player.isSprinting()) {
-                activeSet.getEffect().sprintingJumpEffect(player);
-            } else {
-                activeSet.getEffect().jumpEffect(player);
+            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+                if (entry.getKey().equals(self)) {
+                    if (player.isSprinting()) {
+                        entry.getValue().sprintingJumpEffect(player);
+                    } else {
+                        entry.getValue().jumpEffect(player);
+                    }
+                }
             }
         }
     }
@@ -44,8 +52,11 @@ public abstract class LivingEntityMixin {
     private void cibrary$checkFallDamageHook(double pY, boolean pOnGround, BlockState pState, BlockPos pPos, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player && pOnGround) {
-            ArmorSet activeSet = ArmorSetManager.getActiveArmorSet(player);
-            activeSet.getEffect().landEffect(player, player.fallDistance, pState, pPos);
+            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+                if (entry.getKey().equals(self)) {
+                    entry.getValue().landEffect(player, pY, pState, pPos);
+                }
+            }
         }
     }
 }

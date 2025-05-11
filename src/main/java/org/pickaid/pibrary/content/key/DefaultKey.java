@@ -1,6 +1,8 @@
 package org.pickaid.pibrary.content.key;
 
 import net.minecraft.client.Minecraft;
+import org.pickaid.pibrary.content.key.registry.ConfiguredKey;
+import org.pickaid.pibrary.content.key.registry.KeyRegistry;
 
 public class DefaultKey {
     public static final ConfiguredKey FORWARD_KEY;
@@ -19,6 +21,7 @@ public class DefaultKey {
         RIGHT_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "right", Minecraft.getInstance().options.keyRight)
                 .build());
         ATTACK_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "attack", Minecraft.getInstance().options.keyAttack)
+                        .showDebugMessage()
                 .build());
     }
 
