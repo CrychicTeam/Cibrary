@@ -15,11 +15,20 @@ import org.pickaid.pibrary.content.key.registry.KeyRegistry;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
 import org.pickaid.pibrary.network.key.KeyStatePacket;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * ClientKeyHandler manages all custom key inputs on the client side.
+ *
+ * This class provides a sophisticated input handling system with support for:
+ * - Key state tracking (press, release, hold)
+ * - Power charging mechanics (hold to build power)
+ * - Rapid click detection
+ * - Customizable cooldowns and delays
+ * - Network synchronization
+ */
 @EventBusSubscriber(value = Dist.CLIENT)
 public class ClientKeyHandler {
     public static final Map<ResourceLocation, KeyData> KEY_STATES = new HashMap<>();
@@ -32,17 +41,15 @@ public class ClientKeyHandler {
     private static final Map<ResourceLocation, Boolean> RELEASE_BLOCK_INPUT = new HashMap<>();
     private static final Map<ResourceLocation, Long> RAPID_CLICK_COOLDOWN_TIMES = new HashMap<>();
     private static final Map<ResourceLocation, Boolean> IN_TIMEOUT_STATE = new HashMap<>();
-
     private static final Map<ResourceLocation, Long> HELD_START_TIMES = new HashMap<>();
-
     private static final Map<ResourceLocation, Boolean> PRESSED_TRIGGERED = new HashMap<>();
 
     private static final Map<ResourceLocation, Float> LAST_SENT_POWER = new HashMap<>();
     private static final Map<ResourceLocation, Integer> LAST_SENT_RAPID_COUNT = new HashMap<>();
     private static final Map<ResourceLocation, Long> LAST_NETWORK_UPDATE = new HashMap<>();
+
     private static final float POWER_UPDATE_THRESHOLD = 0.1f;
     private static final long CHARGING_UPDATE_INTERVAL = 100L;
-
     public static final float LEAST_RELEASE_TIME = 0.5f;
     public static final long RAPID_CLICK_THRESHOLD = 300;
     public static final long RAPID_CLICK_INTERVAL = 500;
@@ -68,69 +75,24 @@ public class ClientKeyHandler {
             }
 
             if (keyData.checkCooldown(currentTime)) {
-                keyData.state = KeyData.KeyState.COOLDOWN;
                 showDebugMessage(String.format("Cooldown: %d ms remaining",
                         keyData.getRemainingCooldown(currentTime)), config);
                 PREVIOUS_STATES.put(keyId, config.isDown());
                 continue;
             }
 
-            Long rapidClickCooldownEnd = RAPID_CLICK_COOLDOWN_TIMES.get(keyId);
-            if (rapidClickCooldownEnd != null) {
-                if (currentTime >= rapidClickCooldownEnd) {
-                    RAPID_CLICK_COOLDOWN_TIMES.remove(keyId);
-                    keyData.inRapidClickCooldown = false;
-                    showDebugMessage("Rapid click cooldown ended: " + keyId.getPath(), config);
-                } else {
-                    keyData.inRapidClickCooldown = true;
-                }
-            }
+            processRapidClickCooldown(keyId, keyData, currentTime, config);
 
             boolean isCurrentlyDown = config.isDown();
-            Boolean blockingInput = RELEASE_BLOCK_INPUT.getOrDefault(keyId, false);
-            if (blockingInput) {
-                if (!isCurrentlyDown && prevPressed) {
-                    showDebugMessage("Physical release after auto-release - unblocking input: " + keyId.getPath(), config);
-                    RELEASE_BLOCK_INPUT.put(keyId, false);
-                    AUTO_RELEASED.put(keyId, false);
 
-                    if (config.physicalReleaseDelay > 0) {
-                        CHARGED_RELEASE_TIMES.put(keyId, currentTime);
-                        keyData.state = KeyData.KeyState.AWAITING_RELEASE;
-                        showDebugMessage("Starting release delay: " + config.physicalReleaseDelay + "ms", config);
-                    } else {
-                        keyData.state = KeyData.KeyState.IDLE;
-                    }
-
-                    sendKeyState(keyData);
-                    LAST_SENT_STATE.put(keyId, keyData.state);
-                } else {
-                    showDebugMessage("Blocking input until physical release: " + keyId.getPath(), config);
-                    PREVIOUS_STATES.put(keyId, isCurrentlyDown);
-                    continue;
-                }
+            if (processBlockedInput(keyId, keyData, isCurrentlyDown, prevPressed, currentTime, config)) {
+                PREVIOUS_STATES.put(keyId, isCurrentlyDown);
+                continue;
             }
 
-            if (keyData.state == KeyData.KeyState.AWAITING_RELEASE) {
-                Long releaseTime = CHARGED_RELEASE_TIMES.get(keyId);
-                if (releaseTime != null) {
-                    long elapsedSinceRelease = currentTime - releaseTime;
-                    if (elapsedSinceRelease < config.physicalReleaseDelay) {
-                        long remaining = config.physicalReleaseDelay - elapsedSinceRelease;
-                        showDebugMessage(String.format("Release delay: %d ms remaining", remaining), config);
-                        PREVIOUS_STATES.put(keyId, isCurrentlyDown);
-                        continue;
-                    } else {
-                        keyData.state = KeyData.KeyState.IDLE;
-                        CHARGED_RELEASE_TIMES.remove(keyId);
-                        showDebugMessage("Release delay completed: " + keyId.getPath(), config);
-
-                        sendKeyState(keyData);
-                        LAST_SENT_STATE.put(keyId, keyData.state);
-                    }
-                } else {
-                    keyData.state = KeyData.KeyState.IDLE;
-                }
+            if (processReleaseDelay(keyId, keyData, currentTime, config)) {
+                PREVIOUS_STATES.put(keyId, isCurrentlyDown);
+                continue;
             }
 
             KeyData.KeyState oldState = keyData.state;
@@ -141,15 +103,99 @@ public class ClientKeyHandler {
             checkAndSendNetworkUpdate(keyId, keyData, oldState, oldRapidCount, oldPower, currentTime);
 
             PREVIOUS_STATES.put(keyId, isCurrentlyDown);
-
             if (keyData.state != KeyData.KeyState.IDLE &&
                     keyData.state != KeyData.KeyState.CHARGING &&
                     keyData.state != KeyData.KeyState.COOLDOWN &&
                     keyData.state != KeyData.KeyState.AWAITING_RELEASE &&
                     keyData.state != KeyData.KeyState.TIMEOUT &&
-                    keyData.state != KeyData.KeyState.HELD) {  // 保留HELD状态
+                    keyData.state != KeyData.KeyState.HELD) {
                 keyData.state = KeyData.KeyState.IDLE;
             }
+        }
+    }
+
+    /**
+     * Processes the rapid click cooldown state.
+     *
+     * @param keyId The key identifier
+     * @param keyData The key's state data
+     * @param currentTime Current system time
+     * @param config The key's configuration
+     */
+    private static void processRapidClickCooldown(ResourceLocation keyId, KeyData keyData,
+                                                  long currentTime, ConfiguredKey config) {
+        Long rapidClickCooldownEnd = RAPID_CLICK_COOLDOWN_TIMES.get(keyId);
+        if (rapidClickCooldownEnd != null) {
+            if (currentTime >= rapidClickCooldownEnd) {
+                RAPID_CLICK_COOLDOWN_TIMES.remove(keyId);
+                keyData.inRapidClickCooldown = false;
+                showDebugMessage("Rapid click cooldown ended: " + keyId.getPath(), config);
+            } else {
+                keyData.inRapidClickCooldown = true;
+            }
+        }
+    }
+
+    /**
+     * Processes keys that are blocking input until physical release.
+     *
+     * @return true if input is blocked, false otherwise
+     */
+    private static boolean processBlockedInput(ResourceLocation keyId, KeyData keyData,
+                                               boolean isCurrentlyDown, boolean prevPressed,
+                                               long currentTime, ConfiguredKey config) {
+        Boolean blockingInput = RELEASE_BLOCK_INPUT.getOrDefault(keyId, false);
+        if (!blockingInput) return false;
+
+        if (!isCurrentlyDown && prevPressed) {
+            showDebugMessage("Physical release after auto-release - unblocking input: " + keyId.getPath(), config);
+            RELEASE_BLOCK_INPUT.put(keyId, false);
+            AUTO_RELEASED.put(keyId, false);
+            if (config.physicalReleaseDelay > 0) {
+                CHARGED_RELEASE_TIMES.put(keyId, currentTime);
+                keyData.state = KeyData.KeyState.AWAITING_RELEASE;
+                showDebugMessage("Starting release delay: " + config.physicalReleaseDelay + "ms", config);
+            } else {
+                keyData.state = KeyData.KeyState.IDLE;
+            }
+
+            sendKeyState(keyData);
+            LAST_SENT_STATE.put(keyId, keyData.state);
+        } else {
+            showDebugMessage("Blocking input until physical release: " + keyId.getPath(), config);
+        }
+
+        return true;
+    }
+
+    /**
+     * Processes keys in the release delay state.
+     *
+     * @return true if in release delay, false otherwise
+     */
+    private static boolean processReleaseDelay(ResourceLocation keyId, KeyData keyData,
+                                               long currentTime, ConfiguredKey config) {
+        if (keyData.state != KeyData.KeyState.AWAITING_RELEASE) return false;
+
+        Long releaseTime = CHARGED_RELEASE_TIMES.get(keyId);
+        if (releaseTime == null) {
+            keyData.state = KeyData.KeyState.IDLE;
+            return false;
+        }
+
+        long elapsedSinceRelease = currentTime - releaseTime;
+        if (elapsedSinceRelease < config.physicalReleaseDelay) {
+            long remaining = config.physicalReleaseDelay - elapsedSinceRelease;
+            showDebugMessage(String.format("Release delay: %d ms remaining", remaining), config);
+            return true;
+        } else {
+            keyData.state = KeyData.KeyState.IDLE;
+            CHARGED_RELEASE_TIMES.remove(keyId);
+            showDebugMessage("Release delay completed: " + keyId.getPath(), config);
+
+            sendKeyState(keyData);
+            LAST_SENT_STATE.put(keyId, keyData.state);
+            return false;
         }
     }
 
@@ -166,20 +212,25 @@ public class ClientKeyHandler {
 
         if (oldState != keyData.state) {
             shouldSendUpdate = true;
-        } else if (oldRapidCount != keyData.rapidClickCount) {
+        }
+        else if (oldRapidCount != keyData.rapidClickCount) {
             int lastSentCount = LAST_SENT_RAPID_COUNT.getOrDefault(keyId, 0);
             if (keyData.rapidClickCount != lastSentCount) {
                 shouldSendUpdate = true;
                 LAST_SENT_RAPID_COUNT.put(keyId, keyData.rapidClickCount);
             }
-        } else if (keyData.state == KeyData.KeyState.CHARGING || keyData.state == KeyData.KeyState.HELD) {
+        }
+        else if (keyData.state == KeyData.KeyState.CHARGING || keyData.state == KeyData.KeyState.HELD) {
             float lastSentPower = LAST_SENT_POWER.getOrDefault(keyId, 0f);
-            if (Math.abs(keyData.power - lastSentPower) >= POWER_UPDATE_THRESHOLD ||
-                    timeSinceLastUpdate >= CHARGING_UPDATE_INTERVAL) {
+            boolean powerThresholdReached = Math.abs(keyData.power - lastSentPower) >= POWER_UPDATE_THRESHOLD;
+            boolean intervalReached = timeSinceLastUpdate >= CHARGING_UPDATE_INTERVAL;
+
+            if (powerThresholdReached || intervalReached) {
                 shouldSendUpdate = true;
                 LAST_SENT_POWER.put(keyId, keyData.power);
             }
         }
+
         if (shouldSendUpdate) {
             sendKeyState(keyData);
             LAST_SENT_STATE.put(keyId, keyData.state);
@@ -195,6 +246,7 @@ public class ClientKeyHandler {
                                        boolean isPressed, boolean prevPressed, long currentTime) {
         boolean inActiveRapidClick = keyData.rapidClickCount > 0 &&
                 !keyData.inRapidClickCooldown && config.enableRapidClick;
+
         boolean isInTimeout = IN_TIMEOUT_STATE.getOrDefault(keyId, false);
         if (isInTimeout) {
             if (isPressed) {
@@ -217,52 +269,13 @@ public class ClientKeyHandler {
                 handleInitialKeyPress(keyId, config, keyData, currentTime);
                 return;
             }
-
             if (keyData.state == KeyData.KeyState.HELD) {
                 checkHeldTimeout(keyId, config, keyData, currentTime);
                 return;
             }
-
-            long holdDuration = currentTime - PRESS_START_TIMES.getOrDefault(keyId, currentTime);
-
-            if (config.enableRapidClick && keyData.rapidClickCount == 1 && keyData.state == KeyData.KeyState.IDLE) {
-                boolean pressedTriggered = PRESSED_TRIGGERED.getOrDefault(keyId, false);
-                if (!pressedTriggered && holdDuration > config.pressTimeTolerance) {
-                    keyData.state = KeyData.KeyState.PRESSED;
-                    PRESSED_TRIGGERED.put(keyId, true);
-                    showDebugMessage("Key Pressed (during potential rapid click): " + keyId.getPath(), config);
-                }
-            }
-
-            if (holdDuration > config.chargingTimeTolerance &&
-                    config.enableCharging &&
-                    keyData.state == KeyData.KeyState.IDLE &&
-                    keyData.rapidClickCount == 0) {
-                keyData.state = KeyData.KeyState.CHARGING;
-                showDebugMessage("Start Charging: " + keyId.getPath(), config);
-                LAST_SENT_POWER.put(keyId, 0f);
-            }
-
-            if (keyData.state == KeyData.KeyState.CHARGING) {
-                updateChargePower(keyId, config, keyData, currentTime);
-            }
-
-            if (config.enableRapidClick && holdDuration > RAPID_CLICK_INTERVAL && keyData.rapidClickCount > 0) {
-                if (keyData.rapidClickCount == 1 && !PRESSED_TRIGGERED.getOrDefault(keyId, false)) {
-                    keyData.state = KeyData.KeyState.PRESSED;
-                    PRESSED_TRIGGERED.put(keyId, true);
-                    showDebugMessage("Key Pressed (after rapid click timeout): " + keyId.getPath(), config);
-                    sendKeyState(keyData);
-                }
-
-                resetRapidClick(keyId, keyData, config, currentTime);
-                showDebugMessage("Rapid Click Reset (holding too long): " + keyId.getPath(), config);
-            }
-
-            if (keyData.state == KeyData.KeyState.CHARGING) {
-                checkChargingTimeout(keyId, config, keyData, currentTime);
-            }
-        } else if (prevPressed && !inActiveRapidClick) {
+            processContinuingPress(keyId, config, keyData, currentTime);
+        }
+        else if (prevPressed && !inActiveRapidClick) {
             handleKeyRelease(keyId, config, keyData, currentTime);
         }
 
@@ -280,9 +293,60 @@ public class ClientKeyHandler {
         }
     }
 
-    private static void checkChargingTimeout(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
+    /**
+     * Processes a continuing key press (key was already pressed in previous tick).
+     */
+    private static void processContinuingPress(ResourceLocation keyId, ConfiguredKey config,
+                                               KeyData keyData, long currentTime) {
+        long holdDuration = currentTime - PRESS_START_TIMES.getOrDefault(keyId, currentTime);
+
+        if (config.enableRapidClick && keyData.rapidClickCount == 1 &&
+                keyData.state == KeyData.KeyState.IDLE) {
+            boolean pressedTriggered = PRESSED_TRIGGERED.getOrDefault(keyId, false);
+            if (!pressedTriggered && holdDuration > config.pressTimeTolerance) {
+                keyData.state = KeyData.KeyState.PRESSED;
+                PRESSED_TRIGGERED.put(keyId, true);
+                showDebugMessage("Key Pressed (during potential rapid click): " + keyId.getPath(), config);
+            }
+        }
+
+        if (holdDuration > config.chargingTimeTolerance &&
+                config.enableCharging &&
+                keyData.state == KeyData.KeyState.IDLE &&
+                keyData.rapidClickCount == 0) {
+            keyData.state = KeyData.KeyState.CHARGING;
+            showDebugMessage("Start Charging: " + keyId.getPath(), config);
+            LAST_SENT_POWER.put(keyId, 0f);
+        }
+        if (keyData.state == KeyData.KeyState.CHARGING) {
+            updateChargePower(keyId, config, keyData, currentTime);
+        }
+
+        if (config.enableRapidClick && holdDuration > RAPID_CLICK_INTERVAL &&
+                keyData.rapidClickCount > 0) {
+            if (keyData.rapidClickCount == 1 && !PRESSED_TRIGGERED.getOrDefault(keyId, false)) {
+                keyData.state = KeyData.KeyState.PRESSED;
+                PRESSED_TRIGGERED.put(keyId, true);
+                showDebugMessage("Key Pressed (after rapid click timeout): " + keyId.getPath(), config);
+                sendKeyState(keyData);
+            }
+
+            resetRapidClick(keyId, keyData, config, currentTime);
+            showDebugMessage("Rapid Click Reset (holding too long): " + keyId.getPath(), config);
+        }
+        if (keyData.state == KeyData.KeyState.CHARGING) {
+            checkChargingTimeout(keyId, config, keyData, currentTime);
+        }
+    }
+
+    /**
+     * Checks if a key in charging state has reached its timeout duration.
+     */
+    private static void checkChargingTimeout(ResourceLocation keyId, ConfiguredKey config,
+                                             KeyData keyData, long currentTime) {
         long timeoutDuration = config.timeoutTime > 0 ? config.timeoutTime : DEFAULT_STATE_TIMEOUT;
         long holdDuration = currentTime - PRESS_START_TIMES.getOrDefault(keyId, currentTime);
+
         if (holdDuration > timeoutDuration) {
             keyData.state = KeyData.KeyState.TIMEOUT;
             IN_TIMEOUT_STATE.put(keyId, true);
@@ -292,7 +356,11 @@ public class ClientKeyHandler {
         }
     }
 
-    private static void checkHeldTimeout(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
+    /**
+     * Checks if a key in held state has reached its timeout duration.
+     */
+    private static void checkHeldTimeout(ResourceLocation keyId, ConfiguredKey config,
+                                         KeyData keyData, long currentTime) {
         long timeoutDuration = config.timeoutTime > 0 ? config.timeoutTime : DEFAULT_STATE_TIMEOUT;
 
         Long heldStartTime = HELD_START_TIMES.get(keyId);
@@ -308,20 +376,22 @@ public class ClientKeyHandler {
         }
     }
 
-    private static void handleInitialKeyPress(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
+    /**
+     * Handles the initial key press events and rapid click detection.
+     */
+    private static void handleInitialKeyPress(ResourceLocation keyId, ConfiguredKey config,
+                                              KeyData keyData, long currentTime) {
         PRESS_START_TIMES.put(keyId, currentTime);
         PRESSED_TRIGGERED.put(keyId, false);
 
         if (config.enableRapidClick) {
-            System.arraycopy(keyData.pressTimestamps, 0, keyData.pressTimestamps, 1, 2);
-            keyData.pressTimestamps[0] = currentTime;
+            keyData.recordPressTimestamp(currentTime);
 
             if (keyData.pressTimestamps[1] > 0 && !keyData.inRapidClickCooldown) {
                 long timeSincePreviousClick = currentTime - keyData.pressTimestamps[1];
 
                 if (timeSincePreviousClick < RAPID_CLICK_THRESHOLD) {
                     keyData.rapidClickCount++;
-
                     int maxCount = config.maxRapidClickCount > 0 ? config.maxRapidClickCount : 5;
                     if (keyData.rapidClickCount >= maxCount) {
                         showDebugMessage("Max Rapid Clicks Reached! (" + maxCount + "): " + keyId.getPath(), config);
@@ -342,12 +412,17 @@ public class ClientKeyHandler {
             }
         } else {
             keyData.rapidClickCount = 0;
-            Arrays.fill(keyData.pressTimestamps, 0);
+            keyData.clearTimestamps();
         }
     }
 
-    private static void handleKeyRelease(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
+    /**
+     * Handles key release events.
+     */
+    private static void handleKeyRelease(ResourceLocation keyId, ConfiguredKey config,
+                                         KeyData keyData, long currentTime) {
         long holdDuration = currentTime - PRESS_START_TIMES.getOrDefault(keyId, currentTime);
+
         if (keyData.state == KeyData.KeyState.TIMEOUT) {
             keyData.state = KeyData.KeyState.IDLE;
             showDebugMessage("Key released from timeout state: " + keyId.getPath(), config);
@@ -359,14 +434,13 @@ public class ClientKeyHandler {
         }
 
         if (keyData.state == KeyData.KeyState.HELD) {
-            keyData.state = KeyData.KeyState.RELEASED;
-            showDebugMessage(String.format("Released from HELD state - Power: %.1f", keyData.power), config);
+            keyData.state = KeyData.KeyState.HELD_RELEASED;
+            showDebugMessage(String.format("Manual release from HELD state - Power: %.1f", keyData.power), config);
 
             if (config.releaseCooldown > 0) {
                 keyData.startCooldown(config.releaseCooldown);
                 showDebugMessage("Started release cooldown: " + config.releaseCooldown + "ms", config);
             }
-
             if (config.physicalReleaseDelay > 0) {
                 CHARGED_RELEASE_TIMES.put(keyId, currentTime);
                 keyData.state = KeyData.KeyState.AWAITING_RELEASE;
@@ -411,7 +485,8 @@ public class ClientKeyHandler {
                 keyData.state = KeyData.KeyState.IDLE;
                 showDebugMessage("Ignored too short press: " + keyId.getPath(), config);
             }
-        } else if (holdDuration >= config.pressTimeTolerance) {
+        }
+        else if (holdDuration >= config.pressTimeTolerance) {
             keyData.state = KeyData.KeyState.PRESSED;
             showDebugMessage("Key Pressed: " + keyId.getPath(), config);
 
@@ -429,15 +504,17 @@ public class ClientKeyHandler {
         PRESSED_TRIGGERED.remove(keyId);
     }
 
-    private static void updateChargePower(ResourceLocation keyId, ConfiguredKey config, KeyData keyData, long currentTime) {
+    /**
+     * Updates the charge power for a key in charging state.
+     */
+    private static void updateChargePower(ResourceLocation keyId, ConfiguredKey config,
+                                          KeyData keyData, long currentTime) {
         long holdDuration = currentTime - PRESS_START_TIMES.getOrDefault(keyId, currentTime);
-
-        keyData.power = Math.min((float) holdDuration / 1000.0f, config.maxPower);
-        keyData.remainingTime = config.maxPower - keyData.power;
-
+        float newPower = Math.min((float) holdDuration / 1000.0f, config.maxPower);
+        keyData.updatePower(newPower, config.maxPower);
         if (keyData.power >= config.maxPower) {
             if (config.autoReleaseOnMax) {
-                keyData.state = KeyData.KeyState.RELEASED;
+                keyData.state = KeyData.KeyState.FINISHED;
                 config.keyMapping.release();
                 AUTO_RELEASED.put(keyId, true);
                 RELEASE_BLOCK_INPUT.put(keyId, true);
@@ -446,7 +523,7 @@ public class ClientKeyHandler {
                     keyData.startCooldown(config.releaseCooldown);
                     showDebugMessage("Started release cooldown: " + config.releaseCooldown + "ms", config);
                 }
-                showDebugMessage("Auto Released (blocking next input): " + keyId.getPath(), config);
+                showDebugMessage("Auto Finished (blocking next input): " + keyId.getPath(), config);
                 PRESS_START_TIMES.put(keyId, 0L);
                 HELD_START_TIMES.remove(keyId);
             } else {
@@ -459,6 +536,9 @@ public class ClientKeyHandler {
         }
     }
 
+    /**
+     * Triggers a rapid click event and sends the update to the server.
+     */
     private static void triggerRapidClickEvent(KeyData keyData, ConfiguredKey config) {
         keyData.state = KeyData.KeyState.RAPID_CLICK;
         sendKeyState(keyData);
@@ -476,6 +556,9 @@ public class ClientKeyHandler {
         }
     }
 
+    /**
+     * Completes a rapid click sequence when the maximum count is reached.
+     */
     private static void completeRapidClickSequence(ResourceLocation keyId, KeyData keyData,
                                                    ConfiguredKey config, long currentTime) {
         keyData.state = KeyData.KeyState.FINISHED;
@@ -490,9 +573,12 @@ public class ClientKeyHandler {
         }
 
         keyData.rapidClickCount = 0;
-        Arrays.fill(keyData.pressTimestamps, 0);
+        keyData.clearTimestamps();
     }
 
+    /**
+     * Resets a rapid click sequence that was interrupted or timed out.
+     */
     private static void resetRapidClick(ResourceLocation keyId, KeyData keyData,
                                         ConfiguredKey config, long currentTime) {
         int reachedCount = keyData.rapidClickCount;
@@ -518,7 +604,7 @@ public class ClientKeyHandler {
             keyData.rapidClickCount = 0;
         }
 
-        Arrays.fill(keyData.pressTimestamps, 0);
+        keyData.clearTimestamps();
     }
 
     private static void startRapidClickCooldown(ResourceLocation keyId, long duration, long currentTime) {
@@ -558,11 +644,11 @@ public class ClientKeyHandler {
     /**
      * Sets the current state of a key.
      *
-     * @param keyData The key's state data to set'
+     * @param keyData The key's state data to set
      */
     public static void setKeState(KeyData keyData) {
         var existingKeyData = KEY_STATES.get(keyData.keyId);
-        if (existingKeyData!= null) {
+        if (existingKeyData != null) {
             existingKeyData.state = keyData.state;
             LAST_SENT_STATE.put(keyData.keyId, keyData.state);
             sendKeyState(keyData);

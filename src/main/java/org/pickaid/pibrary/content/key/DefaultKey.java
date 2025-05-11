@@ -21,6 +21,7 @@ public class DefaultKey {
         RIGHT_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "right", Minecraft.getInstance().options.keyRight)
                 .build());
         ATTACK_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "attack", Minecraft.getInstance().options.keyAttack)
+                        .showDebugMessage()
                 .build());
     }
 

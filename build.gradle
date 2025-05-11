@@ -361,7 +361,7 @@ jar {
     manifest {
         attributes([
                 "Specification-Title"     : config.mod_id,
-                "Specification-Vendor"    : "Zeitheron",
+                "Specification-Vendor"    : "PickAID",
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : archiveVersion,

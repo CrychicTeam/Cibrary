@@ -8,7 +8,8 @@ import net.minecraft.resources.ResourceLocation;
  *
  * This class maintains all runtime state information for keys managed by the
  * ClientKeyHandler, including power levels, timing information, and various
- * state flags.
+ * state flags. It provides a more streamlined implementation with cleaner state
+ * transitions and optimized member access.
  */
 @SerialClass
 public class KeyData {
@@ -26,12 +27,14 @@ public class KeyData {
 
     /**
      * Current power level (for charging mechanics)
+     * This value represents the charge level from 0.0 to maxPower
      */
     @SerialClass.SerialField
     public float power;
 
     /**
      * Remaining time until full power (for charging mechanics)
+     * Calculated as maxPower - power
      */
     @SerialClass.SerialField
     public float remainingTime;
@@ -44,6 +47,7 @@ public class KeyData {
 
     /**
      * Timestamps of the most recent key presses (for rapid click detection)
+     * Index 0 contains the most recent press
      */
     @SerialClass.SerialField
     public long[] pressTimestamps = new long[3];
@@ -82,12 +86,7 @@ public class KeyData {
      * Default constructor. Initializes all state variables to their default values.
      */
     public KeyData() {
-        this.state = KeyState.IDLE;
-        this.power = 0.0f;
-        this.remainingTime = 0.0f;
-        this.rapidClickCount = 0;
-        this.inRapidClickCooldown = false;
-        this.isInCooldown = false;
+        reset();
     }
 
     /**
@@ -113,6 +112,7 @@ public class KeyData {
         this.rapidClickCount = 0;
         this.inRapidClickCooldown = false;
         this.isInCooldown = false;
+        // Preserve keyId
     }
 
     /**
@@ -127,6 +127,7 @@ public class KeyData {
 
         this.cooldownEndTime = System.currentTimeMillis() + duration;
         this.isInCooldown = true;
+        this.state = KeyState.COOLDOWN;
     }
 
     /**
@@ -142,6 +143,7 @@ public class KeyData {
 
         if (currentTime >= cooldownEndTime) {
             isInCooldown = false;
+            this.state = KeyState.IDLE;
             return false;
         }
 
@@ -156,9 +158,62 @@ public class KeyData {
      */
     public long getRemainingCooldown(long currentTime) {
         if (!isInCooldown) return 0;
+        return Math.max(0, cooldownEndTime - currentTime);
+    }
 
-        long remaining = cooldownEndTime - currentTime;
-        return Math.max(0, remaining);
+    /**
+     * Update the power level during charging and calculate remaining time
+     *
+     * @param currentPower The new power level to set
+     * @param maxPower The maximum power level for this key
+     */
+    public void updatePower(float currentPower, float maxPower) {
+        this.power = Math.min(currentPower, maxPower);
+        this.remainingTime = maxPower - this.power;
+    }
+
+    /**
+     * Records a new key press timestamp and shifts older timestamps
+     *
+     * @param timestamp The timestamp to record
+     */
+    public void recordPressTimestamp(long timestamp) {
+        System.arraycopy(pressTimestamps, 0, pressTimestamps, 1, pressTimestamps.length - 1);
+        pressTimestamps[0] = timestamp;
+    }
+
+    /**
+     * Clears all timestamp data
+     */
+    public void clearTimestamps() {
+        for (int i = 0; i < pressTimestamps.length; i++) {
+            pressTimestamps[i] = 0;
+        }
+    }
+
+    /**
+     * Checks if this key has network updates to send
+     *
+     * @param currentTime Current timestamp
+     * @param updateInterval Minimum time between updates
+     * @param powerThreshold Minimum power change to trigger update
+     * @return True if updates should be sent
+     */
+    public boolean hasNetworkUpdates(long currentTime, long lastUpdateTime,
+                                     long updateInterval, float powerThreshold) {
+        // State change always triggers update
+        if (state != lastSentState) return true;
+
+        // Power change exceeds threshold
+        if (Math.abs(power - lastSentPower) >= powerThreshold) return true;
+
+        // Regular update interval for charging/held states
+        if ((state == KeyState.CHARGING || state == KeyState.HELD) &&
+                (currentTime - lastUpdateTime) >= updateInterval) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -167,16 +222,17 @@ public class KeyData {
      * These states form the core of the key binding state machine.
      */
     public enum KeyState {
-        IDLE,
-        CHARGING,
-        PRESSED,
-        RELEASED,
-        FINISHED,
-        RAPID_CLICK,
-        RAPID_FINISH,
-        TIMEOUT,
-        COOLDOWN,
-        AWAITING_RELEASE,
-        HELD
+        IDLE,              // Key is not pressed or in use
+        CHARGING,          // Key is being held down to accumulate power
+        PRESSED,           // Key has been pressed once
+        RELEASED,          // Key has been released after being pressed before reaching max power
+        FINISHED,          // An action has completed automatically (e.g., auto-release at max power)
+        HELD,              // Key is being held at max power (when auto-release is false)
+        HELD_RELEASED,     // Key was manually released from HELD state
+        RAPID_CLICK,       // Key is being rapidly clicked
+        RAPID_FINISH,      // A rapid click sequence has completed
+        TIMEOUT,           // Key has been held too long and timed out
+        COOLDOWN,          // Key is in cooldown period after use
+        AWAITING_RELEASE   // Key is waiting for physical release after an action
     }
 }
