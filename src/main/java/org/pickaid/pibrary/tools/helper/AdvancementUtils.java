@@ -10,9 +10,12 @@ import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
-public class AdvancementHelper {
+import javax.annotation.Nullable;
+
+public class AdvancementUtils {
 
     public static boolean hasAdvancementUnlocked(Player player, Advancement advancement) {
         return player instanceof ServerPlayer
@@ -31,8 +34,12 @@ public class AdvancementHelper {
         return ServerLifecycleHooks.getCurrentServer().getAdvancements();
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static ClientAdvancements getAdvancementManagerClient() {
-        return Minecraft.getInstance().player.connection.getAdvancements();
+        if (Minecraft.getInstance().player != null) {
+            return Minecraft.getInstance().player.connection.getAdvancements();
+        }
+        return null;
     }
 
     public static <T extends CriterionTrigger<?>> T registerCriteriaTrigger(T criterion) {

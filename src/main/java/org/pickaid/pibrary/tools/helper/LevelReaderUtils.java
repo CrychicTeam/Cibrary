@@ -116,7 +116,7 @@ public class LevelReaderUtils {
     }
 
     public static boolean isOcean(LevelReader level, BlockPos pos) {
-        return level.getFluidState(pos).is(FluidTags.WATER) && level.getBiome(pos).is(BiomeTags.IS_OCEAN);
+        return level.getFluidState(pos).is(FluidTags.WATER) && getBiome(level, pos).is(BiomeTags.IS_OCEAN);
     }
 
     public static int getSeaLevel(LevelReader level) {
@@ -127,7 +127,7 @@ public class LevelReaderUtils {
         return pos.getY() < level.getSeaLevel();
     }
 
-    public static boolean inDimension(Player player, String dimensionName) {
-        return player.level().dimension().location().equals(new ResourceLocation(dimensionName));
+    public static boolean inDimension(Player player, ResourceLocation dimensionName) {
+        return player.level().dimension().location().equals(dimensionName);
     }
 }

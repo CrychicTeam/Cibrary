@@ -69,4 +69,10 @@ public class ConfiguredKeyEvent extends Event {
             super(player, keyData);
         }
     }
+
+    public static class HeldReleased extends ConfiguredKeyEvent {
+        public HeldReleased(Player player, KeyData keyData) {
+            super(player, keyData);
+        }
+    }
 }

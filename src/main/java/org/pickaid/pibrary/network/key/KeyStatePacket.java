@@ -33,14 +33,17 @@ public class KeyStatePacket extends SerialPacketBase {
                         case PRESSED:
                             MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Pressed(player, keyData));
                             ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
                             break;
                         case RELEASED:
                             MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Released(player, keyData));
                             ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
                             break;
                         case FINISHED:
                             MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Finished(player, keyData));
                             ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
                             break;
                         case RAPID_CLICK:
                             MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClick(player, keyData));
@@ -51,16 +54,18 @@ public class KeyStatePacket extends SerialPacketBase {
                         case TIMEOUT:
                             MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.TimeOut(player, keyData));
                             ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            break;
+                        case HELD_RELEASED:
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.HeldReleased(player, keyData));
+                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
                             break;
                         case CHARGING:
-                            if (!ServerKeyManager.chargingKeys.contains(keyData.keyId)) {
-                                ServerKeyManager.chargingKeys.add(keyData.keyId);
-                            }
+                            ServerKeyManager.chargingKeys.add(keyData.keyId);
                             break;
                         case HELD:
-                            if (!ServerKeyManager.heldClickKeys.contains(keyData.keyId)) {
-                                ServerKeyManager.heldClickKeys.add(keyData.keyId);
-                            }
+                            ServerKeyManager.heldClickKeys.add(keyData.keyId);
                         case IDLE:
                             break;
                         default:
