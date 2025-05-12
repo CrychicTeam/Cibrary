@@ -21,7 +21,7 @@ public class SetKeyStatePacket extends SerialPacketBase {
     public void handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
             if (context.getDirection().getReceptionSide().isClient()) {
-                ClientKeyHandler.setKeState(keyData);
+                ClientKeyHandler.setKeyState(keyData);
             }
         });
     }

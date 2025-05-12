@@ -1,27 +1,28 @@
 package org.pickaid.pibrary.content.key;
 
 import net.minecraft.client.Minecraft;
-import org.pickaid.pibrary.content.key.registry.ConfiguredKey;
+import org.pickaid.pibrary.content.key.registry.KeyConfig;
 import org.pickaid.pibrary.content.key.registry.KeyRegistry;
 
 public class DefaultKey {
-    public static final ConfiguredKey FORWARD_KEY;
-    public static final ConfiguredKey BACKWARD_KEY;
-    public static final ConfiguredKey LEFT_KEY;
-    public static final ConfiguredKey RIGHT_KEY;
-    public static final ConfiguredKey ATTACK_KEY;
+    public static final KeyConfig FORWARD_KEY;
+    public static final KeyConfig BACKWARD_KEY;
+    public static final KeyConfig LEFT_KEY;
+    public static final KeyConfig RIGHT_KEY;
+    public static final KeyConfig ATTACK_KEY;
 
     static {
-        FORWARD_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "forward", Minecraft.getInstance().options.keyUp)
-                        .build());
-        BACKWARD_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "backward", Minecraft.getInstance().options.keyDown)
+        FORWARD_KEY = KeyRegistry.register(new KeyConfig.Builder("minecraft", "forward", Minecraft.getInstance().options.keyUp)
                 .build());
-        LEFT_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "left", Minecraft.getInstance().options.keyLeft)
+        BACKWARD_KEY = KeyRegistry.register(new KeyConfig.Builder("minecraft", "backward", Minecraft.getInstance().options.keyDown)
                 .build());
-        RIGHT_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "right", Minecraft.getInstance().options.keyRight)
+        LEFT_KEY = KeyRegistry.register(new KeyConfig.Builder("minecraft", "left", Minecraft.getInstance().options.keyLeft)
                 .build());
-        ATTACK_KEY = KeyRegistry.register(new ConfiguredKey.Builder("minecraft", "attack", Minecraft.getInstance().options.keyAttack)
-                        .showDebugMessage()
+        RIGHT_KEY = KeyRegistry.register(new KeyConfig.Builder("minecraft", "right", Minecraft.getInstance().options.keyRight)
+                .build());
+        ATTACK_KEY = KeyRegistry.register(new KeyConfig.Builder("minecraft", "attack", Minecraft.getInstance().options.keyAttack)
+                        .enableCharging()
+                        .enableRapidClick()
                 .build());
     }
 
