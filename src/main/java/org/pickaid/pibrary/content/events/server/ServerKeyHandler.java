@@ -70,57 +70,57 @@ public class ServerKeyHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onKeyPressed(ConfiguredKeyEvent.Pressed event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' pressed").withStyle(ChatFormatting.DARK_GREEN));
-    }
-
-    @SubscribeEvent
-    public static void onKeyCharging(ConfiguredKeyEvent.Charging event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' is charging").withStyle(ChatFormatting.BLUE));
-    }
-
-    @SubscribeEvent
-    public static void onKeyRapidClick(ConfiguredKeyEvent.RapidClick event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' performed a rapid click").withStyle(ChatFormatting.RED));
-    }
-
-    @SubscribeEvent
-    public static void onKeyRapidFinish(ConfiguredKeyEvent.RapidClickFinish event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' rapid click finish").withStyle(ChatFormatting.YELLOW));
-    }
-
-    @SubscribeEvent
-    public static void onKeyRelease(ConfiguredKeyEvent.Released event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' released").withStyle(ChatFormatting.GREEN));
-    }
-
-    @SubscribeEvent
-    public static void onKeyFinish(ConfiguredKeyEvent.Finished event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' finish").withStyle(ChatFormatting.AQUA));
-    }
-
-    @SubscribeEvent
-    public static void onKeyHeld(ConfiguredKeyEvent.Held event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' is held").withStyle(ChatFormatting.GOLD));
-    }
-
-    @SubscribeEvent
-    public static void onKeyHeldFinish(ConfiguredKeyEvent.HeldReleased event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' is not held anymore").withStyle(ChatFormatting.GRAY));
-    }
-
-    @SubscribeEvent
-    public static void onKeyTimeOut(ConfiguredKeyEvent.TimeOut event) {
-        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
-        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' timed out").withStyle(ChatFormatting.RED));
-    }
+//    @SubscribeEvent
+//    public static void onKeyPressed(ConfiguredKeyEvent.Pressed event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' pressed").withStyle(ChatFormatting.DARK_GREEN));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyCharging(ConfiguredKeyEvent.Charging event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' is charging").withStyle(ChatFormatting.BLUE));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyRapidClick(ConfiguredKeyEvent.RapidClick event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' performed a rapid click").withStyle(ChatFormatting.RED));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyRapidFinish(ConfiguredKeyEvent.RapidClickFinish event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' rapid click finish").withStyle(ChatFormatting.YELLOW));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyRelease(ConfiguredKeyEvent.Released event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' released").withStyle(ChatFormatting.GREEN));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyFinish(ConfiguredKeyEvent.Finished event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' finish").withStyle(ChatFormatting.AQUA));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyHeld(ConfiguredKeyEvent.Held event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' is held").withStyle(ChatFormatting.GOLD));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyHeldFinish(ConfiguredKeyEvent.HeldReleased event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' is not held anymore").withStyle(ChatFormatting.GRAY));
+//    }
+//
+//    @SubscribeEvent
+//    public static void onKeyTimeOut(ConfiguredKeyEvent.TimeOut event) {
+//        if (!Objects.equals(event.getKeyData().keyId, new ResourceLocation("minecraft:attack"))) return;
+//        event.getPlayer().sendSystemMessage(Component.literal("Key '" + event.getKeyData().keyId + "' timed out").withStyle(ChatFormatting.RED));
+//    }
 }

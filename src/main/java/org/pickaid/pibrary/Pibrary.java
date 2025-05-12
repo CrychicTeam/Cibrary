@@ -15,6 +15,7 @@ import org.pickaid.pibrary.api.effect.IPlayerEffect;
 import org.pickaid.pibrary.content.events.server.PlayerEffectHandler;
 import org.pickaid.pibrary.content.events.server.ServerKeyHandler;
 import org.pickaid.pibrary.content.key.DefaultKey;
+import org.pickaid.pibrary.content.key.combo.ComboRegistrationSample;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
 import org.slf4j.Logger;
 
@@ -37,7 +38,6 @@ public class Pibrary {
 	public Pibrary() {
 		FMLJavaModLoadingContext ctx = FMLJavaModLoadingContext.get();
 		IEventBus modEventBus = ctx.getModEventBus();
-		keySetUp();
 		registerEventListeners();
 		modEventBus.addListener(this::onCommonSetup);
 	}
@@ -52,6 +52,7 @@ public class Pibrary {
 
 	public void onCommonSetup(FMLCommonSetupEvent event) {
 		PibraryNetworkHandler.init();
+		keySetUp();
 	}
 
 	public void keySetUp() {

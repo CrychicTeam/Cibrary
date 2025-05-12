@@ -87,9 +87,7 @@ public class JsonParser {
         JsonArray array = new JsonArray();
         byte elementType = listTag.getElementType();
 
-        for (int i = 0; i < listTag.size(); i++) {
-            Tag element = listTag.get(i);
-
+        for (Tag element : listTag) {
             switch (elementType) {
                 case TAG_COMPOUND:
                     array.add(toJSON((CompoundTag) element));
@@ -206,7 +204,6 @@ public class JsonParser {
         long longVal = value.longValue();
 
         if (doubleVal == longVal) {
-            // Integer type
             if (longVal >= Byte.MIN_VALUE && longVal <= Byte.MAX_VALUE) {
                 tag.putByte(key, value.byteValue());
             } else if (longVal >= Short.MIN_VALUE && longVal <= Short.MAX_VALUE) {
@@ -217,7 +214,6 @@ public class JsonParser {
                 tag.putLong(key, longVal);
             }
         } else {
-            // Floating point type
             if (doubleVal >= Float.MIN_VALUE && doubleVal <= Float.MAX_VALUE) {
                 tag.putFloat(key, value.floatValue());
             } else {

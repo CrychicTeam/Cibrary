@@ -38,13 +38,11 @@ public class ChargingState implements KeyState {
             
             return new HeldReleasedState();
         }
-        
-        // 自动释放或能量足够 -> 去RELEASED状态
+
         if (isAutoRelease || hasEnoughPower) {
             context.showDebugMessage(String.format("Released with sufficient power - Power: %.1f",
                     context.getKeyData().power));
 
-            // 设置RELEASED状态并确保发送
             context.getKeyData().state = KeyData.KeyState.RELEASED;
             context.sendNetworkUpdate();
             context.forceLastSentState(KeyData.KeyState.RELEASED);
@@ -64,19 +62,17 @@ public class ChargingState implements KeyState {
             }
 
             return new ReleasedState();
-        } 
-        // 能量不足但按住时间足够长 -> 仍然触发RELEASED
+        }
+
         else if (holdDuration >= context.getConfig().pressTimeTolerance) {
             context.showDebugMessage("Key released after sufficient hold duration but insufficient power");
-            
-            // 确保设置RELEASED状态并发送
+
             context.getKeyData().state = KeyData.KeyState.RELEASED;
-            context.sendNetworkUpdate();
             context.forceLastSentState(KeyData.KeyState.RELEASED);
-            
+
             return new ReleasedState();
-        } 
-        // 按住时间太短 -> IDLE状态（不触发事件）
+        }
+
         else {
             context.showDebugMessage("Ignored too short press (< " + context.getConfig().pressTimeTolerance + "ms)");
             return new IdleState();

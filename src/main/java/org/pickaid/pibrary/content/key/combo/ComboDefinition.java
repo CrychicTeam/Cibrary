@@ -6,28 +6,11 @@ import org.pickaid.pibrary.content.key.KeyData;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Defines a combo pattern and its associated action.
- */
 public interface ComboDefinition {
-    /**
-     * Gets the unique identifier for this combo.
-     */
     ResourceLocation getId();
-
-    /**
-     * Checks if the given input sequence matches this combo.
-     */
     boolean matches(List<ComboSystem.ComboInput> inputSequence);
-
-    /**
-     * Executes the action associated with this combo.
-     */
     void execute();
 
-    /**
-     * Basic implementation for sequence-based combos.
-     */
     class SequenceCombo implements ComboDefinition {
         private final ResourceLocation id;
         private final ResourceLocation[] keySequence;

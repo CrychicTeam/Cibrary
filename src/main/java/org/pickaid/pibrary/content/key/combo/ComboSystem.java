@@ -3,6 +3,8 @@ package org.pickaid.pibrary.content.key.combo;
 import net.minecraft.resources.ResourceLocation;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.content.key.KeyData;
+import org.pickaid.pibrary.network.PibraryNetworkHandler;
+import org.pickaid.pibrary.network.key.ComboPacket;
 
 import java.util.*;
 
@@ -18,14 +20,13 @@ public class ComboSystem {
 
     public static ComboSystem getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ComboSystem(300);
+            INSTANCE = new ComboSystem(1000);
         }
         return INSTANCE;
     }
 
     public void registerCombo(ComboDefinition comboDefinition) {
         registeredCombos.put(comboDefinition.getId(), comboDefinition);
-        Pibrary.LOGGER.info("Registered combo: {}", comboDefinition.getId());
     }
 
     public void recordKeyInput(ResourceLocation keyId, long timestamp, KeyData.KeyState keyState) {
@@ -45,6 +46,7 @@ public class ComboSystem {
         for (ComboDefinition combo : registeredCombos.values()) {
             if (combo.matches(currentSequence)) {
                 triggerCombo(combo);
+                PibraryNetworkHandler.HANDLER.toServer(new ComboPacket(combo.getId()));
                 currentSequence.clear();
                 return;
             }
@@ -53,14 +55,10 @@ public class ComboSystem {
 
     private void triggerCombo(ComboDefinition combo) {
         combo.execute();
-        Pibrary.LOGGER.info("Executed combo: {}", combo.getId());
     }
 
     public void resetCombo() {
         currentSequence.clear();
-    }
-    public List<ComboInput> getCurrentSequence() {
-        return Collections.unmodifiableList(currentSequence);
     }
 
     public static class ComboInput {

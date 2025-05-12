@@ -7,9 +7,9 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import org.pickaid.pibrary.api.key.KeyStateMachineManager;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.KeyStateMachine;
-import org.pickaid.pibrary.api.key.KeyStateMachineManager;
 import org.pickaid.pibrary.content.key.combo.ComboSystem;
 import org.pickaid.pibrary.content.key.registry.KeyConfig;
 import org.pickaid.pibrary.content.key.registry.KeyRegistry;
@@ -30,7 +30,7 @@ public class ClientKeyHandler {
             stateMachine.process(config.isDown(), currentTime);
             KeyData.KeyState newState = stateMachine.getKeyData().state;
 
-            if (oldState != newState) {
+            if (newState != KeyData.KeyState.IDLE && oldState!= newState) {
                 ComboSystem.getInstance().recordKeyInput(
                         config.id,
                         currentTime,
