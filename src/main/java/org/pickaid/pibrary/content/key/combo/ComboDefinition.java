@@ -51,7 +51,6 @@ public interface ComboDefinition {
                 return false;
             }
 
-            // Check last N inputs match our sequence
             int startIndex = inputSequence.size() - keySequence.length;
             for (int i = 0; i < keySequence.length; i++) {
                 ComboSystem.ComboInput input = inputSequence.get(startIndex + i);
@@ -70,9 +69,6 @@ public interface ComboDefinition {
         }
     }
 
-    /**
-     * Combo that requires specific key states (e.g., charging + press).
-     */
     class StateCombo implements ComboDefinition {
         private final ResourceLocation id;
         private final ComboRequirement[] requirements;
@@ -95,8 +91,6 @@ public interface ComboDefinition {
             if (inputSequence.size() < requirements.length) {
                 return false;
             }
-
-            // Build map of latest state for each key
             for (int i = 0; i < requirements.length; i++) {
                 boolean found = false;
                 for (int j = inputSequence.size() - 1; j >= 0; j--) {
@@ -121,9 +115,6 @@ public interface ComboDefinition {
         }
     }
 
-    /**
-     * Defines a requirement for a key in a combo.
-     */
     class ComboRequirement {
         public final ResourceLocation keyId;
         public final KeyData.KeyState requiredState;

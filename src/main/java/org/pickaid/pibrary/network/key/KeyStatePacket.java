@@ -66,15 +66,18 @@ public class KeyStatePacket extends SerialPacketBase {
                             break;
                         case HELD:
                             ServerKeyManager.heldClickKeys.add(keyData.keyId);
+                            break;
                         case IDLE:
+                        case COOLDOWN:
+                        case AWAITING_RELEASE:
+                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
                             break;
                         default:
                             Pibrary.LOGGER.warn("Received unknown state: {}", keyData.state);
                             break;
                     }
                 }
-            } else if (context.getDirection().getReceptionSide().isClient()) {
-                
             }
         });
     }
