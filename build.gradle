@@ -28,6 +28,15 @@ apply plugin: 'org.spongepowered.mixin'
 
 jarJar.enable()
 
+tasks.jarJar.configure {
+    it.archiveClassifier.set("")
+    finalizedBy("reobfJarJar")
+}
+
+tasks.jar.configure {
+    it.archiveClassifier.set("slim")
+}
+
 ext.configFile = file("build.txt")
 configFile.withReader {
     def prop = new Properties()
@@ -165,13 +174,10 @@ repositories {
         name = 'tterrag'
         url = 'https://maven.tterrag.com/'
     }
+
     maven {
         name = 'GeckoLib'
         url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-        content {
-            includeGroupByRegex("software\\.bernie.*")
-            includeGroup("com.eliotlash.mclib")
-        }
     }
     maven {
         url = "https://maven.theillusivec4.top/"
@@ -198,10 +204,16 @@ repositories {
         }
     }
     maven {
-        name = "Lat's Maven"
-        url = "https://maven.saps.dev/minecraft"
+        url "https://maven.latvian.dev/releases"
         content {
             includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
         }
     }
     maven { url "https://maven.mihono.cn/repository/pickaid/" }
@@ -225,14 +237,14 @@ dependencies {
     }
 
     if (hasConfig("geckolib_version") && !config.geckolib_version.isEmpty()) {
-        implementation fg.deobf("software.bernie.geckolib:geckolib-neoforge-${config.mc_version}:${config.geckolib_version}")
+        implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${config.mc_version}:${config.geckolib_version}")
         implementation("com.eliotlash.mclib:mclib:20")
-        jarJar(group: 'software.bernie.geckolib', name: "geckolib-neoforge-${config.mc_version}", version: "[${config.geckolib_version},)")
+        jarJar(group: 'software.bernie.geckolib', name: "geckolib-forge-${config.mc_version}", version: "[${config.geckolib_version},)")
     }
 
     if (hasConfig("curios_version") && !config.curios_version.isEmpty()) {
         compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${config.curios_version}")
-//        runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${config.curios_version}")
+        runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${config.curios_version}")
     }
 
     if (hasConfig("playeranimator_version") && !config.playeranimator_version.isEmpty()) {
@@ -376,7 +388,17 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            from components.java
+            artifact(tasks.jarJar)
+            artifactId = config.mod_id
+
+            pom {
+                packaging = 'pom'
+                withXml {
+                    def root = asNode()
+                    root.dependencies.replaceNode {}
+                }
+            }
         }
     }
     repositories {
@@ -640,13 +662,9 @@ tasks.register("incrementBuildVersionProperty") {
     group "upload"
     doLast incrementBuild
 }
-tasks.build.dependsOn tasks.incrementBuildVersionProperty
 
-tasks.jarJar.finalizedBy('reobfJarJar')
+tasks.build.dependsOn tasks.incrementBuildVersionProperty
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-}
-tasks.jarJar.configure {
-    archiveClassifier.set('')
 }
