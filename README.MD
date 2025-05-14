@@ -31,7 +31,7 @@ Add the following to your `build.gradle`:
 ```gradle
 repositories {
     // Add Pibrary repository
-    maven { url = 'https://maven.mihono.cn/pickaid1201' }
+    maven { url = 'https://maven.mihono.cn/pickaid1201/' }
 }
 
 dependencies {
