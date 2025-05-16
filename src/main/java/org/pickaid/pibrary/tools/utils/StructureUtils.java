@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.tools.helper;
+package org.pickaid.pibrary.tools.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;

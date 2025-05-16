@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.events.client;
+package org.pickaid.pibrary.content.handler.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

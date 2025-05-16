@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.tools.helper;
+package org.pickaid.pibrary.tools.utils;
 
 import com.endertech.minecraft.forge.blocks.ForgeBlock;
 import com.endertech.minecraft.forge.math.GameMath;

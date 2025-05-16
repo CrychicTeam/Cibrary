@@ -1,13 +1,14 @@
 package org.pickaid.pibrary.content.key.state;
 
+import org.pickaid.pibrary.api.key.AbstractKeyState;
 import org.pickaid.pibrary.api.key.KeyState;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.KeyStateMachine;
 
-public class AwaitingReleaseState implements KeyState {
+public class AwaitingReleaseState extends AbstractKeyState {
     @Override
     public KeyState handlePress(KeyStateMachine context, long currentTime) {
-        return this;
+        return super.handlePress(context, currentTime);
     }
 
     @Override
@@ -17,17 +18,18 @@ public class AwaitingReleaseState implements KeyState {
 
     @Override
     public KeyState handleTick(KeyStateMachine context, long currentTime) {
-        if (context.getChargedReleaseTime() <= 0) {
+        if (context.getTimingTracker().getChargedReleaseTime() <= 0) {
             return new IdleState();
         }
 
-        long elapsedSinceRelease = currentTime - context.getChargedReleaseTime();
+        long elapsedSinceRelease = currentTime - context.getTimingTracker().getChargedReleaseTime();
         if (elapsedSinceRelease >= context.getConfig().physicalReleaseDelay) {
-            context.showDebugMessage("Release delay completed");
-            context.setChargedReleaseTime(0);
+            sendDebugMessage(context, "Release delay completed");
+            context.getTimingTracker().setChargedReleaseTime(0);
+
             if (context.getConfig().releaseCooldown > 0 && !context.getKeyData().inCooldown) {
-                context.getKeyData().startCooldown(context.getConfig().releaseCooldown);
-                context.showDebugMessage("Started post-release cooldown: " +
+                startCooldown(context, context.getConfig().releaseCooldown);
+                sendDebugMessage(context, "Started post-release cooldown: " +
                         context.getConfig().releaseCooldown + "ms");
                 return new CooldownState();
             }
@@ -35,7 +37,7 @@ public class AwaitingReleaseState implements KeyState {
             return new IdleState();
         } else {
             long remaining = context.getConfig().physicalReleaseDelay - elapsedSinceRelease;
-            context.showDebugMessage(String.format("Release delay: %d ms remaining", remaining));
+            sendDebugMessage(context, String.format("Release delay: %d ms remaining", remaining));
         }
 
         return this;

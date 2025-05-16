@@ -1,7 +1,6 @@
 package org.pickaid.pibrary.network.key;
 
-import dev.xkmc.l2serial.network.SerialPacketBase;
-import dev.xkmc.l2serial.serialization.SerialClass;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.NetworkEvent;
@@ -10,75 +9,79 @@ import org.pickaid.pibrary.api.common.ServerKeyManager;
 import org.pickaid.pibrary.api.event.ConfiguredKeyEvent;
 import org.pickaid.pibrary.content.key.KeyData;
 
-@SerialClass
-public class KeyStatePacket extends SerialPacketBase {
-    @SerialClass.SerialField
-    public KeyData keyData;
+import java.util.function.Supplier;
 
-    public KeyStatePacket() {}
+public record KeyStatePacket(KeyData keyData) {
 
-    public KeyStatePacket(KeyData keyData) {
-        this.keyData = keyData;
+    public KeyStatePacket {}
+
+    public static void encode(KeyStatePacket packet, FriendlyByteBuf buffer) {
+        packet.keyData.encode(buffer);
     }
 
-    @Override
-    public void handle(NetworkEvent.Context context) {
+    public static KeyStatePacket decode(FriendlyByteBuf buffer) {
+        return new KeyStatePacket(KeyData.decode(buffer));
+    }
+
+    public static void handle(KeyStatePacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             if (context.getDirection().getReceptionSide().isServer()) {
                 ServerPlayer player = context.getSender();
                 if (player != null) {
-                    Pibrary.KEY_HANDLER.updateKeyState(player, keyData);
+                    Pibrary.KEY_HANDLER.updateKeyState(player, packet.keyData);
 
-                    switch (keyData.state) {
+                    switch (packet.keyData.state) {
                         case PRESSED:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Pressed(player, keyData));
-                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
-                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Pressed(player, packet.keyData));
+                            ServerKeyManager.chargingKeys.remove(packet.keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(packet.keyData.keyId);
                             break;
                         case RELEASED:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Released(player, keyData));
-                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
-                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Released(player, packet.keyData));
+                            ServerKeyManager.chargingKeys.remove(packet.keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(packet.keyData.keyId);
                             break;
                         case FINISHED:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Finished(player, keyData));
-                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
-                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.Finished(player, packet.keyData));
+                            ServerKeyManager.chargingKeys.remove(packet.keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(packet.keyData.keyId);
                             break;
                         case RAPID_CLICK:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClick(player, keyData));
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClick(player, packet.keyData));
                             break;
                         case RAPID_FINISH:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClickFinish(player, keyData));
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.RapidClickFinish(player, packet.keyData));
                             break;
                         case TIMEOUT:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.TimeOut(player, keyData));
-                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
-                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.TimeOut(player, packet.keyData));
+                            ServerKeyManager.chargingKeys.remove(packet.keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(packet.keyData.keyId);
                             break;
                         case HELD_RELEASED:
-                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.HeldReleased(player, keyData));
-                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
-                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            MinecraftForge.EVENT_BUS.post(new ConfiguredKeyEvent.HeldReleased(player, packet.keyData));
+                            ServerKeyManager.chargingKeys.remove(packet.keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(packet.keyData.keyId);
                             break;
                         case CHARGING:
-                            ServerKeyManager.chargingKeys.add(keyData.keyId);
+                            ServerKeyManager.chargingKeys.add(packet.keyData.keyId);
                             break;
                         case HELD:
-                            ServerKeyManager.heldClickKeys.add(keyData.keyId);
+                            ServerKeyManager.heldClickKeys.add(packet.keyData.keyId);
                             break;
                         case IDLE:
                         case COOLDOWN:
                         case AWAITING_RELEASE:
-                            ServerKeyManager.chargingKeys.remove(keyData.keyId);
-                            ServerKeyManager.heldClickKeys.remove(keyData.keyId);
+                            ServerKeyManager.chargingKeys.remove(packet.keyData.keyId);
+                            ServerKeyManager.heldClickKeys.remove(packet.keyData.keyId);
                             break;
                         default:
-                            Pibrary.LOGGER.warn("Received unknown state: {}", keyData.state);
+                            Pibrary.LOGGER.warn("Received unknown state: {}", packet.keyData.state);
                             break;
                     }
                 }
             }
         });
+        context.setPacketHandled(true);
     }
 }

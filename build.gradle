@@ -216,6 +216,7 @@ repositories {
             includeGroup "com.github.rtyley"
         }
     }
+    maven { url = "https://maven.createmod.net" }
     maven { url "https://maven.mihono.cn/repository/pickaid/" }
     flatDir { dirs "libraries/${config.mc_version}/all" }
     flatDir { dirs "libraries/${config.mc_version}/classpathOnly" }
@@ -288,6 +289,10 @@ dependencies {
     compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${config.kubejs_version}")
     compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${config.rhino_version}")
     implementation fg.deobf("dev.architectury:architectury-forge:${config.architectury_version}")
+
+    implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${config.mc_version}:${config.ponder_version}"))
+    compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${config.mc_version}:${config.flywheel_version}"))
+    runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${config.mc_version}:${config.flywheel_version}"))
 
     def libraries = new File(file("libraries"), "${config.mc_version}")
     if (!libraries.isDirectory()) libraries.mkdirs()
@@ -389,7 +394,8 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifact(tasks.jarJar)
+//            artifact(tasks.jarJar)
+            artifact jar
             artifactId = config.mod_id
 
             pom {

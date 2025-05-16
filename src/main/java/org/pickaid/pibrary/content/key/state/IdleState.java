@@ -1,147 +1,176 @@
 package org.pickaid.pibrary.content.key.state;
 
+import org.pickaid.pibrary.api.key.AbstractKeyState;
 import org.pickaid.pibrary.api.key.KeyState;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.KeyStateMachine;
 
-public class IdleState implements KeyState {
+public class IdleState extends AbstractKeyState {
     @Override
     public KeyState handlePress(KeyStateMachine context, long currentTime) {
-        context.setPressStartTime(currentTime);
-        context.setPressedTriggered(false);
-        
-        context.showDebugMessage("Key Press detected in IDLE state");
+        context.getTimingTracker().setPressStartTime(currentTime);
+        context.getTimingTracker().setPressedTriggered(false);
+
+        sendDebugMessage(context, "Key Press detected in IDLE state");
 
         if (context.getConfig().enableRapidClick) {
-            context.getKeyData().recordPressTimestamp(currentTime);
+            return handleRapidClickPress(context, currentTime);
+        }
 
-            if (context.getKeyData().pressTimestamps[1] > 0 &&
-                    !context.getKeyData().inRapidClickCooldown) {
-                long timeSincePreviousClick = currentTime - context.getKeyData().pressTimestamps[1];
+        if (context.getConfig().disableNormalClick && context.getConfig().enableCharging) {
+            sendDebugMessage(context, "Entering charging state directly (normal click disabled)");
+            return startCharging(context, currentTime);
+        }
 
-                if (timeSincePreviousClick < KeyStateMachine.RAPID_CLICK_THRESHOLD) {
-                    context.getKeyData().rapidClickCount++;
-                    int maxCount = context.getConfig().maxRapidClickCount > 0 ?
-                            context.getConfig().maxRapidClickCount : 5;
+        if (!context.getConfig().enableCharging) {
+            sendDebugMessage(context, "Regular key press - entering PRESSED state");
+            context.getTimingTracker().setPressedTriggered(true);
+            return new PressedState();
+        }
 
-                    if (context.getKeyData().rapidClickCount >= maxCount) {
-                        context.showDebugMessage("Max Rapid Clicks Reached! (" + maxCount + ")");
-                        context.completeRapidClickSequence(currentTime);
-                        return new FinishedState();
-                    } else {
-                        context.showDebugMessage("Rapid Click #" + context.getKeyData().rapidClickCount);
-                        context.triggerRapidClickEvent();
-                        return new RapidClickState();
-                    }
-                } else {
-                    context.getKeyData().rapidClickCount = 1;
-                    context.showDebugMessage("New Click Sequence");
-                    
-                    if (context.getConfig().disableNormalClick) {
-                        context.showDebugMessage("First click in sequence with normal click disabled");
-                        context.triggerRapidClickEvent();
-                        return new RapidClickState();
-                    }
-                }
-            } else if (!context.getKeyData().inRapidClickCooldown) {
-                context.getKeyData().rapidClickCount = 1;
-                context.showDebugMessage("First Click");
-                
-                if (context.getConfig().disableNormalClick) {
-                    context.showDebugMessage("First click with normal click disabled");
-                    context.triggerRapidClickEvent();
-                    return new RapidClickState();
-                }
-            } else {
-                context.showDebugMessage("Click during cooldown ignored");
-            }
+        sendDebugMessage(context, "Ready for charging if held");
+        return this;
+    }
 
-            if (context.getConfig().enableCharging) {
-                context.showDebugMessage("Ready for charging if held");
-            }
-
-            return this;
-        } else {
-            context.getKeyData().rapidClickCount = 0;
-            context.getKeyData().clearTimestamps();
-            
-            if (context.getConfig().disableNormalClick && context.getConfig().enableCharging) {
-                context.showDebugMessage("Entering charging state directly (normal click disabled)");
-                context.setLastSentPower(0f);
-                return new ChargingState();
-            }
-            
-            if (context.getConfig().enableCharging) {
-                context.showDebugMessage("Ready for charging if held");
-            }
-            
+    private KeyState handleRapidClickPress(KeyStateMachine context, long currentTime) {
+        if (context.getKeyData().inRapidClickCooldown) {
+            sendDebugMessage(context, "Click during cooldown ignored");
             return this;
         }
+
+        context.getKeyData().recordPressTimestamp(currentTime);
+        boolean hasRecentClick = context.getKeyData().pressTimestamps[1] > 0;
+
+        if (hasRecentClick) {
+            return handleRecentClick(context, currentTime);
+        }
+
+        context.getKeyData().rapidClickCount = 1;
+        sendDebugMessage(context, "First Click");
+
+        return handleNormalOrChargingClick(context);
+    }
+
+    private KeyState handleRecentClick(KeyStateMachine context, long currentTime) {
+        long timeSincePreviousClick = currentTime - context.getKeyData().pressTimestamps[1];
+
+        if (timeSincePreviousClick < context.getConfig().rapidClickTimeWindow) {
+            context.getKeyData().rapidClickCount++;
+            sendDebugMessage(context, "Rapid Click #" + context.getKeyData().rapidClickCount);
+            context.triggerRapidClickEvent();
+
+            int maxCount = context.getConfig().maxRapidClickCount > 0 ?
+                    context.getConfig().maxRapidClickCount : 5;
+
+            if (context.getKeyData().rapidClickCount >= maxCount) {
+                sendDebugMessage(context, "Max Rapid Clicks Reached!");
+                context.completeRapidClickSequence(currentTime);
+                return new RapidFinishState();
+            }
+            return new RapidClickState();
+        }
+
+        context.getKeyData().rapidClickCount = 1;
+        sendDebugMessage(context, "New Click Sequence");
+
+        return handleNormalOrChargingClick(context);
+    }
+
+    private KeyState handleNormalOrChargingClick(KeyStateMachine context) {
+        if (!context.getConfig().disableNormalClick) {
+            if (context.getConfig().enableCharging) {
+                sendDebugMessage(context, "Ready for charging if held");
+            }
+            return this;
+        }
+
+        if (context.getConfig().enableCharging) {
+            sendDebugMessage(context, "Click with charging enabled - waiting for potential charging");
+            return this;
+        }
+
+        sendDebugMessage(context, "Click with normal click disabled - entering RAPID_CLICK state");
+        context.triggerRapidClickEvent();
+        return new RapidClickState();
     }
 
     @Override
     public KeyState handleRelease(KeyStateMachine context, long currentTime) {
-        if (context.getPressStartTime() > 0) {
-            long holdDuration = currentTime - context.getPressStartTime();
-
-            if (context.getConfig().disableNormalClick) {
-                context.showDebugMessage("Normal click disabled by config");
-                context.setPressStartTime(0);
-                return this;
-            }
-            
-            context.showDebugMessage("Key Press and Release detected - treating as normal click");
-            context.setPressedTriggered(true);
-            context.setPressStartTime(0);
-
-            if (context.getConfig().pressCooldown > 0) {
-                context.getKeyData().startCooldown(context.getConfig().pressCooldown);
-                context.showDebugMessage("Started press cooldown: " +
-                        context.getConfig().pressCooldown + "ms");
-                return new CooldownState();
-            }
-
-            return new PressedState();
+        if (context.getTimingTracker().getPressStartTime() <= 0) {
+            return this;
         }
 
-        context.setPressStartTime(0);
-        return this;
+        if (context.getConfig().disableNormalClick) {
+            sendDebugMessage(context, "Normal click disabled by config");
+            context.getTimingTracker().setPressStartTime(0);
+            return this;
+        }
+
+        sendDebugMessage(context, "Key Press and Release detected - treating as normal click");
+        context.getTimingTracker().setPressedTriggered(true);
+        context.getTimingTracker().setPressStartTime(0);
+
+        if (context.getConfig().pressCooldown > 0) {
+            startCooldown(context, context.getConfig().pressCooldown);
+            sendDebugMessage(context, "Started press cooldown: " + context.getConfig().pressCooldown + "ms");
+            return new CooldownState();
+        }
+
+        return new PressedState();
     }
 
     @Override
     public KeyState handleTick(KeyStateMachine context, long currentTime) {
-        if (context.isPressed() && context.getPressStartTime() > 0) {
-            long holdDuration = currentTime - context.getPressStartTime();
+        if (!context.getTimingTracker().isPressed() || context.getTimingTracker().getPressStartTime() <= 0) {
+            return this;
+        }
 
-            if (context.getConfig().enableCharging) {
-                if (holdDuration > context.getConfig().chargingTimeTolerance) {
-                    context.showDebugMessage("Start Charging (duration: " + holdDuration + "ms)");
-                    context.setLastSentPower(0f);
-                    return new ChargingState();
-                }
-            }
+        long holdDuration = currentTime - context.getTimingTracker().getPressStartTime();
 
-            if (holdDuration >= context.getConfig().pressTimeTolerance &&
-                    !context.isPressedTriggered() &&
-                    !context.getConfig().enableCharging) {
-                if (context.getConfig().disableNormalClick) {
-                    return this;
-                }
-                
-                context.setPressedTriggered(true);
-                context.showDebugMessage("Key Pressed (normal hold)");
-                return new PressedState();
-            }
-        } else if (!context.isPressed() && context.getPressStartTime() > 0 && 
-                !context.isPressedTriggered() && 
-                !context.getConfig().disableNormalClick) {
-            context.showDebugMessage("Detecting missed click in tick - processing now");
-            context.setPressedTriggered(true);
-            context.setPressStartTime(0);
+        if (shouldStartCharging(context, holdDuration)) {
+            sendDebugMessage(context, "Start Charging (duration: " + holdDuration + "ms)");
+            return startCharging(context, currentTime);
+        }
+
+        if (shouldTriggerNormalPress(context, holdDuration)) {
+            context.getTimingTracker().setPressedTriggered(true);
+            sendDebugMessage(context, "Key Pressed (normal hold)");
+            return new PressedState();
+        }
+
+        if (shouldDetectMissedClick(context)) {
+            sendDebugMessage(context, "Detecting missed click in tick - processing now");
+            context.getTimingTracker().setPressedTriggered(true);
+            context.getTimingTracker().setPressStartTime(0);
             return new PressedState();
         }
 
         return this;
+    }
+
+    private boolean shouldStartCharging(KeyStateMachine context, long holdDuration) {
+        return context.getConfig().enableCharging &&
+                holdDuration > context.getConfig().chargingTimeTolerance;
+    }
+
+    private boolean shouldTriggerNormalPress(KeyStateMachine context, long holdDuration) {
+        return !context.getConfig().enableCharging &&
+                holdDuration >= context.getConfig().pressTimeTolerance &&
+                !context.getTimingTracker().isPressedTriggered() &&
+                !context.getConfig().disableNormalClick;
+    }
+
+    private boolean shouldDetectMissedClick(KeyStateMachine context) {
+        return !context.getTimingTracker().isPressed() &&
+                !context.getTimingTracker().isPressedTriggered() &&
+                !context.getConfig().disableNormalClick;
+    }
+
+    private KeyState startCharging(KeyStateMachine context, long currentTime) {
+        sendDebugMessage(context, "Starting charging...");
+        context.getKeyData().updatePower(0.0f, context.getConfig().maxPower);
+        context.getKeyData().state = KeyData.KeyState.CHARGING;
+        return new ChargingState();
     }
 
     @Override

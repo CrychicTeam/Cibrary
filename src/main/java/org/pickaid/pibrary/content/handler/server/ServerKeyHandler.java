@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.events.server;
+package org.pickaid.pibrary.content.handler.server;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -15,14 +15,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Handles server-side key state management for players.
- */
 @Mod.EventBusSubscriber
 public class ServerKeyHandler {
     private static ServerKeyHandler INSTANCE;
-
-    /** Stores key states for each player, organized by UUID. */
     public final Map<UUID, Map<ResourceLocation, KeyData>> playerKeyStates = new ConcurrentHashMap<>();
 
     /**
@@ -59,7 +54,7 @@ public class ServerKeyHandler {
     }
 
     /**
-     * Handles player logout events, clearing key states upon logout.
+     * Handles player logout handler, clearing key states upon logout.
      *
      * @param event The player logout event.
      */

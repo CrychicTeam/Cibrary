@@ -1,34 +1,28 @@
 package org.pickaid.pibrary.network.sound;
 
-import dev.xkmc.l2serial.network.SerialPacketBase;
-import dev.xkmc.l2serial.serialization.SerialClass;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
-import org.pickaid.pibrary.content.sound.SoundManagerHandler;
 import org.pickaid.pibrary.content.sound.SoundData;
+import org.pickaid.pibrary.content.sound.SoundManagerHandler;
 
-@SerialClass
-public class SoundPacket extends SerialPacketBase {
-    @SerialClass.SerialField
+import java.util.function.Supplier;
+
+public class SoundPacket {
     public SoundData soundData;
-
-    @SerialClass.SerialField
     public SoundData newSoundData;
-
-    @SerialClass.SerialField
     public PacketType packetType;
 
     public enum PacketType {
         PLAY, STOP, STOP_ALL, CROSS_FADE
     }
 
-    public SoundPacket() {}
-
     public SoundPacket(SoundData soundData, PacketType packetType) {
         this.soundData = soundData;
         this.packetType = packetType;
+        this.newSoundData = null;
     }
 
     public SoundPacket(SoundData oldSoundData, SoundData newSoundData, PacketType packetType) {
@@ -37,39 +31,62 @@ public class SoundPacket extends SerialPacketBase {
         this.packetType = packetType;
     }
 
-    @Override
-    public void handle(NetworkEvent.Context context) {
-        context.enqueueWork(() -> {
-            if (context.getDirection().getReceptionSide().isClient()) {
-                handleClientSide();
+    public static void encode(SoundPacket packet, FriendlyByteBuf buffer) {
+        buffer.writeEnum(packet.packetType);
+        packet.soundData.encode(buffer);
+        if (packet.packetType == PacketType.CROSS_FADE) {
+            buffer.writeBoolean(packet.newSoundData != null);
+            if (packet.newSoundData != null) {
+                packet.newSoundData.encode(buffer);
             }
-        });
+        }
     }
 
-    private void handleClientSide() {
+    public static SoundPacket decode(FriendlyByteBuf buffer) {
+        PacketType packetType = buffer.readEnum(PacketType.class);
+        SoundData soundData = SoundData.decode(buffer);
+        if (packetType == PacketType.CROSS_FADE && buffer.readBoolean()) {
+            SoundData newSoundData = SoundData.decode(buffer);
+            return new SoundPacket(soundData, newSoundData, packetType);
+        } else {
+            return new SoundPacket(soundData, packetType);
+        }
+    }
+
+    public static void handle(SoundPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            if (context.getDirection().getReceptionSide().isClient()) {
+                handleClientSide(packet);
+            }
+        });
+        context.setPacketHandled(true);
+    }
+
+    private static void handleClientSide(SoundPacket packet) {
         SoundManagerHandler manager = SoundManagerHandler.getInstance();
         Player clientPlayer = Minecraft.getInstance().player;
 
-        switch (packetType) {
+        switch (packet.packetType) {
             case PLAY:
-                SoundEvent sound = SoundEvent.createVariableRangeEvent(soundData.sound);
-                if (soundData.loopCount > 0) {
-                    manager.playLoopingSound(clientPlayer, sound, soundData.soundType, soundData.volume, soundData.pitch, soundData.loopCount, soundData.fadeTime);
+                SoundEvent sound = SoundEvent.createVariableRangeEvent(packet.soundData.sound);
+                if (packet.soundData.loopCount > 0) {
+                    manager.playLoopingSound(clientPlayer, sound, packet.soundData.soundType, packet.soundData.volume, packet.soundData.pitch, packet.soundData.loopCount, packet.soundData.fadeTime);
                 } else {
-                    manager.playSound(clientPlayer, sound, soundData.soundType, soundData.volume, soundData.pitch, soundData.fadeTime);
+                    manager.playSound(clientPlayer, sound, packet.soundData.soundType, packet.soundData.volume, packet.soundData.pitch, packet.soundData.fadeTime);
                 }
                 break;
             case STOP:
-                manager.stopSound(soundData.sound, soundData.fadeTime);
+                manager.stopSound(packet.soundData.sound, packet.soundData.fadeTime);
                 break;
             case STOP_ALL:
-                manager.stopAllSounds(soundData.fadeTime);
+                manager.stopAllSounds(packet.soundData.fadeTime);
                 break;
             case CROSS_FADE:
-                if (newSoundData != null) {
-                    SoundEvent oldSound = SoundEvent.createVariableRangeEvent(soundData.sound);
-                    SoundEvent newSound = SoundEvent.createVariableRangeEvent(newSoundData.sound);
-                    manager.crossFade(oldSound.getLocation(), newSound, clientPlayer, newSoundData.soundType, newSoundData.volume, newSoundData.pitch, newSoundData.fadeTime);
+                if (packet.newSoundData != null) {
+                    SoundEvent oldSound = SoundEvent.createVariableRangeEvent(packet.soundData.sound);
+                    SoundEvent newSound = SoundEvent.createVariableRangeEvent(packet.newSoundData.sound);
+                    manager.crossFade(oldSound.getLocation(), newSound, clientPlayer, packet.newSoundData.soundType, packet.newSoundData.volume, packet.newSoundData.pitch, packet.newSoundData.fadeTime);
                 }
                 break;
         }

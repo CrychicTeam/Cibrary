@@ -1,27 +1,15 @@
 package org.pickaid.pibrary.content.sound;
 
-import dev.xkmc.l2serial.serialization.SerialClass;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 
-@SerialClass
 public class SoundData {
-    @SerialClass.SerialField
     public ResourceLocation sound;
-
-    @SerialClass.SerialField
     public SoundSource soundType;
-
-    @SerialClass.SerialField
     public float volume;
-
-    @SerialClass.SerialField
     public float pitch;
-
-    @SerialClass.SerialField
     public float fadeTime;
-
-    @SerialClass.SerialField
     public int loopCount;
 
     public SoundData() {}
@@ -33,5 +21,25 @@ public class SoundData {
         this.pitch = pitch;
         this.fadeTime = fadeTime;
         this.loopCount = loopCount;
+    }
+
+    public void encode(FriendlyByteBuf buffer) {
+        buffer.writeResourceLocation(sound);
+        buffer.writeEnum(soundType);
+        buffer.writeFloat(volume);
+        buffer.writeFloat(pitch);
+        buffer.writeFloat(fadeTime);
+        buffer.writeInt(loopCount);
+    }
+
+    public static SoundData decode(FriendlyByteBuf buffer) {
+        ResourceLocation sound = buffer.readResourceLocation();
+        SoundSource soundType = buffer.readEnum(SoundSource.class);
+        float volume = buffer.readFloat();
+        float pitch = buffer.readFloat();
+        float fadeTime = buffer.readFloat();
+        int loopCount = buffer.readInt();
+
+        return new SoundData(sound, soundType, volume, pitch, fadeTime, loopCount);
     }
 }

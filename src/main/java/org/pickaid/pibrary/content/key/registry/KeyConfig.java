@@ -6,6 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 
+/**
+ * 键位配置类 - 管理所有与键位相关的配置参数
+ */
 public class KeyConfig {
     public final ResourceLocation id;
     public final KeyMapping keyMapping;
@@ -195,7 +198,7 @@ public class KeyConfig {
         }
 
         public KeyConfig build() {
-            return new KeyConfig(this);
+            return KeyRegistry.register(new KeyConfig(this));
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.events.server;
+package org.pickaid.pibrary.content.handler.server;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +13,7 @@ import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.api.common.ServerKeyManager;
+import org.pickaid.pibrary.api.effect.EffectEngine;
 import org.pickaid.pibrary.api.effect.IPlayerEffect;
 import org.pickaid.pibrary.api.event.ConfiguredKeyEvent;
 import org.pickaid.pibrary.api.event.ItemDamageEvent;
@@ -26,7 +27,7 @@ public class PlayerEffectHandler {
 
     @SubscribeEvent
     public void onEntityFinishUsingItem(LivingEntityUseItemEvent.Finish event) {
-        for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+        for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
             if (!entry.getKey().equals(event.getEntity())) continue;
             entry.getValue().releaseEffect(entry.getKey());
         }
@@ -35,8 +36,7 @@ public class PlayerEffectHandler {
     @SubscribeEvent
     public void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.player instanceof ServerPlayer player) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
-                if (!entry.getKey().equals(player)) continue;
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (player.isSprinting()) {
                     entry.getValue().sprintingEffect(player);
                 } else {
@@ -72,7 +72,7 @@ public class PlayerEffectHandler {
     public void onItemHurt(ItemDamageEvent<LivingEntity> event) {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (!entry.getKey().equals(entity)) continue;
                 ItemStack itemStack = event.getItemStack();
                 int damage = event.getDamage();
@@ -93,7 +93,7 @@ public class PlayerEffectHandler {
     public void onLivingTargetChange(LivingChangeTargetEvent event) {
         LivingEntity target = event.getNewTarget();
         if (target instanceof Player player) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (!entry.getKey().equals(player)) continue;
                 entry.getValue().onTargetedEffect(player, event);
             }
@@ -103,7 +103,7 @@ public class PlayerEffectHandler {
     @SubscribeEvent
     public void onStandOnLiquid(StandOnFluidEvent event) {
         if (event.getEntity() instanceof Player player) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (!entry.getKey().equals(player)) continue;
                 entry.getValue().onStandOnFluidEffect(player, event);
             }
@@ -112,7 +112,7 @@ public class PlayerEffectHandler {
 
     @SubscribeEvent
     public void stackedOnOther(ItemStackedOnOtherEvent event) {
-        for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+        for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
             if (!entry.getKey().equals(event.getPlayer())) continue;
             entry.getValue().stackedOnOther(event.getPlayer(), event);
         }

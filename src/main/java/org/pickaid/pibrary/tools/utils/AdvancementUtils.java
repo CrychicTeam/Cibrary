@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.tools.helper;
+package org.pickaid.pibrary.tools.utils;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -12,8 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.server.ServerLifecycleHooks;
-
-import javax.annotation.Nullable;
 
 public class AdvancementUtils {
 

@@ -13,6 +13,8 @@
     "ServerLevelAccessor"
   ],
   "client": [
+    "ParticleEngineAccessor",
+    "ParticleMixin"
   ],
   "server": [
   ]

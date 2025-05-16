@@ -7,7 +7,7 @@
 
 ## Overview
 
-Pibrary is a comprehensive utility library for Minecraft Forge mods that provides a wide range of tools and APIs to simplify mod development. To use this library in your project, change the import reference from `pickaid1201` to `pickaid{your_mc_version}` based on your Minecraft version.
+Pibrary is a utility library for Minecraft Forge mods that provides a wide range of tools and APIs to simplify mod development. To use this library in your project, change the import reference from `pickaid1201` to `pickaid{your_mc_version}` based on your Minecraft version.
 
 ## Supported Versions
 
@@ -46,7 +46,7 @@ dependencies {
 To register a KeyConfig, you can use the following code:
 
 ```java
-    KEY = KeyRegistry.register(new KeyConfig.Builder(Pibrary.MOD_ID, "testskill", GLFW.GLFW_KEY_G)
+    KEY = new KeyConfig.Builder(Pibrary.MOD_ID, "testskill", GLFW.GLFW_KEY_G)
                 .category("category") // The category of the key
                 .enableCharging() // Enable charging
                 .maxPower(4.0f) // The max power of the key
@@ -57,17 +57,15 @@ To register a KeyConfig, you can use the following code:
                 .setMaxRapidClickCount(10) // The max rapid click count
                 .showDebugMessage() // Show debug message
 //                        .setKeyModifier(KeyModifier.ALT)
-                .build()
-        );
+                .build();
 
 ```
 
 To include a existing keymaaping inside the keyconfig, you can use the following code:
 
 ```java
-    KEY = KeyRegistry.register(new KeyConfig.Builder("minecraft", "forward", Minecraft.getInstance().options.keyUp)
+    KEY = new KeyConfig.Builder("minecraft", "forward", Minecraft.getInstance().options.keyUp)
                 .build());
-        );
 ```
 
 As complex state machine, you might shouldn't use all key features of the keyConfig. If some functions work weird, disable normal click expecially when enable rapid click.

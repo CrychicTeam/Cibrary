@@ -1,32 +1,37 @@
 package org.pickaid.pibrary.content.key.state;
 
+import org.pickaid.pibrary.api.key.AbstractKeyState;
 import org.pickaid.pibrary.api.key.KeyState;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.KeyStateMachine;
 
-public class RapidClickState implements KeyState {
+public class RapidClickState extends AbstractKeyState {
+    private boolean isFinishing = false;
+
     @Override
     public KeyState handlePress(KeyStateMachine context, long currentTime) {
-        context.showDebugMessage("New click in RAPID_CLICK state");
-        
+        if (isFinishing) {
+            return this;
+        }
+
         context.getKeyData().recordPressTimestamp(currentTime);
-        
-        if (!context.getKeyData().inRapidClickCooldown) {
-            context.getKeyData().rapidClickCount++;
-            int maxCount = context.getConfig().maxRapidClickCount > 0 ?
-                    context.getConfig().maxRapidClickCount : 5;
-                    
-            if (context.getKeyData().rapidClickCount >= maxCount) {
-                context.showDebugMessage("Max Rapid Clicks Reached! (" + maxCount + ")");
-                context.completeRapidClickSequence(currentTime);
-                return new RapidFinishState();
-            } else {
-                context.showDebugMessage("Rapid Click #" + context.getKeyData().rapidClickCount);
-                context.triggerRapidClickEvent();
-                return this;
-            }
+
+        if (context.getKeyData().inRapidClickCooldown) {
+            sendDebugMessage(context, "Click during cooldown ignored in RAPID_CLICK state");
+            return this;
+        }
+
+        context.getKeyData().rapidClickCount++;
+        int maxCount = context.getConfig().maxRapidClickCount;
+
+        if (context.getKeyData().rapidClickCount >= maxCount) {
+            sendDebugMessage(context, "Max Rapid Clicks Reached! (" + maxCount + ")");
+            isFinishing = true;
+            context.completeRapidClickSequence(currentTime);
+            return new RapidFinishState();
         } else {
-            context.showDebugMessage("Click during cooldown ignored in RAPID_CLICK state");
+            sendDebugMessage(context, "Rapid Click #" + context.getKeyData().rapidClickCount);
+            context.triggerRapidClickEvent();
             return this;
         }
     }
@@ -38,11 +43,16 @@ public class RapidClickState implements KeyState {
 
     @Override
     public KeyState handleTick(KeyStateMachine context, long currentTime) {
+        if (isFinishing) {
+            return new RapidFinishState();
+        }
         if (context.getKeyData().pressTimestamps[0] > 0) {
             long timeSinceLastClick = currentTime - context.getKeyData().pressTimestamps[0];
-            if (timeSinceLastClick > KeyStateMachine.RAPID_CLICK_INTERVAL) {
+
+            if (timeSinceLastClick > context.getConfig().rapidClickTimeWindow) {
+                sendDebugMessage(context, String.format("Rapid Click Reset (exceeded time window of %d ms)",
+                        context.getConfig().rapidClickTimeWindow));
                 context.resetRapidClick(currentTime);
-                context.showDebugMessage("Rapid Click Reset (timeout)");
                 return new IdleState();
             }
         }

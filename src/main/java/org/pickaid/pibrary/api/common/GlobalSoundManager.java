@@ -173,27 +173,23 @@ public class GlobalSoundManager {
 
         void playSound(SoundEvent sound, SoundSource soundType, float volume, float pitch, float fadeInTime) {
             SoundData soundData = new SoundData(sound.getLocation(), soundType, volume, pitch, fadeInTime, 0);
-            SoundPacket packet = new SoundPacket(soundData, SoundPacket.PacketType.PLAY);
-            PibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
+            PibraryNetworkHandler.setSound(player, soundData, SoundPacket.PacketType.PLAY);
         }
 
         void stopSound(SoundEvent sound, float fadeOutTime) {
             SoundData soundData = new SoundData(sound.getLocation(), null, 0, 0, fadeOutTime, 0);
-            SoundPacket packet = new SoundPacket(soundData, SoundPacket.PacketType.STOP);
-            PibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
+            PibraryNetworkHandler.setSound(player, soundData, SoundPacket.PacketType.STOP);
         }
 
         void stopAllSounds(float fadeOutTime) {
             SoundData soundData = new SoundData(null, null, 0, 0, fadeOutTime, 0);
-            SoundPacket packet = new SoundPacket(soundData, SoundPacket.PacketType.STOP_ALL);
-            PibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
+            PibraryNetworkHandler.setSound(player, soundData, SoundPacket.PacketType.STOP_ALL);
         }
 
         void crossFade(SoundEvent oldSound, SoundEvent newSound, SoundSource soundType, float volume, float pitch, float fadeTime) {
             SoundData oldSoundData = new SoundData(oldSound.getLocation(), null, 0, 0, fadeTime, 0);
             SoundData newSoundData = new SoundData(newSound.getLocation(), soundType, volume, pitch, fadeTime, 0);
-            SoundPacket packet = new SoundPacket(oldSoundData, newSoundData, SoundPacket.PacketType.CROSS_FADE);
-            PibraryNetworkHandler.HANDLER.toClientPlayer(packet, player);
+            PibraryNetworkHandler.fadeSound(player, oldSoundData, newSoundData, SoundPacket.PacketType.CROSS_FADE);
         }
     }
 }

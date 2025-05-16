@@ -1,7 +1,6 @@
 package org.pickaid.pibrary.content.key.combo;
 
 import net.minecraft.resources.ResourceLocation;
-import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
 import org.pickaid.pibrary.network.key.ComboPacket;
@@ -46,7 +45,7 @@ public class ComboSystem {
         for (ComboDefinition combo : registeredCombos.values()) {
             if (combo.matches(currentSequence)) {
                 triggerCombo(combo);
-                PibraryNetworkHandler.HANDLER.toServer(new ComboPacket(combo.getId()));
+                PibraryNetworkHandler.combo(combo);
                 currentSequence.clear();
                 return;
             }

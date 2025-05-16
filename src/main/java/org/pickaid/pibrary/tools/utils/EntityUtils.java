@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.tools.helper;
+package org.pickaid.pibrary.tools.utils;
 
 import com.endertech.minecraft.forge.math.AABBHelper;
 import com.endertech.minecraft.forge.math.Vect3d;
@@ -94,6 +94,10 @@ public class EntityUtils {
     public static void setPlayerMotion(Player player, Vect3d vec) {
         player.setDeltaMovement(vec.x, vec.y, vec.z);
         if (!player.level().isClientSide()) player.hurtMarked = true;
+    }
+
+    public static void setPlayerMotionXYZ(Player player, double x, double y, double z) {
+        setPlayerMotion(player, Vect3d.from(x, y, z));
     }
 
     public static Vect3d getCurPosition(Entity entity) {

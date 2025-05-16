@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.tools.helper;
+package org.pickaid.pibrary.tools.utils;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;

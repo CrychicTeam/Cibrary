@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.tools.math;
+package org.pickaid.pibrary.tools.helper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,21 +15,21 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class AABBHelper {
+    private static final double RATE = 1.56;
     public static final AABB EMPTY_BOUNDS = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     public static final AABB FULL_BLOCK_BOUNDS = new AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
     public static final int STANDARD_BLOCK_SIZE = 1;
 
     public static final double THIN_FACE = 0.0625;
     public static final double MEDIUM_FACE = 0.125;
-    public static final double THICK_FACE = 0.25;
 
     /**
      * Generates a list of AABBs for the 12 edges of a block
      *
      * @param thickness Edge thickness (0-1)
-     * @return List of AABBs representing edges
+     * @return array of AABBs representing edges
      */
-    public static List<AABB> generateEdgeBounds(double thickness) {
+    public static AABB[] generateEdgeBounds(double thickness) {
         if (thickness <= 0 || thickness >= 1) {
             throw new IllegalArgumentException("Thickness must be between 0 and 1");
         }
@@ -40,24 +40,20 @@ public class AABBHelper {
         AABB yAxisEdge = new AABB(0.0, 0.0, 0.0, thickness, 1.0, thickness);
         AABB zAxisEdge = new AABB(0.0, 0.0, 0.0, thickness, thickness, 1.0);
 
-        List<AABB> allEdges = new ArrayList<>(12);
-
-        allEdges.add(xAxisEdge);
-        allEdges.add(xAxisEdge.move(0, d1, 0));
-        allEdges.add(xAxisEdge.move(0, 0, d1));
-        allEdges.add(xAxisEdge.move(0, d1, d1));
-
-        allEdges.add(yAxisEdge);
-        allEdges.add(yAxisEdge.move(d1, 0, 0));
-        allEdges.add(yAxisEdge.move(0, 0, d1));
-        allEdges.add(yAxisEdge.move(d1, 0, d1));
-
-        allEdges.add(zAxisEdge);
-        allEdges.add(zAxisEdge.move(0, d1, 0));
-        allEdges.add(zAxisEdge.move(d1, 0, 0));
-        allEdges.add(zAxisEdge.move(d1, d1, 0));
-
-        return Collections.unmodifiableList(allEdges);
+        return new AABB[]{
+                xAxisEdge,
+                xAxisEdge.move(0, d1, 0),
+                xAxisEdge.move(0, 0, d1),
+                xAxisEdge.move(0, d1, d1),
+                yAxisEdge,
+                yAxisEdge.move(0, d1, 0),
+                yAxisEdge.move(0, 0, d1),
+                yAxisEdge.move(d1, 0, d1),
+                zAxisEdge,
+                zAxisEdge.move(0, d1, 0),
+                zAxisEdge.move(d1, 0, 0),
+                zAxisEdge.move(d1, d1, 0),
+        };
     }
 
     /**
@@ -95,23 +91,23 @@ public class AABBHelper {
      * @param facings Array of directions
      * @return List of AABBs for all requested direction faces
      */
-    public static List<AABB> createFaceBounds(double thickness, Direction... facings) {
+    public static AABB[] createFaceBounds(double thickness, Direction... facings) {
         if (facings == null || facings.length == 0) {
-            return Collections.emptyList();
+            return new AABB[]{};
         }
 
         return Arrays.stream(facings)
                 .map(facing -> createFaceBounds(thickness, facing))
-                .toList();
+                .toArray(AABB[]::new);
     }
 
     /**
      * Creates bounding boxes for the four horizontal walls
      *
      * @param thickness Wall thickness
-     * @return List of AABBs for the four horizontal direction walls
+     * @return array of AABBs for the four horizontal direction walls
      */
-    public static List<AABB> createWallBounds(double thickness) {
+    public static AABB[] createWallBounds(double thickness) {
         return createFaceBounds(thickness,
                 Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
     }
@@ -157,6 +153,50 @@ public class AABBHelper {
             case X -> isNegative ? bounds.minX <= 0.0001 : bounds.maxX >= 0.9999;
             case Y -> isNegative ? bounds.minY <= 0.0001 : bounds.maxY >= 0.9999;
             case Z -> isNegative ? bounds.minZ <= 0.0001 : bounds.maxZ >= 0.9999;
+        };
+    }
+
+    /**
+     * generate edge from AABB
+     * @param bound bound
+     * @param thickness thickness
+     * @return array of edge AABBs from AABB
+     */
+    public static AABB[] generateEdgeFromAABB(AABB bound, double thickness) {
+        if (bound == null) {
+            return new AABB[0];
+        }
+
+        if (thickness <= 0 || thickness >= 1) {
+            throw new IllegalArgumentException("Thickness must be between 0 and 1");
+        }
+
+        double width = bound.maxX - bound.minX;
+        double height = bound.maxY - bound.minY;
+        double depth = bound.maxZ - bound.minZ;
+
+        double thicknessX = width * thickness;
+        double thicknessY = height * thickness;
+        double thicknessZ = depth * thickness;
+
+        return new AABB[] {
+                new AABB(bound.minX, bound.minY, bound.minZ, bound.maxX, bound.minY + thicknessY, bound.minZ + thicknessZ),
+                new AABB(bound.minX, bound.minY, bound.maxZ - thicknessZ, bound.maxX, bound.minY + thicknessY, bound.maxZ),
+
+                new AABB(bound.minX, bound.maxY - thicknessY, bound.minZ, bound.maxX, bound.maxY, bound.minZ + thicknessZ),
+                new AABB(bound.minX, bound.maxY - thicknessY, bound.maxZ - thicknessZ, bound.maxX, bound.maxY, bound.maxZ),
+
+                new AABB(bound.minX, bound.minY, bound.minZ, bound.minX + thicknessX, bound.maxY, bound.minZ + thicknessZ),
+                new AABB(bound.minX, bound.minY, bound.maxZ - thicknessZ, bound.minX + thicknessX, bound.maxY, bound.maxZ),
+
+                new AABB(bound.maxX - thicknessX, bound.minY, bound.minZ, bound.maxX, bound.maxY, bound.minZ + thicknessZ),
+                new AABB(bound.maxX - thicknessX, bound.minY, bound.maxZ - thicknessZ, bound.maxX, bound.maxY, bound.maxZ),
+
+                new AABB(bound.minX, bound.minY, bound.minZ, bound.minX + thicknessX, bound.minY + thicknessY, bound.maxZ),
+                new AABB(bound.maxX - thicknessX, bound.minY, bound.minZ, bound.maxX, bound.minY + thicknessY, bound.maxZ),
+
+                new AABB(bound.minX, bound.maxY - thicknessY, bound.minZ, bound.minX + thicknessX, bound.maxY, bound.maxZ),
+                new AABB(bound.maxX - thicknessX, bound.maxY - thicknessY, bound.minZ, bound.maxX, bound.maxY, bound.maxZ)
         };
     }
 
@@ -513,7 +553,6 @@ public class AABBHelper {
 
     /**
      * Creates a cylinder of block positions
-     *
      * @param center The center position
      * @param radius The radius of the cylinder
      * @param height The height of the cylinder
@@ -588,6 +627,69 @@ public class AABBHelper {
         return positions;
     }
 
+    /**
+     * Create a 3D cylinder of block positions
+     * @param center The center position
+     * @param r The radius of the box
+     * @param y The height of the box
+     * @return array of AABB forming the box
+     */
+    public static AABB[] cylinder(Vec3 center, double r, double y) {
+        center = center.add(0, y / 2, 0);
+        double d = r * RATE;
+        double h = r - d / 2;
+        double w = (r * r * Math.PI - d * d) / 4 / h;
+        return new AABB[]{
+                AABB.ofSize(center, d, y, d),
+                AABB.ofSize(center.add(r - h / 2, 0, 0), h, y, w),
+                AABB.ofSize(center.add(-r + h / 2, 0, 0), h, y, w),
+                AABB.ofSize(center.add(0, 0, r - h / 2), w, y, h),
+                AABB.ofSize(center.add(0, 0, -r + h / 2), w, y, h)
+        };
+    }
+
+    /**
+     * Create a 3D ball of block positions
+     * @param center The center position
+     * @param r The radius of the ball
+     * @return array of AABB forming the ball
+     */
+    public static AABB[] ball(Vec3 center, double r) {
+        double d = r * RATE;
+        double h = r - d / 2;
+        double w = (r * r * Math.PI - d * d) / 4 / h;
+        return new AABB[]{
+                AABB.ofSize(center, d, d, d),
+                AABB.ofSize(center.add(r - h / 2, 0, 0), h, w, w),
+                AABB.ofSize(center.add(-r + h / 2, 0, 0), h, w, w),
+                AABB.ofSize(center.add(0, r - h / 2, 0), w, h, w),
+                AABB.ofSize(center.add(0, -r + h / 2, 0), w, h, w),
+                AABB.ofSize(center.add(0, 0, r - h / 2), w, w, h),
+                AABB.ofSize(center.add(0, 0, -r + h / 2), w, w, h)
+        };
+    }
+
+    /**
+     * Check if a given box intersects with any of the given boxes
+     * @param box The box to check intersection with
+     * @param boxes The boxes to check intersection with
+     * @return true if intersection occurs, false otherwise
+     */
+    public static boolean intersects(AABB box, AABB[] boxes) {
+        for (AABB b : boxes) {
+            if (box.intersects(b)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * calculate the distance squared between two positions
+     * @param pos1 The first position
+     * @param pos2 The second position
+     * @return the distance squared between the two positions
+     */
     private static double distanceSquared(Vec3 pos1, Vec3 pos2) {
         double dx = pos1.x - pos2.x;
         double dy = pos1.y - pos2.y;
@@ -595,6 +697,14 @@ public class AABBHelper {
         return dx * dx + dy * dy + dz * dz;
     }
 
+    /**
+     * calculate the distance squared between two 2D positions
+     * @param x1 The first x position
+     * @param y1 The first y position
+     * @param x2 The second x position
+     * @param y2 The second y position
+     * @return the distance squared between the two 2D positions
+     */
     private static double distanceSquared2D(double x1, double y1, double x2, double y2) {
         double dx = x1 - x2;
         double dy = y1 - y2;

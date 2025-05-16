@@ -1,85 +1,53 @@
 package org.pickaid.pibrary.content.key.state;
 
+import org.pickaid.pibrary.api.key.AbstractKeyState;
 import org.pickaid.pibrary.api.key.KeyState;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.KeyStateMachine;
 
-public class HeldState implements KeyState {
-    private long lastHeldCheckTime = 0;
-    
+public class HeldState extends AbstractKeyState {
+
     @Override
     public KeyState handlePress(KeyStateMachine context, long currentTime) {
-        if (context.getLastSentState() != KeyData.KeyState.HELD) {
-            context.showDebugMessage("Re-confirming HELD state in handlePress");
-            context.getKeyData().state = KeyData.KeyState.HELD;
-            context.sendNetworkUpdate();
-            context.forceLastSentState(KeyData.KeyState.HELD);
-        }
-        return this;
+        return super.handlePress(context, currentTime);
     }
 
     @Override
     public KeyState handleRelease(KeyStateMachine context, long currentTime) {
-        context.showDebugMessage(String.format("Manual release from HELD state - Power: %.1f",
-                context.getKeyData().power));
+        long heldDuration = currentTime - context.getTimingTracker().getHeldStartTime();
+        sendDebugMessage(context, "Held state released after " + heldDuration + "ms");
+        context.getKeyData().state = KeyData.KeyState.HELD_RELEASED;
+        context.getNetworkManager().sendNetworkUpdate();
 
-        if (context.getLastSentState() != KeyData.KeyState.HELD_RELEASED) {
-            context.getKeyData().state = KeyData.KeyState.HELD_RELEASED;
-            context.sendNetworkUpdate();
-            context.forceLastSentState(KeyData.KeyState.HELD_RELEASED);
-        }
-        
         if (context.getConfig().releaseCooldown > 0) {
-            context.getKeyData().startCooldown(context.getConfig().releaseCooldown);
-            context.showDebugMessage("Started release cooldown: " +
-                    context.getConfig().releaseCooldown + "ms");
+            startCooldown(context, context.getConfig().releaseCooldown);
+            sendDebugMessage(context, "Started release cooldown: " + context.getConfig().releaseCooldown + "ms");
+            return new CooldownState();
         }
 
         if (context.getConfig().physicalReleaseDelay > 0) {
-            context.setChargedReleaseTime(currentTime);
-            context.showDebugMessage("Starting release delay: " +
-                    context.getConfig().physicalReleaseDelay + "ms");
+            context.getTimingTracker().setChargedReleaseTime(currentTime);
+            sendDebugMessage(context, "Starting physical release delay: " + 
+                   context.getConfig().physicalReleaseDelay + "ms");
             return new AwaitingReleaseState();
         }
 
-        context.setHeldStartTime(0);
-        context.setPressStartTime(0);
-        context.setPressedTriggered(false);
-
-        HeldReleasedState nextState = new HeldReleasedState();
-        context.showDebugMessage("Transitioning to HeldReleasedState");
-        return nextState;
+        return new HeldReleasedState();
     }
 
     @Override
     public KeyState handleTick(KeyStateMachine context, long currentTime) {
-        if (lastHeldCheckTime == 0 || currentTime - lastHeldCheckTime > 500) {
-            if (context.getLastSentState() != KeyData.KeyState.HELD) {
-                context.showDebugMessage("Re-confirming HELD state in tick");
-                context.getKeyData().state = KeyData.KeyState.HELD;
-                context.sendNetworkUpdate();
-                context.forceLastSentState(KeyData.KeyState.HELD);
-            }
-            lastHeldCheckTime = currentTime;
+        if (isTimeout(context, currentTime, context.getTimingTracker().getHeldStartTime())) {
+            sendDebugMessage(context, "Hold timeout reached");
+            context.getTimingTracker().setInTimeoutState(true);
+            return new TimeoutState();
         }
 
-        if (context.getConfig().autoReleaseOnMax && !context.isPressed()) {
-            context.showDebugMessage("Key auto-released from HELD state");
-            return handleRelease(context, currentTime);
+        long timeSinceHeldStart = currentTime - context.getTimingTracker().getHeldStartTime();
+        if (timeSinceHeldStart % KeyStateMachine.CHARGING_UPDATE_INTERVAL == 0) {
+            context.getNetworkManager().sendNetworkUpdate();
         }
-
-        long timeoutDuration = context.getConfig().timeoutTime > 0 ?
-                context.getConfig().timeoutTime : KeyStateMachine.DEFAULT_STATE_TIMEOUT;
-
-        if (context.getHeldStartTime() > 0) {
-            long heldDuration = currentTime - context.getHeldStartTime();
-            if (heldDuration > timeoutDuration) {
-                context.showDebugMessage(String.format("Held Timeout after %d ms", heldDuration));
-                context.setInTimeoutState(true);
-                return new TimeoutState();
-            }
-        }
-
+        
         return this;
     }
 

@@ -1,13 +1,14 @@
 package org.pickaid.pibrary.content.key.state;
 
+import org.pickaid.pibrary.api.key.AbstractKeyState;
 import org.pickaid.pibrary.api.key.KeyState;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.KeyStateMachine;
 
-public class FinishedState implements KeyState {
+public class FinishedState extends AbstractKeyState {
     @Override
     public KeyState handlePress(KeyStateMachine context, long currentTime) {
-        return this;
+        return super.handlePress(context, currentTime);
     }
 
     @Override

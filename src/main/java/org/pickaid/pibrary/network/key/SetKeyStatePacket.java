@@ -1,28 +1,31 @@
 package org.pickaid.pibrary.network.key;
 
-import dev.xkmc.l2serial.network.SerialPacketBase;
-import dev.xkmc.l2serial.serialization.SerialClass;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
-import org.pickaid.pibrary.content.events.client.ClientKeyHandler;
+import org.pickaid.pibrary.content.handler.client.ClientKeyHandler;
 import org.pickaid.pibrary.content.key.KeyData;
 
-@SerialClass
-public class SetKeyStatePacket extends SerialPacketBase {
-    @SerialClass.SerialField
-    public KeyData keyData;
+import java.util.function.Supplier;
 
-    public SetKeyStatePacket() {}
+public record SetKeyStatePacket(KeyData keyData) {
 
-    public SetKeyStatePacket(KeyData keyData) {
-        this.keyData = keyData;
+    public SetKeyStatePacket {}
+
+    public static void encode(SetKeyStatePacket packet, FriendlyByteBuf buffer) {
+        packet.keyData.encode(buffer);
     }
 
-    @Override
-    public void handle(NetworkEvent.Context context) {
+    public static SetKeyStatePacket decode(FriendlyByteBuf buffer) {
+        return new SetKeyStatePacket(KeyData.decode(buffer));
+    }
+
+    public static void handle(SetKeyStatePacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             if (context.getDirection().getReceptionSide().isClient()) {
-                ClientKeyHandler.setKeyState(keyData);
+                ClientKeyHandler.setKeyState(packet.keyData);
             }
         });
+        context.setPacketHandled(true);
     }
 }
