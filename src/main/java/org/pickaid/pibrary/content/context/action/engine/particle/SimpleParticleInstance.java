@@ -1,0 +1,44 @@
+package org.pickaid.pibrary.content.context.action.engine.particle;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import org.pickaid.pibrary.content.context.action.engine.context.BuilderContext;
+import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
+import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
+import org.pickaid.pibrary.content.context.variable.DoubleVariable;
+import org.pickaid.pibrary.init.LibraryRegistries;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import javax.annotation.Nullable;
+
+public record SimpleParticleInstance(ParticleType<?> particle, DoubleVariable speed)
+		implements ParticleInstance<SimpleParticleInstance> {
+
+	public static final Codec<SimpleParticleInstance> CODEC = RecordCodecBuilder.create(i -> i.group(
+			ForgeRegistries.PARTICLE_TYPES.getCodec().fieldOf("particle").forGetter(e -> e.particle),
+			DoubleVariable.codec("speed", ParticleInstance::speed)
+	).apply(i, SimpleParticleInstance::new));
+
+	@Override
+	public EngineType<SimpleParticleInstance> type() {
+		return LibraryRegistries.SIMPLE_PARTICLE.get();
+	}
+
+	@Nullable
+	@Override
+	public ParticleOptions particle(EngineContext ctx) {
+		return particle instanceof ParticleOptions opt ? opt : null;
+	}
+
+	@Override
+	public boolean verify(BuilderContext ctx) {
+		if (!(particle instanceof ParticleOptions)) {
+			ctx.of("particle").error("Invalid particle type");
+			ParticleInstance.super.verify(ctx);
+			return false;
+		}
+		return ParticleInstance.super.verify(ctx);
+	}
+}

@@ -2,7 +2,7 @@ package org.pickaid.pibrary.content.key.combo;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 import org.pickaid.pibrary.content.key.DefaultKey;
 import org.pickaid.pibrary.content.key.KeyData;
 

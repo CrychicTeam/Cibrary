@@ -8,7 +8,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 
 import java.util.Map;
 import java.util.Set;

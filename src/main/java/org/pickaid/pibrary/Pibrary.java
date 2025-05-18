@@ -12,18 +12,28 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pickaid.pibrary.api.common.GlobalSoundManager;
+import org.pickaid.pibrary.api.core.Reg;
 import org.pickaid.pibrary.config.SkinLoadConfig;
+import org.pickaid.pibrary.content.context.action.ActionType;
+import org.pickaid.pibrary.content.context.action.GuiActionRegistration;
+import org.pickaid.pibrary.content.context.action.conditions.ContextConditionType;
 import org.pickaid.pibrary.content.fastprojectileapi.collision.FastMapInit;
 import org.pickaid.pibrary.content.handler.server.PlayerEffectHandler;
 import org.pickaid.pibrary.content.handler.server.ServerKeyHandler;
+import org.pickaid.pibrary.init.ActionEngineRegistries;
+import org.pickaid.pibrary.init.ActionTypeRegistries;
+import org.pickaid.pibrary.init.EffectSystem;
+import org.pickaid.pibrary.init.LibraryRegistries;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
 
 @Mod(Pibrary.MOD_ID)
 public class Pibrary {
 	public static final String MOD_ID = "pibrary";
+	public static final String MODID = MOD_ID; // 别名，方便其他类引用
 	public static Logger LOGGER = LogManager.getLogger();
 	public static final GlobalSoundManager SOUND_MANAGER = GlobalSoundManager.getInstance();
 	public static final ServerKeyHandler KEY_HANDLER = ServerKeyHandler.getInstance();
+	public static Reg REG = new Reg(MOD_ID);
 
 	public static ResourceLocation source(String path) {
 		return new ResourceLocation(Pibrary.MOD_ID, path);
@@ -37,6 +47,14 @@ public class Pibrary {
 		loadingContext.registerConfig(ModConfig.Type.CLIENT, SkinLoadConfig.SKIN_CONFIG);
 		modEventBus.addListener(this::onCommonSetup);
 		FastMapInit.init();
+		LibraryRegistries.register(modEventBus);
+		ContextConditionType.register(modEventBus);
+		ActionType.register(modEventBus);
+		ActionTypeRegistries.register(modEventBus);
+		ActionEngineRegistries.register(modEventBus);
+		
+		// 注册效果系统
+		EffectSystem.register(modEventBus);
 	}
 
 	public static boolean isLoaded(String mod) {
@@ -49,5 +67,8 @@ public class Pibrary {
 
 	public void onCommonSetup(FMLCommonSetupEvent event) {
 		PibraryNetworkHandler.register();
+		
+		// 注册GUI相关Action
+		event.enqueueWork(GuiActionRegistration::init);
 	}
 }

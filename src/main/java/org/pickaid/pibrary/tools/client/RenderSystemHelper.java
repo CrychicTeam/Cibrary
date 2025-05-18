@@ -159,7 +159,7 @@ public class RenderSystemHelper {
      *
      * Sets the shader texture at the specified slot.
      * Textures are images applied to 3D model surfaces. Modern GPUs allow binding multiple textures simultaneously (up to 16).
-     * Different slots can be used for different purposes, such as: base color (slot 0), normal maps (slot 1), specular maps (slot 2), etc.
+     * Different slots can be used for different purposes, such as: params color (slot 0), normal maps (slot 1), specular maps (slot 2), etc.
      *
      * @param slot The texture slot (0-11) - current implementation limits to maximum 12 slots
      * @param texture The texture resource location - resource identifier pointing to the texture file
@@ -595,7 +595,7 @@ public class RenderSystemHelper {
      * This method resets the frame buffer color to the color previously set with setClearColor(),
      * and resets the depth buffer to the maximum depth value (typically 1.0). This is usually called
      * at the beginning of each frame to clear the previous frame's rendering results and prepare for new rendering.
-     * If these buffers are not cleared, new rendering content will blend with the previous frame's content,
+     * If these buffers are not cleared, new rendering action will blend with the previous frame's action,
      * typically causing undesired visual effects.
      */
     public static void clearColorAndDepth() {

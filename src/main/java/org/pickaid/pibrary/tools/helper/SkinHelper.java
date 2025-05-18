@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 import org.pickaid.pibrary.config.SkinLoadConfig;
 
 import javax.annotation.Nullable;

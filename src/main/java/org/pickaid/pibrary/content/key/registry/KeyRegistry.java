@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 import org.pickaid.pibrary.content.key.combo.ComboSystem;
 
 import java.util.HashMap;

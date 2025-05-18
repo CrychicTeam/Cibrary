@@ -11,7 +11,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 import org.pickaid.pibrary.api.common.ServerKeyManager;
 import org.pickaid.pibrary.api.effect.EffectEngine;
 import org.pickaid.pibrary.api.effect.IPlayerEffect;

@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.NetworkEvent;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 import org.pickaid.pibrary.api.common.ServerKeyManager;
 import org.pickaid.pibrary.api.event.ConfiguredKeyEvent;
 import org.pickaid.pibrary.content.key.KeyData;

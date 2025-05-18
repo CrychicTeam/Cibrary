@@ -8,14 +8,14 @@ import java.util.function.BooleanSupplier;
 public final class BaseTicker {
     private static final Map<BooleanSupplier, TickerInfo> TASKS = new ConcurrentHashMap<>();
 
-    public static void schedule(Runnable runnable, int interval, boolean isClient) {
+    public static void schedule(Runnable runnable, long interval, boolean isClient) {
         scheduleTask(() -> {
             runnable.run();
             return true;
         }, interval, isClient);
     }
 
-    public static void scheduleTask(BooleanSupplier task, int interval, boolean isClient) {
+    public static void scheduleTask(BooleanSupplier task, long interval, boolean isClient) {
         TASKS.put(task, new TickerInfo(interval, 0, isClient));
     }
 
@@ -49,11 +49,11 @@ public final class BaseTicker {
     }
 
     public static class TickerInfo {
-        private final int interval;
-        private int counter;
+        private final long interval;
+        private long counter;
         private final boolean isClient;
 
-        public TickerInfo(int interval, int counter, boolean isClient) {
+        public TickerInfo(long interval, long counter, boolean isClient) {
             this.interval = interval;
             this.counter = counter;
             this.isClient = isClient;

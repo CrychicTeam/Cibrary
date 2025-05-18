@@ -2,7 +2,7 @@ package org.pickaid.pibrary.content.fastprojectileapi.collision;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.SectionPos;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 
 import java.util.HashMap;
 

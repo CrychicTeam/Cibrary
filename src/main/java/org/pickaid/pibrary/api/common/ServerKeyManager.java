@@ -2,7 +2,7 @@ package org.pickaid.pibrary.api.common;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
-import org.pickaid.pibrary.Pibrary;
+import org.pickaid.pibrary.Pibrary;;
 import org.pickaid.pibrary.content.key.KeyData;
 
 import java.util.*;
