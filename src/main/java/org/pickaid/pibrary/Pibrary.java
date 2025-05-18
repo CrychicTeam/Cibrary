@@ -14,15 +14,9 @@ import org.apache.logging.log4j.Logger;
 import org.pickaid.pibrary.api.common.GlobalSoundManager;
 import org.pickaid.pibrary.api.core.Reg;
 import org.pickaid.pibrary.config.SkinLoadConfig;
-import org.pickaid.pibrary.content.context.action.ActionType;
-import org.pickaid.pibrary.content.context.action.GuiActionRegistration;
-import org.pickaid.pibrary.content.context.action.conditions.ContextConditionType;
 import org.pickaid.pibrary.content.fastprojectileapi.collision.FastMapInit;
 import org.pickaid.pibrary.content.handler.server.PlayerEffectHandler;
 import org.pickaid.pibrary.content.handler.server.ServerKeyHandler;
-import org.pickaid.pibrary.init.ActionEngineRegistries;
-import org.pickaid.pibrary.init.ActionTypeRegistries;
-import org.pickaid.pibrary.init.EffectSystem;
 import org.pickaid.pibrary.init.LibraryRegistries;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
 
@@ -48,13 +42,6 @@ public class Pibrary {
 		modEventBus.addListener(this::onCommonSetup);
 		FastMapInit.init();
 		LibraryRegistries.register(modEventBus);
-		ContextConditionType.register(modEventBus);
-		ActionType.register(modEventBus);
-		ActionTypeRegistries.register(modEventBus);
-		ActionEngineRegistries.register(modEventBus);
-		
-		// 注册效果系统
-		EffectSystem.register(modEventBus);
 	}
 
 	public static boolean isLoaded(String mod) {
@@ -67,8 +54,5 @@ public class Pibrary {
 
 	public void onCommonSetup(FMLCommonSetupEvent event) {
 		PibraryNetworkHandler.register();
-		
-		// 注册GUI相关Action
-		event.enqueueWork(GuiActionRegistration::init);
 	}
 }
