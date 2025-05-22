@@ -6,9 +6,8 @@ import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.helper.Scheduler;
 import org.pickaid.pibrary.content.context.action.entity.renderer.ProjectileRenderer;
-import org.pickaid.pibrary.content.fastprojectileapi.entity.ProjectileMovement;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
 import org.pickaid.pibrary.init.LibraryRegistries;
-import dev.xkmc.l2serial.serialization.SerialClass;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SerialClass
 public class ProjectileData {
 
 	private static final int SALT_TICK = 0x342ab3c1, SALT_MOVE = 0xa6258bd1,
@@ -35,17 +33,14 @@ public class ProjectileData {
 	public static final Set<String> DEFAULT_PARAMS = Set.of("TickCount",
 			"ProjectileX", "ProjectileY", "ProjectileZ");
 
-	@SerialClass.SerialField(toClient = true)
 	public ProjectileParams params;
 
-	@SerialClass.SerialField(toClient = true)
 	private ResourceLocation id;
 
 	private boolean init;
 
 	private ProjectileConfig config;
 
-	@Deprecated
 	public ProjectileData() {
 	}
 
@@ -55,7 +50,6 @@ public class ProjectileData {
 		this.config = config.get();
 	}
 
-	@SerialClass.OnInject
 	public void onInject() {
 		init = false;
 		config = null;
@@ -69,7 +63,7 @@ public class ProjectileData {
 		return config;
 	}
 
-	private Map<String, Double> allParams(LMProjectile self) {
+	private Map<String, Double> allParams(Pirojectile self) {
 		var ans = new LinkedHashMap<>(params.params());
 		ans.put("TickCount", (double) self.tickCount);
 		ans.put("ProjectileX", self.getX());
@@ -79,7 +73,7 @@ public class ProjectileData {
 	}
 
 	@Nullable
-	private EngineContext getContext(LMProjectile self, int salt, boolean addScheduler) {
+	private EngineContext getContext(Pirojectile self, int salt, boolean addScheduler) {
 		if (!(self.getOwner() instanceof LivingEntity user)) return null;
 		var source = new SingleThreadedRandomSource(params.seed() ^ self.tickCount ^ salt);
 		Scheduler sche = addScheduler ? new Scheduler() : null;
@@ -87,7 +81,7 @@ public class ProjectileData {
 				self.location(), source, allParams(self));
 	}
 
-	public boolean shouldHurt(LMProjectile self, Entity target) {
+	public boolean shouldHurt(Pirojectile self, Entity target) {
 		if (getConfig(self.level()) == null) return false;
 		if (self.getOwner() instanceof LivingEntity le) {
 			return config.filter().test(target, le);
@@ -95,7 +89,7 @@ public class ProjectileData {
 		return false;
 	}
 
-	public void hurtTarget(LMProjectile self, EntityHitResult result) {
+	public void hurtTarget(Pirojectile self, EntityHitResult result) {
 		if (getConfig(self.level()) == null) return;
 		EntityProcessor<?> hit = config.hit();
 		if (hit == null) return;
@@ -105,7 +99,7 @@ public class ProjectileData {
 		hit.process(List.of(le), ctx);
 	}
 
-	public void tick(LMProjectile self) {
+	public void tick(Pirojectile self) {
 		if (getConfig(self.level()) == null) return;
 		ConfiguredEngine<?> tick = config.tick();
 		if (tick == null) return;
@@ -115,7 +109,7 @@ public class ProjectileData {
 		ctx.registerScheduler();
 	}
 
-	public ProjectileMovement move(LMProjectile self, Vec3 vec, Vec3 pos) {
+	public ProjectileMovement move(Pirojectile self, Vec3 vec, Vec3 pos) {
 		if (getConfig(self.level()) != null) {
 			Motion<?> motion = config.motion();
 			EngineContext ctx = getContext(self, SALT_MOVE, false);
@@ -128,7 +122,7 @@ public class ProjectileData {
 
 	@OnlyIn(Dist.CLIENT)
 	@Nullable
-	public ProjectileRenderer getRenderer(LMProjectile self) {
+	public ProjectileRenderer getRenderer(Pirojectile self) {
 		if (getConfig(self.level()) == null) return null;
 		var renderer = config.renderer();
 		if (renderer == null) return null;

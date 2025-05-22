@@ -1,6 +1,6 @@
 package org.pickaid.pibrary.content.context.action.particle.core;
 
-import dev.xkmc.fastprojectileapi.entity.ProjectileMovement;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.entity.core.Motion;
 import org.pickaid.pibrary.content.context.action.entity.motion.SimpleMotion;
@@ -16,9 +16,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public record ClientParticleData(
 		int life, boolean doCollision, float size,
 		EngineContext ctx, Motion<?> motion, ParticleRenderer renderer
-) implements LMParticleData {
+) implements PiParticleData {
 
-	public static final LMParticleData DEFAULT = new ClientParticleData(
+	public static final PiParticleData DEFAULT = new ClientParticleData(
 			40, false, 0.15f, null, SimpleMotion.ZERO,
 			new SimpleParticleSprite(
 					RenderTypePreset.LIT,

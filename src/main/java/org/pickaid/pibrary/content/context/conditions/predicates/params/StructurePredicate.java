@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.context.action.conditions.predicates.params;
+package org.pickaid.pibrary.content.context.conditions.predicates.params;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;

@@ -1,6 +1,6 @@
-package org.pickaid.pibrary.content.context.action.conditions;
+package org.pickaid.pibrary.content.context.conditions;
 
-import org.pickaid.pibrary.content.context.action.Context;
+import org.pickaid.pibrary.content.context.Context;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 

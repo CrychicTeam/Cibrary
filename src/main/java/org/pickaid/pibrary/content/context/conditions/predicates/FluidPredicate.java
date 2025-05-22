@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.context.action.conditions.predicates;
+package org.pickaid.pibrary.content.context.conditions.predicates;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.StatePropertiesPredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.StatePropertiesPredicate;
 
 import java.util.List;
 

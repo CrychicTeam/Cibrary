@@ -1,5 +1,6 @@
 package org.pickaid.pibrary.mixin;
 
+import dev.xkmc.l2library.util.raytrace.EntityTarget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -14,22 +15,39 @@ import net.minecraftforge.common.MinecraftForge;
 import org.pickaid.pibrary.api.event.StandOnFluidEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Iterator;
 
 @Mixin(value = Entity.class, priority = 1000)
-public class EntityMixin {
+public abstract class EntityMixin {
     public EntityMixin() {}
 
-    @ModifyVariable(
-            method = {"move"},
-            ordinal = 1,
-            index = 3,
-            at = @At(
-                    value = "INVOKE_ASSIGN",
-                    target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"
-            )
+    @Inject(
+            at = {@At("HEAD")}, method = {"isCurrentlyGlowing"}, cancellable = true
     )
-    public Vec3 fluidCollision(Vec3 original) {
+    public void pickAIDLibrary$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
+        Iterator<EntityTarget> var2 = EntityTarget.LIST.iterator();
+        Entity self = (Entity) (Object) this;
+
+        EntityTarget target;
+        do {
+            if (!var2.hasNext()) {
+                return;
+            }
+
+            target = var2.next();
+        } while(target.target != self);
+
+        cir.setReturnValue(true);
+    }
+
+    @ModifyVariable(
+            method = {"move"}, ordinal = 1, index = 3, at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;")
+    )
+    public Vec3 pickAIDLibrary$fluidCollision(Vec3 original) {
         Entity var3 = (Entity) (Object) this;
         if (var3 instanceof Player entity) {
             if (original.y > 0.0) {

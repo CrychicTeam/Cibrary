@@ -7,12 +7,11 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.content.context.action.entity.core.LMProjectile;
+import org.pickaid.pibrary.content.context.action.entity.core.Pirojectile;
 import org.pickaid.pibrary.content.context.action.entity.core.ProjectileConfig;
 import org.pickaid.pibrary.content.context.action.entity.core.ProjectileData;
 import org.pickaid.pibrary.content.context.action.entity.core.ProjectileParams;
 import org.pickaid.pibrary.init.LibraryRegistries;
-import dev.xkmc.Pibrary.init.registrate.LMItems;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
 
@@ -49,7 +48,7 @@ public record CustomProjectileShoot(
 
 	@Override
 	public Entity create(EngineContext ctx) {
-		var ans = new LMProjectile(LMItems.GENERIC_PROJECTILE.get(), ctx.user().level());
+		var ans = new Pirojectile(LibraryRegistries.GENERIC_PROJECTILE.get(), ctx.user().level());
 		LinkedHashMap<String, Double> map = new LinkedHashMap<>();
 		for (var e : params.entrySet()) {
 			map.put(e.getKey(), e.getValue().eval(ctx));

@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.BossEvent.BossBarColor;
@@ -24,5 +27,8 @@ public class CodecUtils {
     public static final Codec<LocationPredicate> LOCATION_PREDICATE = ExtraCodecs.JSON.xmap(LocationPredicate::fromJson, LocationPredicate::serializeToJson);
     public static <T extends Enum<T>> Codec<T> enumCodec(Class<T> clazz) {
         return Codec.INT.xmap(i -> clazz.getEnumConstants()[i], Enum::ordinal);
+    }
+    public static <T> Codec<ResourceKey<T>> resourceKeyCodec(ResourceKey<Registry<T>> key) {
+        return ResourceLocation.CODEC.xmap(location -> ResourceKey.create(key, location), ResourceKey::location);
     }
 }

@@ -9,6 +9,7 @@ import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.pickaid.pibrary.init.LibraryRegistries;
 
 public record SoundInstance(
 		SoundEvent sound,
@@ -27,7 +28,7 @@ public record SoundInstance(
 
 	@Override
 	public EngineType<SoundInstance> type() {
-//		return LibraryRegistries.SOUND.get();
+		return LibraryRegistries.SOUND.get();
 	}
 
 	@Override

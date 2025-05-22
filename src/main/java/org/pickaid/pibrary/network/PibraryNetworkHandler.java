@@ -5,8 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
-import org.pickaid.pibrary.Pibrary;;
-import org.pickaid.pibrary.content.context.action.effect.EffectUsePacket;
+import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.content.context.action.engine.context.ActionPacket;
 import org.pickaid.pibrary.content.key.KeyData;
 import org.pickaid.pibrary.content.key.combo.ComboDefinition;
@@ -15,6 +14,9 @@ import org.pickaid.pibrary.network.key.ComboPacket;
 import org.pickaid.pibrary.network.key.KeyStatePacket;
 import org.pickaid.pibrary.network.key.SetKeyStatePacket;
 import org.pickaid.pibrary.network.sound.SoundPacket;
+import org.pickaid.pibrary.network.util.TargetSetPacket;
+
+;
 
 public class PibraryNetworkHandler {
     public static final String PROTOCOL_VERSION = "1";
@@ -33,6 +35,7 @@ public class PibraryNetworkHandler {
         CHANNEL.registerMessage(packetId++, ComboPacket.class, ComboPacket::encode, ComboPacket::decode, ComboPacket::handle);
         CHANNEL.registerMessage(packetId++, SoundPacket.class, SoundPacket::encode, SoundPacket::decode, SoundPacket::handle);
         CHANNEL.registerMessage(packetId++, ActionPacket.class, ActionPacket::encode, ActionPacket::decode, ActionPacket::handle);
+        CHANNEL.registerMessage(packetId++, TargetSetPacket.class, TargetSetPacket::encode, TargetSetPacket::decode, TargetSetPacket::handle);
     }
 
     public static void setSound(ServerPlayer player, SoundData soundData, SoundPacket.PacketType type) {
@@ -49,6 +52,10 @@ public class PibraryNetworkHandler {
 
     public static void action(ServerPlayer player, ActionPacket actionPacket) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), actionPacket);
+    }
+
+    public static void syncRayTrace(TargetSetPacket packet) {
+        CHANNEL.sendToServer(packet);
     }
 
     public static void combo(ComboDefinition definition) {

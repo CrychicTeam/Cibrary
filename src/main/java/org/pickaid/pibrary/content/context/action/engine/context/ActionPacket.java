@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 import org.pickaid.pibrary.content.context.action.engine.helper.Orientation;
-import org.pickaid.pibrary.content.context.skill.Action;
+import org.pickaid.pibrary.content.context.interaction.InteractionAction;
 import org.pickaid.pibrary.init.LibraryRegistries;
 
 import java.util.function.Supplier;
@@ -17,7 +17,7 @@ public class ActionPacket {
 	public Vec3 origin, facing, normal;
 	public double tickUsing, power;
 
-	public ActionPacket(Action action, ActionContext ctx) {
+	public ActionPacket(InteractionAction action, ActionContext ctx) {
 		this.user = ctx.user().getId();
 		this.origin = ctx.origin();
 		this.facing = ctx.facing().forward();

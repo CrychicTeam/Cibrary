@@ -3,8 +3,10 @@ package org.pickaid.pibrary.mixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import org.pickaid.pibrary.Pibrary;;
+import org.pickaid.pibrary.api.effect.EffectEngine;
 import org.pickaid.pibrary.api.effect.IPlayerEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +22,7 @@ public abstract class LivingEntityMixin {
     private void cibrary$setSprintingHook(boolean pSprinting, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (entry.getKey().equals(self)) {
                     if (player.isSprinting()) {
                         entry.getValue().startSprintingEffect(player);
@@ -36,7 +38,7 @@ public abstract class LivingEntityMixin {
     private void cibrary$jumpFromGroundHook(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (entry.getKey().equals(self)) {
                     if (player.isSprinting()) {
                         entry.getValue().sprintingJumpEffect(player);
@@ -52,7 +54,7 @@ public abstract class LivingEntityMixin {
     private void cibrary$checkFallDamageHook(double pY, boolean pOnGround, BlockState pState, BlockPos pPos, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof ServerPlayer player && pOnGround) {
-            for (Map.Entry<LivingEntity, IPlayerEffect> entry : Pibrary.activeEffects.entrySet()) {
+            for (Map.Entry<Player, IPlayerEffect> entry : EffectEngine.getActivePlayerEffects().entrySet()) {
                 if (entry.getKey().equals(self)) {
                     entry.getValue().landEffect(player, pY, pState, pPos);
                 }

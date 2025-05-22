@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Function;
 
 @Mixin(Particle.class)
-public class ParticleMixin {
+public abstract class ParticleMixin {
     @Unique
     private Function<Particle, Integer> pibrary$lightColorFunction;
 

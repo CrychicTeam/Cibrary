@@ -1,6 +1,10 @@
 package org.pickaid.pibrary;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraftforge.common.IExtensibleEnum;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
@@ -14,11 +18,14 @@ import org.apache.logging.log4j.Logger;
 import org.pickaid.pibrary.api.common.GlobalSoundManager;
 import org.pickaid.pibrary.api.core.Reg;
 import org.pickaid.pibrary.config.SkinLoadConfig;
-import org.pickaid.pibrary.content.fastprojectileapi.collision.FastMapInit;
+import org.pickaid.pibrary.api.fastprojectileapi.collision.FastMapInit;
+import org.pickaid.pibrary.content.context.action.engine.selector.SelectionType;
 import org.pickaid.pibrary.content.handler.server.PlayerEffectHandler;
 import org.pickaid.pibrary.content.handler.server.ServerKeyHandler;
 import org.pickaid.pibrary.init.LibraryRegistries;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
+
+import java.util.function.BiPredicate;
 
 @Mod(Pibrary.MOD_ID)
 public class Pibrary {
@@ -54,5 +61,10 @@ public class Pibrary {
 
 	public void onCommonSetup(FMLCommonSetupEvent event) {
 		PibraryNetworkHandler.register();
+		SelectionType MONSTERS_ONLY = new SelectionType(
+				"MONSTERS_ONLY",
+				(entity, user) -> entity instanceof Monster monster && monster.isAlive()
+		);
+		SelectionType.register(MONSTERS_ONLY);
 	}
 }

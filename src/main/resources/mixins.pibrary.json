@@ -13,6 +13,7 @@
     "ServerLevelAccessor"
   ],
   "client": [
+    "LocalPlayerMixin",
     "ParticleEngineAccessor",
     "ParticleMixin"
   ],

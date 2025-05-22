@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.context.action.conditions;
+package org.pickaid.pibrary.content.context.conditions;
 
 import java.util.List;
 

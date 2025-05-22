@@ -9,7 +9,7 @@ import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
 import org.pickaid.pibrary.content.context.action.entity.motion.SimpleMotion;
 import org.pickaid.pibrary.content.context.action.particle.core.ClientParticleData;
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticleOption;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticleOption;
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import org.pickaid.pibrary.content.context.action.particle.render.DustParticleSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.RandomColorParticle;
@@ -39,7 +39,7 @@ public record DustParticleInstance(
 	public ParticleOptions particle(EngineContext ctx) {
 		int life = life().eval(ctx);
 		float scale = (float) scale().eval(ctx) * ClientParticleData.randSize(ctx);
-		return new LMGenericParticleOption(new ClientParticleData(life, true, scale,
+		return new PiGenericParticleOption(new ClientParticleData(life, true, scale,
 				ctx, SimpleMotion.DUST, new DustParticleSprite(RenderTypePreset.NORMAL,
 				randomizeColor(ctx.rand(), color.eval(ctx)))));
 	}

@@ -1,7 +1,7 @@
 package org.pickaid.pibrary.content.context.action.particle.render;
 
-import dev.xkmc.fastprojectileapi.entity.ProjectileMovement;
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticle;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticle;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -13,7 +13,7 @@ public record OrientedSpriteRenderer(
 ) implements OrientableSpriteRenderer {
 
 	@Override
-	public void onParticleInit(LMGenericParticle e) {
+	public void onParticleInit(PiGenericParticle e) {
 		inner.onParticleInit(e);
 		setRot(e);
 		var ori = e.getOrientation();
@@ -21,12 +21,12 @@ public record OrientedSpriteRenderer(
 	}
 
 	@Override
-	public void onPostTick(LMGenericParticle e) {
+	public void onPostTick(PiGenericParticle e) {
 		inner.onPostTick(e);
 		setRot(e);
 	}
 
-	private void setRot(LMGenericParticle e) {
+	private void setRot(PiGenericParticle e) {
 		var ori = e.getOrientation();
 		double rz = roll.get(e.age()) * Mth.DEG_TO_RAD;
 		if (facing().lengthSqr() == 0) {

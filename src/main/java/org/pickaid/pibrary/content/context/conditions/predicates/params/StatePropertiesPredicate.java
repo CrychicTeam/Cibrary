@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.context.action.conditions.predicates.params;
+package org.pickaid.pibrary.content.context.conditions.predicates.params;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;

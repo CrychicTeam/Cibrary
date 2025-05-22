@@ -1,6 +1,6 @@
 package org.pickaid.pibrary.content.context.action.particle.render;
 
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticle;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticle;
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -11,7 +11,7 @@ public record BlockSprite(
 ) implements ModelSpriteData {
 
 	@Override
-	public void onParticleInit(LMGenericParticle e) {
+	public void onParticleInit(PiGenericParticle e) {
 		var shaper = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper();
 		e.setSprite(shaper.getTexture(state, e.level(), pos));
 		int i = Minecraft.getInstance().getBlockColors().getColor(state, e.level(), pos, 0);

@@ -23,11 +23,11 @@ public record BuilderContext(Logger logger, String path, Set<String> params, boo
 	}
 
 	public void error(String str) {
-		logger.error(path + ": " + str);
+        logger.error("{}: {}", path, str);
 	}
 
 	public void error(String str, Exception e) {
-		logger.error(path + ": " + str);
+        logger.error("{}: {}", path, str);
 		logger.throwing(e);
 	}
 

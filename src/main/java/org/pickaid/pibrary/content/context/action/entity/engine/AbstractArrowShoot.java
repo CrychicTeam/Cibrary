@@ -6,7 +6,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import org.pickaid.pibrary.content.fastprojectileapi.entity.ProjectileMovement;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
 
 public interface AbstractArrowShoot<T extends Record & ShootProjectileInstance<T>> extends ShootProjectileInstance<T> {
 

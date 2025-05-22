@@ -71,6 +71,13 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', config.mod_id
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            jvmArgs += [
+                    "-XX:+AllowEnhancedClassRedefinition",
+                    "-XX:HotswapAgent=fatjar",
+                    "-Dhotswapagent.autoHotswap=true"
+            ]
+
             def args = new ArrayList()
 
             args.add "--mixin"
@@ -102,6 +109,13 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', config.mod_id
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            jvmArgs += [
+                    "-XX:+AllowEnhancedClassRedefinition",
+                    "-XX:HotswapAgent=fatjar",
+                    "-Dhotswapagent.autoHotswap=true"
+            ]
+
             def args = new ArrayList()
             args.add "--mixin"
             args.add "mixins.${config.mod_id}.json"

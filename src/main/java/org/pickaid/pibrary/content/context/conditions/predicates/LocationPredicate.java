@@ -1,13 +1,13 @@
-package org.pickaid.pibrary.content.context.action.conditions.predicates;
+package org.pickaid.pibrary.content.context.conditions.predicates;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.BiomePredicate;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.LightPredicate;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.PositionPredicate;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.StructurePredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.BiomePredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.LightPredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.PositionPredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.StructurePredicate;
 
 public record LocationPredicate(PositionPredicate position, BiomePredicate biome, StructurePredicate structure, DimensionPredicate dimension, LightPredicate light, BlockPredicate block, FluidPredicate fluid) {
 	public static final LocationPredicate ANY = new LocationPredicate(PositionPredicate.ANY, BiomePredicate.ANY, StructurePredicate.ANY, DimensionPredicate.ANY, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);

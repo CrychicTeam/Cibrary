@@ -1,8 +1,7 @@
 package org.pickaid.pibrary.content.context.action.engine.context;
 
-import dev.xkmc.l2library.util.raytrace.RayTraceUtil;
 import org.pickaid.pibrary.content.context.action.engine.helper.Orientation;
-import org.pickaid.pibrary.content.context.skill.Action;
+import org.pickaid.pibrary.content.context.interaction.InteractionAction;
 import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.pickaid.pibrary.tools.utils.raytrace.RayTraceUtils;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -29,7 +29,7 @@ public record ActionContext(LivingEntity user, Vec3 origin, Orientation facing, 
 
 	public static Vec3 getForward(LivingEntity le) {
 		if (le instanceof Player player) {
-			return RayTraceUtil.getRayTerm(Vec3.ZERO, player.getXRot(), player.getYRot(), 1);
+			return RayTraceUtils.getRayTerm(Vec3.ZERO, player.getXRot(), player.getYRot(), 1);
 		}
 		if (le instanceof Mob mob) {
 			var target = mob.getTarget();
@@ -43,7 +43,7 @@ public record ActionContext(LivingEntity user, Vec3 origin, Orientation facing, 
 	@Nullable
 	public static LivingEntity getTarget(LivingEntity le) {
 		if (le instanceof Player player) {
-			return RayTraceUtil.serverGetTarget(player);
+			return RayTraceUtils.serverGetTarget(player);
 		}
 		if (le instanceof Mob mob) {
 			return mob.getTarget();
@@ -52,11 +52,11 @@ public record ActionContext(LivingEntity user, Vec3 origin, Orientation facing, 
 	}
 
 	@Nullable
-	public static ActionContext castSpell(LivingEntity user, Action spell, int useTick, double power, int distance) {
+	public static ActionContext castAction(LivingEntity user, InteractionAction action, int useTick, double power, int distance) {
 		Level level = user.level();
 		Vec3 pos;
 		Orientation ori;
-		switch (spell.triggerType()) {
+		switch (action.triggerType()) {
 			case SELF_POS -> {
 				pos = user.position();
 				ori = Orientation.regular();
@@ -66,13 +66,13 @@ public record ActionContext(LivingEntity user, Vec3 origin, Orientation facing, 
 				var forward = ActionContext.getForward(user);
 				var end = start.add(forward.scale(distance));
 				AABB box = (new AABB(start, end)).inflate(1.0);
-				var bhit = level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, user));
-				var ehit = ProjectileUtil.getEntityHitResult(level, user, start, end, box, e -> true);
-				if ((ehit == null || ehit.getType() == HitResult.Type.MISS) && bhit.getType() == HitResult.Type.MISS) {
+				var blockHitResult = level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, user));
+				var entityHitResult = ProjectileUtil.getEntityHitResult(level, user, start, end, box, e -> true);
+				if ((entityHitResult == null || entityHitResult.getType() == HitResult.Type.MISS) && blockHitResult.getType() == HitResult.Type.MISS) {
 					return null;
 				}
-				pos = ehit != null && ehit.getLocation().distanceToSqr(start) < bhit.getLocation().distanceToSqr(start) ?
-						ehit.getLocation() : bhit.getLocation();
+				pos = entityHitResult != null && entityHitResult.getLocation().distanceToSqr(start) < blockHitResult.getLocation().distanceToSqr(start) ?
+						entityHitResult.getLocation() : blockHitResult.getLocation();
 				ori = Orientation.regular();
 			}
 			case HORIZONTAL_FACING -> {

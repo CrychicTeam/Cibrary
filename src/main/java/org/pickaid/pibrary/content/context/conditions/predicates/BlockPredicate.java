@@ -1,4 +1,4 @@
-package org.pickaid.pibrary.content.context.action.conditions.predicates;
+package org.pickaid.pibrary.content.context.conditions.predicates;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,8 +11,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.NbtPredicate;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.params.StatePropertiesPredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.NbtPredicate;
+import org.pickaid.pibrary.content.context.conditions.predicates.params.StatePropertiesPredicate;
 
 import javax.annotation.Nullable;
 import java.util.List;

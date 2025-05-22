@@ -1,11 +1,11 @@
 package org.pickaid.pibrary.content.context.action.engine.core;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.selector.SelectionType;
 import org.pickaid.pibrary.init.LibraryRegistries;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.LivingEntity;
 
 import java.util.LinkedHashSet;
 
@@ -15,7 +15,5 @@ public interface EntitySelector<T extends Record & EntitySelector<T>> extends Ve
 			.dispatch(EntitySelector::type, SelectorType::codec);
 
 	SelectorType<T> type();
-
 	LinkedHashSet<LivingEntity> find(ServerLevel sl, EngineContext ctx, SelectionType type);
-
 }

@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
 import org.pickaid.pibrary.content.context.action.entity.motion.SimpleMotion;
 import org.pickaid.pibrary.content.context.action.particle.core.ClientParticleData;
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticleOption;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticleOption;
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import org.pickaid.pibrary.content.context.action.particle.render.ItemSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.SpriteGeom;
@@ -37,7 +37,7 @@ public record ItemParticleInstance(
 
 	@Override
 	public ParticleOptions particle(EngineContext ctx) {
-		return new LMGenericParticleOption(new ClientParticleData(
+		return new PiGenericParticleOption(new ClientParticleData(
 				life.eval(ctx), breaking, (float) scale.eval(ctx) * ClientParticleData.randSize(ctx), ctx,
 				breaking() ? SimpleMotion.BREAKING : SimpleMotion.ZERO,
 				new ItemSprite(RenderTypePreset.BLOCK, item.getDefaultInstance(),

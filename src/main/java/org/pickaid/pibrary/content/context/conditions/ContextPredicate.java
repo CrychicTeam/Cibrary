@@ -2,7 +2,7 @@ package org.pickaid.pibrary.content.context.conditions;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.util.ExtraCodecs;
-import org.pickaid.pibrary.content.context.action.Context;
+import org.pickaid.pibrary.content.context.Context;
 import org.pickaid.pibrary.init.LibraryRegistries;
 
 import java.util.function.Predicate;

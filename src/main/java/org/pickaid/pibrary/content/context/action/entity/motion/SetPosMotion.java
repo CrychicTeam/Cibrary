@@ -1,10 +1,10 @@
 package org.pickaid.pibrary.content.context.action.entity.motion;
 
-import dev.xkmc.fastprojectileapi.entity.ProjectileMovement;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.context.LocationContext;
 import org.pickaid.pibrary.content.context.action.entity.core.Motion;
 import net.minecraft.world.phys.Vec3;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
 
 public interface SetPosMotion<T extends Record & SetPosMotion<T>> extends Motion<T> {
 
@@ -18,6 +18,4 @@ public interface SetPosMotion<T extends Record & SetPosMotion<T>> extends Motion
 	}
 
 	LocationContext move(EngineContext ctx);
-
-
 }

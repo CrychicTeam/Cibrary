@@ -11,7 +11,7 @@ import org.pickaid.pibrary.content.context.variable.IntVariable;
 import org.pickaid.pibrary.content.context.action.entity.core.Motion;
 import org.pickaid.pibrary.content.context.action.entity.motion.SimpleMotion;
 import org.pickaid.pibrary.content.context.action.particle.core.ClientParticleData;
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticleOption;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticleOption;
 import org.pickaid.pibrary.init.LibraryRegistries;
 import net.minecraft.core.particles.ParticleOptions;
 
@@ -43,7 +43,7 @@ public record CustomParticleInstance(
 
 	@Override
 	public ParticleOptions particle(EngineContext ctx) {
-		return new LMGenericParticleOption(new ClientParticleData(
+		return new PiGenericParticleOption(new ClientParticleData(
 				life.eval(ctx), collide, (float) scale.eval(ctx), ctx,
 				motion, renderer.resolve(ctx)
 		));

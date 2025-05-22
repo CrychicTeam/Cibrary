@@ -1,6 +1,6 @@
 package org.pickaid.pibrary.content.context.action.entity.motion;
 
-import dev.xkmc.fastprojectileapi.entity.ProjectileMovement;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.context.LocationContext;
 import org.pickaid.pibrary.content.context.action.entity.core.Motion;

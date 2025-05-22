@@ -15,7 +15,7 @@ public class MagicCommandEventHandlers {
 	@SubscribeEvent
 	public static void onCommand(RegisterCommandsEvent event) {
 		event.getDispatcher().register(literal(Pibrary.MODID)
-				.then(SpellCastCommand.build()));
+				.then(ActionCastCommand.build()));
 	}
 
 	protected static LiteralArgumentBuilder<CommandSourceStack> literal(String str) {

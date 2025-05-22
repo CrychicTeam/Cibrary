@@ -1,9 +1,8 @@
 package org.pickaid.pibrary.content.context.action.engine.core;
 
+import org.jetbrains.annotations.Nullable;
 import org.pickaid.pibrary.content.context.action.engine.context.BuilderContext;
 import org.pickaid.pibrary.content.context.action.engine.helper.EngineHelper;
-import dev.xkmc.l2serial.util.Wrappers;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -15,8 +14,7 @@ public interface Verifiable {
 	}
 
 	default boolean verify(BuilderContext ctx) {
-		EngineHelper.verifyFields(this, ctx, Wrappers.cast(this.getClass()));
+		EngineHelper.verifyFields(this, ctx, this.getClass());
 		return true;
 	}
-
 }

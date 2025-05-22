@@ -6,10 +6,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import org.pickaid.pibrary.content.context.action.engine.context.BuilderContext;
 import org.pickaid.pibrary.content.context.action.engine.core.Verifiable;
-import dev.xkmc.l2serial.serialization.type_cache.RecordCache;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,13 +63,18 @@ public class EngineHelper {
 
 	public EngineHelper(Class<?> cls) throws Exception {
 		assert cls.isRecord();
-		var cache = RecordCache.get(cls);
-		for (var e : cache.getFields()) {
-			if (Verifiable.class.isAssignableFrom(e.getType())) {
-				children.add(e);
+		RecordComponent[] components = cls.getRecordComponents();
+		if (components == null) {
+			throw new IllegalStateException("Class " + cls.getSimpleName() + " is not a record or has no components");
+		}
+		for (RecordComponent component : components) {
+			Field field = cls.getDeclaredField(component.getName());
+			field.setAccessible(true);
+			if (Verifiable.class.isAssignableFrom(field.getType())) {
+				children.add(field);
 			}
-			if (List.class.isAssignableFrom(e.getType())) {
-				collections.add(e);
+			if (List.class.isAssignableFrom(field.getType())) {
+				collections.add(field);
 			}
 		}
 	}
@@ -97,5 +102,4 @@ public class EngineHelper {
 			}
 		};
 	}
-
 }

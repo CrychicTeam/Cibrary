@@ -2,7 +2,7 @@ package org.pickaid.pibrary.content.context.action.entity.motion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.xkmc.fastprojectileapi.entity.ProjectileMovement;
+import org.pickaid.pibrary.api.fastprojectileapi.entity.ProjectileMovement;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.action.entity.core.Motion;

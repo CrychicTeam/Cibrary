@@ -1,8 +1,8 @@
 package org.pickaid.pibrary.content.context.action.particle.render;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticle;
-import org.pickaid.pibrary.content.context.action.particle.core.LMOrientation;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticle;
+import org.pickaid.pibrary.content.context.action.particle.core.PiOrientation;
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import net.minecraft.client.Camera;
 import net.minecraft.world.phys.Vec3;
@@ -14,12 +14,12 @@ public interface OrientableSpriteRenderer extends ParticleRenderer {
 	ParticleRenderer inner();
 
 	@Override
-	default void onParticleInit(LMGenericParticle e) {
+	default void onParticleInit(PiGenericParticle e) {
 		inner().onParticleInit(e);
 	}
 
 	@Override
-	default void onPostTick(LMGenericParticle e) {
+	default void onPostTick(PiGenericParticle e) {
 		inner().onPostTick(e);
 	}
 
@@ -29,7 +29,7 @@ public interface OrientableSpriteRenderer extends ParticleRenderer {
 	}
 
 	@Override
-	default boolean specialRender(LMGenericParticle e, VertexConsumer vc, Camera camera, float pTick) {
+	default boolean specialRender(PiGenericParticle e, VertexConsumer vc, Camera camera, float pTick) {
 		inner().specialRender(e, vc, camera, pTick);
 		render(e, vc, camera, pTick);
 		return true;
@@ -40,14 +40,14 @@ public interface OrientableSpriteRenderer extends ParticleRenderer {
 		return true;
 	}
 
-	default Quaternionf rotation(LMGenericParticle e, float pTick) {
-		LMOrientation ori = e.getOrientation();
+	default Quaternionf rotation(PiGenericParticle e, float pTick) {
+		PiOrientation ori = e.getOrientation();
 		return new Quaternionf().rotateYXZ((float) ori.getRY(pTick), (float) ori.getRX(pTick), (float) ori.getRZ(pTick));
 	}
 
-	default void render(LMGenericParticle e, VertexConsumer vc, Camera cam, float pTick) {
+	default void render(PiGenericParticle e, VertexConsumer vc, Camera cam, float pTick) {
 		if (e.age() == 0) return;
-		LMOrientation ori = e.getOrientation();
+		PiOrientation ori = e.getOrientation();
 		Vec3 vec3 = cam.getPosition();
 		float f = (float) (ori.getX(pTick) - vec3.x());
 		float f1 = (float) (ori.getY(pTick) - vec3.y());

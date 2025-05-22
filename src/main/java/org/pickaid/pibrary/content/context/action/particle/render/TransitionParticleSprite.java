@@ -1,7 +1,7 @@
 package org.pickaid.pibrary.content.context.action.particle.render;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import org.pickaid.pibrary.content.context.action.particle.core.LMGenericParticle;
+import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticle;
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import net.minecraft.client.Camera;
 import net.minecraft.resources.ResourceLocation;
@@ -19,13 +19,13 @@ public record TransitionParticleSprite(
 	}
 
 	@Override
-	public void onParticleInit(LMGenericParticle e) {
+	public void onParticleInit(PiGenericParticle e) {
 		VanillaParticleSprite.super.onParticleInit(e);
 		e.setColor(start.x, start.y, start.z);
 	}
 
 	@Override
-	public boolean specialRender(LMGenericParticle e, VertexConsumer vc, Camera camera, float pTick) {
+	public boolean specialRender(PiGenericParticle e, VertexConsumer vc, Camera camera, float pTick) {
 		float f = (e.age() + pTick) / (e.getLifetime() + 1);
 		Vector3f col = new Vector3f(start).lerp(end, f);
 		e.setColor(col.x, col.y, col.z);

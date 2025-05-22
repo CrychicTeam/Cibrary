@@ -1,15 +1,14 @@
-package org.pickaid.pibrary.content.context.action.conditions;
+package org.pickaid.pibrary.content.context.conditions;
 
-import org.pickaid.pibrary.content.context.action.Context;
-import org.pickaid.pibrary.content.context.action.conditions.predicates.LocationPredicate;
-import org.pickaid.pibrary.content.context.action.params.ContextParam;
-import org.pickaid.pibrary.content.context.action.params.ContextParamSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
+import org.pickaid.pibrary.content.context.Context;
+import org.pickaid.pibrary.content.context.conditions.predicates.LocationPredicate;
+import org.pickaid.pibrary.content.context.params.ContextParam;
 
 import java.util.Optional;
 
