@@ -71,7 +71,7 @@ public record EngineContext(UserContext user, LocationContext loc, RandomSource 
 		var sche = user.scheduler();
 		if (sche == null) return;
 		if (!sche.isFinished()) {
-            BaseTicker.schedule(sche::tick, sche.time, user().level().isClientSide());
+            BaseTicker.schedule(sche::tick, sche.time, false);
 		}
 	}
 

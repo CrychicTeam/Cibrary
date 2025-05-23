@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.LocationContext
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 public record SetPosModifier(DoubleVariable x, DoubleVariable y, DoubleVariable z)
@@ -24,7 +24,7 @@ public record SetPosModifier(DoubleVariable x, DoubleVariable y, DoubleVariable 
 
 	@Override
 	public ModifierType<SetPosModifier> type() {
-		return LibraryRegistries.POSITION.get();
+		return LibraryObjects.POSITION.get();
 	}
 
 	@Override

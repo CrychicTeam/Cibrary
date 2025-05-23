@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.LocationContext
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 public record OffsetModifier(DoubleVariable x, DoubleVariable y, DoubleVariable z)
@@ -31,7 +31,7 @@ public record OffsetModifier(DoubleVariable x, DoubleVariable y, DoubleVariable 
 
 	@Override
 	public ModifierType<OffsetModifier> type() {
-		return LibraryRegistries.OFFSET.get();
+		return LibraryObjects.OFFSET.get();
 	}
 
 	@Override

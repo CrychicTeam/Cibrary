@@ -1,0 +1,77 @@
+{
+  "action": {
+    "type": "pibrary:list",
+    "children": [
+      {
+        "type": "pibrary:if",
+        "action": {
+          "type": "pibrary:processor",
+          "processors": [
+            {
+              "type": "pibrary:damage",
+              "damage": "4",
+              "damage_type": "minecraft:freeze",
+              "indirect": true,
+              "positioned": true
+            },
+            {
+              "type": "pibrary:push",
+              "angle": "75",
+              "from_center": "TO_CENTER",
+              "speed": "0.1",
+              "tilt": "0"
+            }
+          ],
+          "selector": {
+            "type": "pibrary:arc",
+            "maxAngle": "-180+360/12*11",
+            "minAngle": "-180",
+            "radius": "4.0",
+            "size": "2.0",
+            "step": "11"
+          },
+          "target": "enemy"
+        },
+        "predicate": "TickUsing>=10"
+      },
+      {
+        "type": "pibrary:iterate_delayed",
+        "child": {
+          "type": "pibrary:random_pos_fan",
+          "child": {
+            "type": "pibrary:move",
+            "child": {
+              "type": "pibrary:particle",
+              "particle": "minecraft:snowflake",
+              "speed": "0.5"
+            },
+            "modifiers": [
+              {
+                "type": "pibrary:rotate",
+                "degree": "75",
+                "vertical": "0"
+              },
+              {
+                "type": "pibrary:offset",
+                "x": "0",
+                "y": "rand(0.5,2.5)",
+                "z": "0"
+              }
+            ]
+          },
+          "count": "5",
+          "maxAngle": "180",
+          "maxRadius": "5.0",
+          "minAngle": "-180",
+          "minRadius": "3.0"
+        },
+        "delay": "2",
+        "step": "10"
+      }
+    ]
+  },
+  "cast_type": "CONTINUOUS",
+  "icon": "minecraft:snowball",
+  "order": 100,
+  "trigger_type": "SELF_POS"
+}

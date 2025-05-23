@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
@@ -38,7 +38,7 @@ public record RingRandomIterator(DoubleVariable minRadius, DoubleVariable maxRad
 
 	@Override
 	public EngineType<RingRandomIterator> type() {
-		return LibraryRegistries.RANDOM_FAN.get();
+		return LibraryObjects.RANDOM_FAN.get();
 	}
 
 	private static double randomRadius(double min, double max, RandomSource rand) {

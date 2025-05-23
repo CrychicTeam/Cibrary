@@ -3,6 +3,7 @@ package org.pickaid.pibrary.content.context.action.engine.core;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.ExtraCodecs;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.init.LibraryRegistries;
 
@@ -11,8 +12,8 @@ import java.util.function.Function;
 
 public interface ConfiguredEngine<T extends Record & ConfiguredEngine<T>> extends Verifiable {
 
-	Codec<ConfiguredEngine<?>> CODEC = LibraryRegistries.ENGINE.codec()
-			.dispatch(ConfiguredEngine::type, EngineType::codec);
+	Codec<ConfiguredEngine<?>> CODEC = ExtraCodecs.lazyInitializedCodec(() -> LibraryRegistries.ENGINE_TYPE.get().getCodec()
+			.dispatch(ConfiguredEngine::type, EngineType::codec));
 
 	static <T> RecordCodecBuilder<T, ConfiguredEngine<?>> codec(String str, Function<T, ConfiguredEngine<?>> func) {
 		return CODEC.fieldOf(str).forGetter(func);

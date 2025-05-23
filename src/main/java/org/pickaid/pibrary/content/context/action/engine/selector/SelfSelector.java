@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EntitySelector;
 import org.pickaid.pibrary.content.context.action.engine.core.SelectorType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -17,7 +17,7 @@ public record SelfSelector() implements EntitySelector<SelfSelector> {
 
 	@Override
 	public SelectorType<SelfSelector> type() {
-		return LibraryRegistries.SELF.get();
+		return LibraryObjects.SELF.get();
 	}
 
 	@Override

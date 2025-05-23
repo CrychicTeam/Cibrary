@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EntitySelector;
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.SelectorType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -23,7 +23,7 @@ public record MoveSelector(List<Modifier<?>> modifiers, EntitySelector<?> child)
 
 	@Override
 	public SelectorType<MoveSelector> type() {
-		return LibraryRegistries.MOVE_SELECTOR.get();
+		return LibraryObjects.MOVE_SELECTOR.get();
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticl
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import org.pickaid.pibrary.content.context.action.particle.render.ItemSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.SpriteGeom;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -32,7 +32,7 @@ public record ItemParticleInstance(
 
 	@Override
 	public EngineType<ItemParticleInstance> type() {
-		return LibraryRegistries.ITEM_PARTICLE.get();
+		return LibraryObjects.ITEM_PARTICLE.get();
 	}
 
 	@Override

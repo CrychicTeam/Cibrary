@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.Items;
@@ -20,7 +20,7 @@ public record TridentShoot(
 
 	@Override
 	public EngineType<TridentShoot> type() {
-		return LibraryRegistries.TRIDENT.get();
+		return LibraryObjects.TRIDENT.get();
 	}
 
 	@Override

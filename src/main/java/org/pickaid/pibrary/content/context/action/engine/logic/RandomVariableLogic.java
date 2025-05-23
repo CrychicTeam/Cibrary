@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -22,7 +22,7 @@ public record RandomVariableLogic(String name, int count, ConfiguredEngine<?> ch
 
 	@Override
 	public EngineType<RandomVariableLogic> type() {
-		return LibraryRegistries.RANDOM.get();
+		return LibraryObjects.RANDOM.get();
 	}
 
 	@Override

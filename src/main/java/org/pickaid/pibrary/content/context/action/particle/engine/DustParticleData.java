@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.variable.ColorVariable;
 import org.pickaid.pibrary.content.context.action.particle.render.DustParticleSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.ParticleRenderer;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -21,7 +21,7 @@ public record DustParticleData(
 
 	@Override
 	public ParticleRenderType<DustParticleData> type() {
-		return LibraryRegistries.COLOR_RENDER.get();
+		return LibraryObjects.COLOR_RENDER.get();
 	}
 
 	@OnlyIn(Dist.CLIENT)

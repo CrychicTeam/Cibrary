@@ -1,0 +1,112 @@
+{
+  "action": {
+    "type": "pibrary:list",
+    "children": [
+      {
+        "type": "pibrary:if",
+        "action": {
+          "type": "pibrary:processor",
+          "processors": [
+            {
+              "type": "pibrary:damage",
+              "damage": "4",
+              "damage_type": "minecraft:freeze",
+              "indirect": true,
+              "positioned": true
+            },
+            {
+              "type": "pibrary:push",
+              "angle": "0",
+              "from_center": "TO_CENTER",
+              "speed": "0.1",
+              "tilt": "0"
+            }
+          ],
+          "selector": {
+            "type": "pibrary:line",
+            "size": "1.5",
+            "step": "6"
+          },
+          "target": "enemy"
+        },
+        "predicate": "TickUsing>=10"
+      },
+      {
+        "type": "pibrary:iterate_delayed",
+        "child": {
+          "type": "pibrary:random",
+          "child": {
+            "type": "pibrary:move",
+            "child": {
+              "type": "pibrary:random_pos_fan",
+              "child": {
+                "type": "pibrary:move",
+                "child": {
+                  "type": "pibrary:custom_particle",
+                  "collide": true,
+                  "life": "20",
+                  "motion": {
+                    "type": "pibrary:control_position",
+                    "modifiers": [
+                      {
+                        "type": "pibrary:forward",
+                        "distance": "-0.3"
+                      },
+                      {
+                        "type": "pibrary:rotate",
+                        "degree": "162.4702611704238*(log(0.3+TickCount*0.08816348773665984)+log(0.3))",
+                        "vertical": "0"
+                      },
+                      {
+                        "type": "pibrary:forward",
+                        "distance": "0.3+TickCount*0.08816348773665984"
+                      },
+                      {
+                        "type": "pibrary:normal_to_direction"
+                      },
+                      {
+                        "type": "pibrary:forward",
+                        "distance": "TickCount*0.5"
+                      }
+                    ]
+                  },
+                  "renderer": {
+                    "type": "pibrary:simple",
+                    "particle": "minecraft:snowflake",
+                    "renderType": "NORMAL"
+                  },
+                  "scale": "0.7",
+                  "speed": "0"
+                },
+                "modifiers": [
+                  {
+                    "type": "pibrary:normal_offset",
+                    "distance": "rand(-0.5,0.5)"
+                  }
+                ]
+              },
+              "count": "3",
+              "maxAngle": "180",
+              "maxRadius": "0.3",
+              "minAngle": "-180",
+              "minRadius": "0.3"
+            },
+            "modifiers": [
+              {
+                "type": "pibrary:direction_to_normal"
+              }
+            ]
+          },
+          "count": 1,
+          "name": "r"
+        },
+        "delay": "1",
+        "step": "10"
+      }
+    ]
+  },
+  "cast_type": "CONTINUOUS",
+  "icon": "minecraft:powder_snow_bucket",
+  "order": 100,
+  "trigger_type": "FACING_FRONT"
+}

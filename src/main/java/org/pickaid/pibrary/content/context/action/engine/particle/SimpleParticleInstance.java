@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.BuilderContext;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -23,7 +23,7 @@ public record SimpleParticleInstance(ParticleType<?> particle, DoubleVariable sp
 
 	@Override
 	public EngineType<SimpleParticleInstance> type() {
-		return LibraryRegistries.SIMPLE_PARTICLE.get();
+		return LibraryObjects.SIMPLE_PARTICLE.get();
 	}
 
 	@Nullable

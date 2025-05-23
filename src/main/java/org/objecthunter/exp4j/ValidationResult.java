@@ -20,6 +20,9 @@ import java.util.List;
 /**
  * Contains the validation result for a given {@link Expression}
  */
+/**
+ * Contains the validation result for a given {@link Expression}
+ */
 public class ValidationResult {
     private final boolean valid;
     private final List<String> errors;

@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.variable.ColorVariable;
 import org.pickaid.pibrary.content.context.action.particle.render.ParticleRenderer;
 import org.pickaid.pibrary.content.context.action.particle.render.TransitionParticleSprite;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -22,7 +22,7 @@ public record TransitionParticleData(
 
 	@Override
 	public ParticleRenderType<TransitionParticleData> type() {
-		return LibraryRegistries.TRANSITION_RENDER.get();
+		return LibraryObjects.TRANSITION_RENDER.get();
 	}
 
 	@OnlyIn(Dist.CLIENT)

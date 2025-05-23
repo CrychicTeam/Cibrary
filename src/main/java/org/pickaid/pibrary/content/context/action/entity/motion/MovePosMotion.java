@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.context.LocationContext;
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.entity.core.MotionType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public record MovePosMotion(
 
 	@Override
 	public MotionType<MovePosMotion> type() {
-		return LibraryRegistries.MOVE_MOTION.get();
+		return LibraryObjects.MOVE_MOTION.get();
 	}
 
 	@Override

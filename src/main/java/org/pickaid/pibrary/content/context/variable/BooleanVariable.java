@@ -8,7 +8,7 @@ public record BooleanVariable(String str, ExpressionHolder exp) implements Numer
 	public static final Codec<BooleanVariable> CODEC = Codec.STRING.xmap(BooleanVariable::of, BooleanVariable::str);
 
 	public static BooleanVariable of(String str) {
-		return new BooleanVariable(str, ExpressionHolder.of(str));
+		return new BooleanVariable(str, ExpressionHolder.ofVerified(str));
 	}
 
 	public boolean eval(EngineContext ctx) {

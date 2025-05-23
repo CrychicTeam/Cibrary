@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.particle.render.BlockSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.ParticleRenderer;
 import org.pickaid.pibrary.content.context.action.particle.render.SpriteGeom;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
@@ -28,7 +28,7 @@ public record BlockParticleData(
 
 	@Override
 	public ParticleRenderType<BlockParticleData> type() {
-		return LibraryRegistries.BLOCK_RENDER.get();
+		return LibraryObjects.BLOCK_RENDER.get();
 	}
 
 	@OnlyIn(Dist.CLIENT)

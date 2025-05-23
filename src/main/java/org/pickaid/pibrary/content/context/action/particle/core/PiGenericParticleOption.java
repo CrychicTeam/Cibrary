@@ -9,7 +9,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 public class PiGenericParticleOption implements ParticleOptions {
 
@@ -28,7 +28,7 @@ public class PiGenericParticleOption implements ParticleOptions {
 
 	@Override
 	public @NotNull ParticleType<?> getType() {
-		return LibraryRegistries.GENERIC_PARTICLE.get();
+		return LibraryObjects.GENERIC_PARTICLE.get();
 	}
 
 	@Override

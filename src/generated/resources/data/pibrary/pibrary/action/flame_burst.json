@@ -1,0 +1,176 @@
+{
+  "action": {
+    "type": "pibrary:list",
+    "children": [
+      {
+        "type": "pibrary:move",
+        "child": {
+          "type": "pibrary:list",
+          "children": [
+            {
+              "type": "pibrary:iterate",
+              "child": {
+                "type": "pibrary:move",
+                "child": {
+                  "type": "pibrary:iterate_linear",
+                  "alongDir": "0.304",
+                  "alongOffset": "0",
+                  "child": {
+                    "type": "pibrary:particle",
+                    "particle": "minecraft:flame",
+                    "speed": "0"
+                  },
+                  "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "startFromOrigin": true,
+                  "step": "26"
+                },
+                "modifiers": [
+                  {
+                    "type": "pibrary:rotate",
+                    "degree": "72*ri",
+                    "vertical": "0"
+                  },
+                  {
+                    "type": "pibrary:forward",
+                    "distance": "4.0"
+                  },
+                  {
+                    "type": "pibrary:rotate",
+                    "degree": "162",
+                    "vertical": "0"
+                  }
+                ]
+              },
+              "index": "ri",
+              "step": "5"
+            },
+            {
+              "type": "pibrary:iterate",
+              "child": {
+                "type": "pibrary:move",
+                "child": {
+                  "type": "pibrary:particle",
+                  "particle": "minecraft:flame",
+                  "speed": "0"
+                },
+                "modifiers": [
+                  {
+                    "type": "pibrary:rotate",
+                    "degree": "4.285714285714286*ri",
+                    "vertical": "0"
+                  },
+                  {
+                    "type": "pibrary:forward",
+                    "distance": "4.0"
+                  }
+                ]
+              },
+              "index": "ri",
+              "step": "84"
+            }
+          ]
+        },
+        "modifiers": [
+          {
+            "type": "pibrary:direction",
+            "x": "1",
+            "y": "0",
+            "z": "0"
+          },
+          {
+            "type": "pibrary:rotate",
+            "degree": "rand(0,360)",
+            "vertical": "0"
+          }
+        ]
+      },
+      {
+        "type": "pibrary:iterate_delayed",
+        "child": {
+          "type": "pibrary:list",
+          "children": [
+            {
+              "type": "pibrary:processor",
+              "processors": [
+                {
+                  "type": "pibrary:damage",
+                  "damage": "4",
+                  "damage_type": "minecraft:in_fire",
+                  "indirect": true,
+                  "positioned": false
+                },
+                {
+                  "type": "pibrary:push",
+                  "angle": "0",
+                  "from_center": "UNIFORM",
+                  "speed": "0.1",
+                  "tilt": "0"
+                },
+                {
+                  "type": "pibrary:property",
+                  "duration": "100",
+                  "property": "IGNITE"
+                }
+              ],
+              "selector": {
+                "type": "pibrary:cylinder",
+                "r": "4",
+                "y": "6"
+              },
+              "target": "enemy"
+            },
+            {
+              "type": "pibrary:random_pos_fan",
+              "child": {
+                "type": "pibrary:random",
+                "child": {
+                  "type": "pibrary:move",
+                  "child": {
+                    "type": "pibrary:if",
+                    "action": {
+                      "type": "pibrary:particle",
+                      "particle": "minecraft:soul",
+                      "speed": "0.5+r3*0.2"
+                    },
+                    "fallback": {
+                      "type": "pibrary:particle",
+                      "particle": "minecraft:flame",
+                      "speed": "0.5+r3*0.2"
+                    },
+                    "predicate": "r2<0.25"
+                  },
+                  "modifiers": [
+                    {
+                      "type": "pibrary:direction",
+                      "x": "(r0-0.5)*0.2",
+                      "y": "1",
+                      "z": "(r1-0.5)*0.2"
+                    }
+                  ]
+                },
+                "count": 4,
+                "name": "r"
+              },
+              "count": "10",
+              "index": "i",
+              "maxAngle": "180",
+              "maxRadius": "4",
+              "minAngle": "-180",
+              "minRadius": "0"
+            }
+          ]
+        },
+        "delay": "1",
+        "step": "40"
+      }
+    ]
+  },
+  "cast_type": "INSTANT",
+  "icon": "minecraft:fire_charge",
+  "order": 200,
+  "trigger_type": "TARGET_POS"
+}

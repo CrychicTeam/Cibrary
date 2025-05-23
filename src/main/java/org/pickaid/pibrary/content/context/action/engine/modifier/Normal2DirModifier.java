@@ -5,7 +5,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.context.LocationContext;
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 public record Normal2DirModifier() implements Modifier<Normal2DirModifier> {
 
@@ -13,7 +13,7 @@ public record Normal2DirModifier() implements Modifier<Normal2DirModifier> {
 
 	@Override
 	public ModifierType<Normal2DirModifier> type() {
-		return LibraryRegistries.NORMAL_2_DIR.get();
+		return LibraryObjects.NORMAL_2_DIR.get();
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.BooleanVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import javax.annotation.Nullable;
 
@@ -24,7 +24,7 @@ public record PredicateLogic(
 
 	@Override
 	public EngineType<PredicateLogic> type() {
-		return LibraryRegistries.IF.get();
+		return LibraryObjects.IF.get();
 	}
 
 	@Override

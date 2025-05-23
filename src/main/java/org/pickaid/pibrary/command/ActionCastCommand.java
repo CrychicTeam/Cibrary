@@ -7,7 +7,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import org.pickaid.pibrary.content.context.interaction.InteractionActionCastType;
-import org.pickaid.pibrary.init.LibraryRegistries;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -17,6 +16,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
+import org.pickaid.pibrary.init.LibraryRegistries;
 
 import java.util.Optional;
 
@@ -73,6 +73,10 @@ public class ActionCastCommand extends MagicCommandEventHandlers {
 								)
 						)
 				);
+	}
+
+	public void test() {
+
 	}
 
 	private static int run(CommandContext<CommandSourceStack> ctx, InteractionActionCastType type, boolean usePower) throws CommandSyntaxException {

@@ -1,0 +1,76 @@
+{
+  "action": {
+    "type": "pibrary:move",
+    "child": {
+      "type": "pibrary:iterate_arc",
+      "child": {
+        "type": "pibrary:iterate_delayed",
+        "child": {
+          "type": "pibrary:move",
+          "child": {
+            "type": "pibrary:list",
+            "children": [
+              {
+                "type": "pibrary:processor",
+                "processors": [
+                  {
+                    "type": "pibrary:damage",
+                    "damage": "6",
+                    "damage_type": "minecraft:indirect_magic",
+                    "indirect": true,
+                    "positioned": true
+                  },
+                  {
+                    "type": "pibrary:push",
+                    "angle": "0",
+                    "from_center": "UNIFORM",
+                    "speed": "0.5",
+                    "tilt": "0"
+                  }
+                ],
+                "selector": {
+                  "type": "pibrary:box",
+                  "center": true,
+                  "size": "1.0",
+                  "y": "1.0"
+                },
+                "target": "enemy"
+              },
+              {
+                "type": "pibrary:particle",
+                "particle": "minecraft:end_rod",
+                "speed": "0"
+              }
+            ]
+          },
+          "modifiers": [
+            {
+              "type": "pibrary:forward",
+              "distance": "1.0"
+            }
+          ]
+        },
+        "delay": "1",
+        "index": "i",
+        "step": "24"
+      },
+      "count": "7",
+      "maxAngle": "30",
+      "maxInclusive": true,
+      "minAngle": "-30",
+      "radius": "0.5"
+    },
+    "modifiers": [
+      {
+        "type": "pibrary:offset",
+        "x": "0",
+        "y": "-0.1",
+        "z": "0"
+      }
+    ]
+  },
+  "cast_type": "INSTANT",
+  "icon": "minecraft:arrow",
+  "order": 500,
+  "trigger_type": "FACING_FRONT"
+}

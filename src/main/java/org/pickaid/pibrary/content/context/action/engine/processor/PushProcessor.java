@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.action.engine.helper.EngineHelper;
 import org.pickaid.pibrary.content.context.action.engine.helper.Orientation;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -39,7 +39,7 @@ public record PushProcessor(
 
 	@Override
 	public ProcessorType<PushProcessor> type() {
-		return LibraryRegistries.PUSH_ENTITY.get();
+		return LibraryObjects.PUSH_ENTITY.get();
 	}
 
 	@Override

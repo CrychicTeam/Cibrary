@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.action.engine.helper.EffectInstanceEntry;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 
@@ -25,7 +25,7 @@ public record ArrowShoot(
 
 	@Override
 	public EngineType<ArrowShoot> type() {
-		return LibraryRegistries.ARROW.get();
+		return LibraryObjects.ARROW.get();
 	}
 
 	@Override

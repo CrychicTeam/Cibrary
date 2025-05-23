@@ -1,0 +1,214 @@
+{
+  "action": {
+    "type": "pibrary:if",
+    "action": {
+      "type": "pibrary:random_pos_fan",
+      "child": {
+        "type": "pibrary:move",
+        "child": {
+          "type": "pibrary:particle",
+          "particle": "minecraft:small_flame",
+          "speed": "0.3"
+        },
+        "modifiers": [
+          {
+            "type": "pibrary:rotate",
+            "degree": "135",
+            "vertical": "rand(-15*min(floor(TickUsing/10),3),0)"
+          },
+          {
+            "type": "pibrary:forward",
+            "distance": "-4"
+          }
+        ]
+      },
+      "count": "5*min(TickUsing/10,3)",
+      "maxAngle": "180",
+      "maxRadius": "1",
+      "minAngle": "-180",
+      "minRadius": "0.5"
+    },
+    "fallback": {
+      "type": "pibrary:iterate_delayed",
+      "child": {
+        "type": "pibrary:random",
+        "child": {
+          "type": "pibrary:iterate",
+          "child": {
+            "type": "pibrary:delay",
+            "child": {
+              "type": "pibrary:move",
+              "child": {
+                "type": "pibrary:list",
+                "children": [
+                  {
+                    "type": "pibrary:move",
+                    "child": {
+                      "type": "pibrary:list",
+                      "children": [
+                        {
+                          "type": "pibrary:iterate",
+                          "child": {
+                            "type": "pibrary:move",
+                            "child": {
+                              "type": "pibrary:iterate_linear",
+                              "alongDir": "0.19999999999999998",
+                              "alongOffset": "0",
+                              "child": {
+                                "type": "pibrary:particle",
+                                "particle": "minecraft:flame",
+                                "speed": "0"
+                              },
+                              "offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                              ],
+                              "startFromOrigin": true,
+                              "step": "20"
+                            },
+                            "modifiers": [
+                              {
+                                "type": "pibrary:rotate",
+                                "degree": "72*ri",
+                                "vertical": "0"
+                              },
+                              {
+                                "type": "pibrary:forward",
+                                "distance": "2.0"
+                              },
+                              {
+                                "type": "pibrary:rotate",
+                                "degree": "162",
+                                "vertical": "0"
+                              }
+                            ]
+                          },
+                          "index": "ri",
+                          "step": "5"
+                        },
+                        {
+                          "type": "pibrary:iterate",
+                          "child": {
+                            "type": "pibrary:move",
+                            "child": {
+                              "type": "pibrary:particle",
+                              "particle": "minecraft:flame",
+                              "speed": "0"
+                            },
+                            "modifiers": [
+                              {
+                                "type": "pibrary:rotate",
+                                "degree": "5.714285714285714*ri",
+                                "vertical": "0"
+                              },
+                              {
+                                "type": "pibrary:forward",
+                                "distance": "2.0"
+                              }
+                            ]
+                          },
+                          "index": "ri",
+                          "step": "63"
+                        }
+                      ]
+                    },
+                    "modifiers": [
+                      {
+                        "type": "pibrary:rotate",
+                        "degree": "rand(0,360)",
+                        "vertical": "0"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "pibrary:processor",
+                    "processors": [
+                      {
+                        "type": "pibrary:damage",
+                        "damage": "10",
+                        "damage_type": "minecraft:explosion",
+                        "indirect": true,
+                        "positioned": true
+                      },
+                      {
+                        "type": "pibrary:knockback",
+                        "angle": "0",
+                        "knockback": "2",
+                        "tilt": "0"
+                      }
+                    ],
+                    "selector": {
+                      "type": "pibrary:cylinder",
+                      "r": "4",
+                      "y": "2"
+                    },
+                    "target": "enemy"
+                  },
+                  {
+                    "type": "pibrary:random_pos_fan",
+                    "child": {
+                      "type": "pibrary:move",
+                      "child": {
+                        "type": "pibrary:block_particle",
+                        "block": "minecraft:stone",
+                        "breaking": true,
+                        "life": "rand(20,40)",
+                        "scale": "0.5",
+                        "speed": "0.5+rand(0,0.4)"
+                      },
+                      "modifiers": [
+                        {
+                          "type": "pibrary:direction",
+                          "x": "0",
+                          "y": "1",
+                          "z": "0"
+                        }
+                      ]
+                    },
+                    "count": "100",
+                    "maxAngle": "180",
+                    "maxRadius": "2",
+                    "minAngle": "-180",
+                    "minRadius": "0"
+                  }
+                ]
+              },
+              "modifiers": [
+                {
+                  "type": "pibrary:rotate",
+                  "degree": "180/(3+i*2)*(j+(r0+r1)/2)-90",
+                  "vertical": "0"
+                },
+                {
+                  "type": "pibrary:forward",
+                  "distance": "6*i+4"
+                },
+                {
+                  "type": "pibrary:random_offset",
+                  "shape": "SPHERE",
+                  "x": "0.1",
+                  "y": "0",
+                  "z": "0.1"
+                }
+              ]
+            },
+            "tick": "abs(i+1-j)*1"
+          },
+          "index": "j",
+          "step": "3+i*2"
+        },
+        "count": 2,
+        "name": "r"
+      },
+      "delay": "10",
+      "index": "i",
+      "step": "min(TickUsing/10,3)"
+    },
+    "predicate": "Power==0"
+  },
+  "cast_type": "CHARGE",
+  "icon": "minecraft:tnt",
+  "order": 300,
+  "trigger_type": "HORIZONTAL_FACING"
+}

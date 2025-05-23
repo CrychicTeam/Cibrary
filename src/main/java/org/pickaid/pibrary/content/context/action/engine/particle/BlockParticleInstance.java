@@ -12,7 +12,7 @@ import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticl
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import org.pickaid.pibrary.content.context.action.particle.render.BlockSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.SpriteGeom;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +34,7 @@ public record BlockParticleInstance(
 
 	@Override
 	public EngineType<BlockParticleInstance> type() {
-		return LibraryRegistries.BLOCK_PARTICLE.get();
+		return LibraryObjects.BLOCK_PARTICLE.get();
 	}
 
 	@Override

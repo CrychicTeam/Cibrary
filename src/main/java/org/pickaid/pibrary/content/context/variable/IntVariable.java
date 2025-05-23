@@ -20,7 +20,7 @@ public record IntVariable(String str, ExpressionHolder exp) implements NumericVa
 	}
 
 	public static IntVariable of(String str) {
-		return new IntVariable(str, ExpressionHolder.of(str));
+		return new IntVariable(str, ExpressionHolder.ofVerified(str));
 	}
 
 	public int eval(EngineContext ctx) {

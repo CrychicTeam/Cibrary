@@ -13,7 +13,7 @@ import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticl
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import org.pickaid.pibrary.content.context.action.particle.render.DustParticleSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.RandomColorParticle;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.particles.ParticleOptions;
 
 public record DustParticleInstance(
@@ -32,7 +32,7 @@ public record DustParticleInstance(
 
 	@Override
 	public EngineType<DustParticleInstance> type() {
-		return LibraryRegistries.DUST_PARTICLE.get();
+		return LibraryObjects.DUST_PARTICLE.get();
 	}
 
 	@Override

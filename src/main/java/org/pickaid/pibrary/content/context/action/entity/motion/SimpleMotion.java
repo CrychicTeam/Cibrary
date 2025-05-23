@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.action.entity.core.Motion;
 import org.pickaid.pibrary.content.context.action.entity.core.MotionType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 public record SimpleMotion(
@@ -29,7 +29,7 @@ public record SimpleMotion(
 
 	@Override
 	public MotionType<SimpleMotion> type() {
-		return LibraryRegistries.SIMPLE_MOTION.get();
+		return LibraryObjects.SIMPLE_MOTION.get();
 	}
 
 	@Override

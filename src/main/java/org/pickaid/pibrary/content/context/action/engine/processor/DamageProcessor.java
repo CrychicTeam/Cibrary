@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
@@ -39,7 +39,7 @@ public record DamageProcessor(
 
 	@Override
 	public ProcessorType<DamageProcessor> type() {
-		return LibraryRegistries.DAMAGE.get();
+		return LibraryObjects.DAMAGE.get();
 	}
 
 	@Override

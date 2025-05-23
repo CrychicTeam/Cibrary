@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.LocationContext
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 public record NormalOffsetModifier(DoubleVariable distance) implements Modifier<NormalOffsetModifier> {
 
@@ -21,7 +21,7 @@ public record NormalOffsetModifier(DoubleVariable distance) implements Modifier<
 
 	@Override
 	public ModifierType<NormalOffsetModifier> type() {
-		return LibraryRegistries.NORMAL_OFFSET.get();
+		return LibraryObjects.NORMAL_OFFSET.get();
 	}
 
 	@Override

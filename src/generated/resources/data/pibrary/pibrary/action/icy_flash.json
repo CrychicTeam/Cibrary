@@ -1,0 +1,83 @@
+{
+  "action": {
+    "type": "pibrary:list",
+    "children": [
+      {
+        "type": "pibrary:processor",
+        "processors": [
+          {
+            "type": "pibrary:teleport",
+            "x": "PosX",
+            "y": "PosY",
+            "z": "PosZ"
+          }
+        ],
+        "selector": {
+          "type": "pibrary:self"
+        },
+        "target": "all"
+      },
+      {
+        "type": "pibrary:sound",
+        "pitch": "0",
+        "sound": "minecraft:entity.enderman.teleport",
+        "volume": "2"
+      },
+      {
+        "type": "pibrary:processor",
+        "processors": [
+          {
+            "type": "pibrary:damage",
+            "damage": "4",
+            "damage_type": "minecraft:freeze",
+            "indirect": true,
+            "positioned": true
+          },
+          {
+            "type": "pibrary:knockback",
+            "angle": "0",
+            "knockback": "0.1",
+            "tilt": "0"
+          }
+        ],
+        "selector": {
+          "type": "pibrary:cylinder",
+          "r": "1",
+          "y": "2"
+        },
+        "target": "enemy"
+      },
+      {
+        "type": "pibrary:iterate",
+        "child": {
+          "type": "pibrary:move",
+          "child": {
+            "type": "pibrary:particle",
+            "particle": "minecraft:snowflake",
+            "speed": "0.1"
+          },
+          "modifiers": [
+            {
+              "type": "pibrary:random_offset",
+              "shape": "RECT",
+              "x": "2",
+              "y": "2",
+              "z": "2"
+            },
+            {
+              "type": "pibrary:direction",
+              "x": "0",
+              "y": "-1",
+              "z": "0"
+            }
+          ]
+        },
+        "step": "100"
+      }
+    ]
+  },
+  "cast_type": "INSTANT",
+  "icon": "minecraft:snowball",
+  "order": 3100,
+  "trigger_type": "TARGET_POS"
+}

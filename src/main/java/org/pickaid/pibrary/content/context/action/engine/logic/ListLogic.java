@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public record ListLogic(List<ConfiguredEngine<?>> children)
 
 	@Override
 	public EngineType<ListLogic> type() {
-		return LibraryRegistries.LIST.get();
+		return LibraryObjects.LIST.get();
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.action.engine.helper.EngineHelper;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 //TODO This modifier needs further improvements
@@ -31,7 +31,7 @@ public record RandomOffsetModifier(Type shape, DoubleVariable x, DoubleVariable 
 
 	@Override
 	public ModifierType<RandomOffsetModifier> type() {
-		return LibraryRegistries.RANDOM_OFFSET.get();
+		return LibraryObjects.RANDOM_OFFSET.get();
 	}
 
 	@Override

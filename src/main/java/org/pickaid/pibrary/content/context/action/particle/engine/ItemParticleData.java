@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.particle.render.ItemSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.ParticleRenderer;
 import org.pickaid.pibrary.content.context.action.particle.render.SpriteGeom;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,7 +27,7 @@ public record ItemParticleData(
 
 	@Override
 	public ParticleRenderType<ItemParticleData> type() {
-		return LibraryRegistries.ITEM_RENDER.get();
+		return LibraryObjects.ITEM_RENDER.get();
 	}
 
 	@OnlyIn(Dist.CLIENT)

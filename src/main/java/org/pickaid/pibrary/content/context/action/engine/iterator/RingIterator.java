@@ -2,14 +2,14 @@ package org.pickaid.pibrary.content.context.action.engine.iterator;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.phys.Vec3;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.context.LocationContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
-import net.minecraft.world.phys.Vec3;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public record RingIterator(DoubleVariable radius,
 
 	@Override
 	public EngineType<RingIterator> type() {
-		return LibraryRegistries.ITERATE_ARC.get();
+		return LibraryObjects.ITERATE_ARC.get();
 	}
 
 	@Override

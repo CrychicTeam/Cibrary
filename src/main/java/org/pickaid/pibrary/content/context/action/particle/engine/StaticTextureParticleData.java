@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.particle.render.FixedParticleSprite;
 import org.pickaid.pibrary.content.context.action.particle.render.ParticleRenderer;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -25,7 +25,7 @@ public record StaticTextureParticleData(
 
 	@Override
 	public ParticleRenderType<StaticTextureParticleData> type() {
-		return LibraryRegistries.STATIC_RENDER.get();
+		return LibraryObjects.STATIC_RENDER.get();
 	}
 
 	@OnlyIn(Dist.CLIENT)

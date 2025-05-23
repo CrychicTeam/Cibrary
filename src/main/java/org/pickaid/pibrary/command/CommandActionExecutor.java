@@ -5,6 +5,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.ActionContext;
 import org.pickaid.pibrary.content.context.interaction.InteractionAction;
 import org.pickaid.pibrary.content.context.interaction.InteractionActionCastType;
 import net.minecraft.world.entity.LivingEntity;
+import org.pickaid.pibrary.content.logic.ticker.BaseTicker;
 
 public class CommandActionExecutor {
 
@@ -14,7 +15,7 @@ public class CommandActionExecutor {
 			if (val == null) return false;
 			spell.execute(val);
 		} else {
-			GeneralEventHandler.schedulePersistent(new CommandActionExecutor(le, spell, time, power, distance)::tick);
+			BaseTicker.schedule(new CommandActionExecutor(le, spell, time, power, distance)::tick, 0, false);
 		}
 		return true;
 	}

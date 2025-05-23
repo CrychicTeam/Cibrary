@@ -28,7 +28,7 @@ public class ExpressionBuilder {
      *
      * @param expression the expression to be parsed
      */
-    public ExpressionBuilder(String expression) {
+	public ExpressionBuilder(String expression) {
         if (expression == null || expression.trim().length() == 0) {
             throw new IllegalArgumentException("Expression can not be empty");
         }

@@ -4,9 +4,10 @@ import com.mojang.serialization.Codec;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
-;
 import org.pickaid.pibrary.api.core.Reg;
 import org.pickaid.pibrary.init.LibraryRegistries;
+
+;
 
 public record ContextConditionType<T extends ContextPredicate>(Codec<T> codec) {
 	private static final DeferredRegister<ContextConditionType<?>> VANILLA_DEFERRED_REGISTER = Reg.of("minecraft").make(LibraryRegistries.PREDICATE_TYPE_KEY);

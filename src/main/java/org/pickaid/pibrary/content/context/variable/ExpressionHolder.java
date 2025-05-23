@@ -35,6 +35,7 @@ public class ExpressionHolder {
 		if (isConstant) {
 			return constant;
 		}
+		verify(BuilderContext.STATIC);
 		if (exp == null) throw new IllegalStateException("Must call verify before fetching expression");
 		return evalImpl(ctx);
 	}

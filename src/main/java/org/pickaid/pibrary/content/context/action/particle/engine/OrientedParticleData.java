@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.action.particle.render.OrientedSpriteRenderer;
 import org.pickaid.pibrary.content.context.action.particle.render.ParticleRenderer;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -27,7 +27,7 @@ public record OrientedParticleData(
 
 	@Override
 	public ParticleRenderType<OrientedParticleData> type() {
-		return LibraryRegistries.ORIENTED_RENDER.get();
+		return LibraryObjects.ORIENTED_RENDER.get();
 	}
 
 	@Override

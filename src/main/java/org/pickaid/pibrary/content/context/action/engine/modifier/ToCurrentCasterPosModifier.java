@@ -5,7 +5,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.context.LocationContext;
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 public record ToCurrentCasterPosModifier() implements Modifier<ToCurrentCasterPosModifier> {
 
@@ -13,7 +13,7 @@ public record ToCurrentCasterPosModifier() implements Modifier<ToCurrentCasterPo
 
 	@Override
 	public ModifierType<ToCurrentCasterPosModifier> type() {
-		return LibraryRegistries.TO_CASTER_POS.get();
+		return LibraryObjects.TO_CASTER_POS.get();
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.LocationContext
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 public record SetDirectionModifier(DoubleVariable x, DoubleVariable y, DoubleVariable z)
@@ -24,7 +24,7 @@ public record SetDirectionModifier(DoubleVariable x, DoubleVariable y, DoubleVar
 
 	@Override
 	public ModifierType<SetDirectionModifier> type() {
-		return LibraryRegistries.DIRECTION.get();
+		return LibraryObjects.DIRECTION.get();
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -28,7 +28,7 @@ public record SphereRandomIterator(DoubleVariable radius, IntVariable count,
 
 	@Override
 	public EngineType<SphereRandomIterator> type() {
-		return LibraryRegistries.RANDOM_SPHERE.get();
+		return LibraryObjects.RANDOM_SPHERE.get();
 	}
 
 	@Override

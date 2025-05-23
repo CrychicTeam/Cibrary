@@ -7,7 +7,8 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public record DelayedIterator(IntVariable step, IntVariable delay, ConfiguredEng
 
 	@Override
 	public EngineType<DelayedIterator> type() {
-		return LibraryRegistries.ITERATE_DELAY.get();
+		return LibraryObjects.ITERATE_DELAY.get();
 	}
 
 	@Override

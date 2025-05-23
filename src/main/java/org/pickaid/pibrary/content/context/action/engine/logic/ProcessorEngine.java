@@ -8,7 +8,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.core.EntitySelector;
 import org.pickaid.pibrary.content.context.action.engine.selector.SelectionType;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public record ProcessorEngine(
 
 	@Override
 	public EngineType<ProcessorEngine> type() {
-		return LibraryRegistries.PROCESS_ENGINE.get();
+		return LibraryObjects.PROCESS_ENGINE.get();
 	}
 
 	@Override

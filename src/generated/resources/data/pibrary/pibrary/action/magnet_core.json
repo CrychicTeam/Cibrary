@@ -1,0 +1,128 @@
+{
+  "action": {
+    "type": "pibrary:list",
+    "children": [
+      {
+        "type": "pibrary:iterate_delayed",
+        "child": {
+          "type": "pibrary:random_pos_sphere",
+          "child": {
+            "type": "pibrary:dust_particle",
+            "color": "e88b00",
+            "life": "10",
+            "scale": "2",
+            "speed": ".01"
+          },
+          "count": "50",
+          "radius": "0.1+0.005*r"
+        },
+        "delay": "5",
+        "index": "r",
+        "step": "24"
+      },
+      {
+        "type": "pibrary:iterate",
+        "child": {
+          "type": "pibrary:delay",
+          "child": {
+            "type": "pibrary:random_pos_sphere",
+            "child": {
+              "type": "pibrary:dust_particle",
+              "color": "e88b00",
+              "life": "20-2*t",
+              "scale": "2",
+              "speed": "-.5"
+            },
+            "count": "200",
+            "radius": "8"
+          },
+          "tick": "10+30*t-2*t*t"
+        },
+        "index": "t",
+        "step": "6"
+      },
+      {
+        "type": "pibrary:delay",
+        "child": {
+          "type": "pibrary:list",
+          "children": [
+            {
+              "type": "pibrary:random_pos_sphere",
+              "child": {
+                "type": "pibrary:dust_particle",
+                "color": "e88b00",
+                "life": "10",
+                "scale": "2",
+                "speed": "3"
+              },
+              "count": "200",
+              "radius": ".01"
+            },
+            {
+              "type": "pibrary:processor",
+              "processors": [
+                {
+                  "type": "pibrary:damage",
+                  "damage": "20",
+                  "damage_type": "minecraft:indirect_magic",
+                  "indirect": true,
+                  "positioned": false
+                },
+                {
+                  "type": "pibrary:push",
+                  "angle": "0",
+                  "from_center": "TO_CENTER",
+                  "speed": "1",
+                  "tilt": "0"
+                }
+              ],
+              "selector": {
+                "type": "pibrary:box",
+                "center": true,
+                "size": "8",
+                "y": "8"
+              },
+              "target": "enemy"
+            }
+          ]
+        },
+        "tick": "120"
+      },
+      {
+        "type": "pibrary:iterate_delayed",
+        "child": {
+          "type": "pibrary:processor",
+          "processors": [
+            {
+              "type": "pibrary:damage",
+              "damage": "1",
+              "damage_type": "minecraft:indirect_magic",
+              "indirect": true,
+              "positioned": false
+            },
+            {
+              "type": "pibrary:push",
+              "angle": "0",
+              "from_center": "TO_CENTER",
+              "speed": "-.1",
+              "tilt": "0"
+            }
+          ],
+          "selector": {
+            "type": "pibrary:box",
+            "center": true,
+            "size": "16",
+            "y": "16"
+          },
+          "target": "enemy"
+        },
+        "delay": "1",
+        "step": "120"
+      }
+    ]
+  },
+  "cast_type": "INSTANT",
+  "icon": "minecraft:iron_ore",
+  "order": 3000,
+  "trigger_type": "TARGET_POS"
+}

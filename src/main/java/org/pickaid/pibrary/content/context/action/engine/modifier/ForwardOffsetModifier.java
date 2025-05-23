@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.LocationContext
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 public record ForwardOffsetModifier(DoubleVariable distance) implements Modifier<ForwardOffsetModifier> {
 
 	public static Codec<ForwardOffsetModifier> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -20,7 +20,7 @@ public record ForwardOffsetModifier(DoubleVariable distance) implements Modifier
 
 	@Override
 	public ModifierType<ForwardOffsetModifier> type() {
-		return LibraryRegistries.FORWARD.get();
+		return LibraryObjects.FORWARD.get();
 	}
 
 	@Override

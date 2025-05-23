@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.EntitySelector;
 import org.pickaid.pibrary.content.context.action.engine.core.SelectorType;
 import org.pickaid.pibrary.content.context.action.engine.helper.CollisionHelper;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
@@ -25,7 +25,7 @@ public record ApproxBallSelector(
 
 	@Override
 	public SelectorType<ApproxBallSelector> type() {
-		return LibraryRegistries.BALL.get();
+		return LibraryObjects.BALL.get();
 	}
 
 	public LinkedHashSet<LivingEntity> find(ServerLevel sl, EngineContext ctx, SelectionType type) {

@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,7 +34,7 @@ public record EffectProcessor(
 
 	@Override
 	public ProcessorType<EffectProcessor> type() {
-		return LibraryRegistries.EFFECT.get();
+		return LibraryObjects.EFFECT.get();
 	}
 
 	@Override

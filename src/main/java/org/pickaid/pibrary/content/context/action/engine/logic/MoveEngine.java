@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public record MoveEngine(List<Modifier<?>> modifiers, ConfiguredEngine<?> child)
 
 	@Override
 	public EngineType<MoveEngine> type() {
-		return LibraryRegistries.MOVE_ENGINE.get();
+		return LibraryObjects.MOVE_ENGINE.get();
 	}
 
 	@Override

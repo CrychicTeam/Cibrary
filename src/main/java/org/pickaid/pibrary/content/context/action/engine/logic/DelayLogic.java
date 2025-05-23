@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 public record DelayLogic(IntVariable tick, ConfiguredEngine<?> child)
 		implements ConfiguredEngine<DelayLogic> {
@@ -19,7 +19,7 @@ public record DelayLogic(IntVariable tick, ConfiguredEngine<?> child)
 
 	@Override
 	public EngineType<DelayLogic> type() {
-		return LibraryRegistries.DELAY.get();
+		return LibraryObjects.DELAY.get();
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.action.engine.helper.EngineHelper;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -48,7 +48,7 @@ public record PropertyProcessor(
 
 	@Override
 	public ProcessorType<PropertyProcessor> type() {
-		return LibraryRegistries.PROP.get();
+		return LibraryObjects.PROP.get();
 	}
 
 	@Override

@@ -2,12 +2,13 @@ package org.pickaid.pibrary.content.context.action.engine.processor;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.entity.LivingEntity;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
+import org.pickaid.pibrary.init.LibraryObjects;
 import org.pickaid.pibrary.init.LibraryRegistries;
-import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Collection;
 
@@ -25,7 +26,7 @@ public record TeleportProcessor(
 
     @Override
     public ProcessorType<TeleportProcessor> type() {
-        return LibraryRegistries.TP.get();
+        return LibraryObjects.TP.get();
     }
 
     @Override

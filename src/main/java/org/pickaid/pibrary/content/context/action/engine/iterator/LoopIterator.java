@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.ConfiguredEngine;
 import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.variable.IntVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -22,7 +22,7 @@ public record LoopIterator(IntVariable step, ConfiguredEngine<?> child, @Nullabl
 
 	@Override
 	public EngineType<LoopIterator> type() {
-		return LibraryRegistries.ITERATE.get();
+		return LibraryObjects.ITERATE.get();
 	}
 
 	@Override

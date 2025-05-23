@@ -1,0 +1,145 @@
+{
+  "action": {
+    "type": "pibrary:list",
+    "children": [
+      {
+        "type": "pibrary:move",
+        "child": {
+          "type": "pibrary:list",
+          "children": [
+            {
+              "type": "pibrary:processor",
+              "processors": [
+                {
+                  "type": "pibrary:damage",
+                  "damage": "6",
+                  "damage_type": "minecraft:indirect_magic",
+                  "indirect": true,
+                  "positioned": true
+                },
+                {
+                  "type": "pibrary:knockback",
+                  "angle": "0",
+                  "knockback": "1",
+                  "tilt": "0"
+                }
+              ],
+              "selector": {
+                "type": "pibrary:line",
+                "size": "1.0",
+                "step": "24.0"
+              },
+              "target": "enemy"
+            },
+            {
+              "type": "pibrary:iterate_linear",
+              "alongDir": "0.2",
+              "alongOffset": "0",
+              "child": {
+                "type": "pibrary:particle",
+                "particle": "minecraft:end_rod",
+                "speed": "0"
+              },
+              "offset": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "startFromOrigin": true,
+              "step": "120.0"
+            }
+          ]
+        },
+        "modifiers": [
+          {
+            "type": "pibrary:offset",
+            "x": "0",
+            "y": "-0.1",
+            "z": "0"
+          }
+        ]
+      },
+      {
+        "type": "pibrary:random",
+        "child": {
+          "type": "pibrary:move",
+          "child": {
+            "type": "pibrary:iterate_arc",
+            "child": {
+              "type": "pibrary:move",
+              "child": {
+                "type": "pibrary:list",
+                "children": [
+                  {
+                    "type": "pibrary:processor",
+                    "processors": [
+                      {
+                        "type": "pibrary:damage",
+                        "damage": "6",
+                        "damage_type": "minecraft:indirect_magic",
+                        "indirect": true,
+                        "positioned": true
+                      },
+                      {
+                        "type": "pibrary:knockback",
+                        "angle": "0",
+                        "knockback": "1",
+                        "tilt": "0"
+                      }
+                    ],
+                    "selector": {
+                      "type": "pibrary:line",
+                      "size": "1.0",
+                      "step": "24.0"
+                    },
+                    "target": "enemy"
+                  },
+                  {
+                    "type": "pibrary:iterate_linear",
+                    "alongDir": "0.2",
+                    "alongOffset": "0",
+                    "child": {
+                      "type": "pibrary:particle",
+                      "particle": "minecraft:end_rod",
+                      "speed": "0"
+                    },
+                    "offset": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "startFromOrigin": true,
+                    "step": "120.0"
+                  }
+                ]
+              },
+              "modifiers": [
+                {
+                  "type": "pibrary:rotate",
+                  "degree": "0",
+                  "vertical": "75"
+                }
+              ]
+            },
+            "count": "7",
+            "maxAngle": "360+r0*360",
+            "maxInclusive": false,
+            "minAngle": "r0*360",
+            "radius": "0.5"
+          },
+          "modifiers": [
+            {
+              "type": "pibrary:direction_to_normal"
+            }
+          ]
+        },
+        "count": 1,
+        "name": "r"
+      }
+    ]
+  },
+  "cast_type": "INSTANT",
+  "icon": "minecraft:spectral_arrow",
+  "order": 400,
+  "trigger_type": "FACING_FRONT"
+}

@@ -6,7 +6,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 import org.pickaid.pibrary.content.context.action.engine.core.EntitySelector;
 import org.pickaid.pibrary.content.context.action.engine.core.SelectorType;
 import org.pickaid.pibrary.content.context.action.engine.helper.EngineHelper;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -47,7 +47,7 @@ public record CompoundEntitySelector(
 
 	@Override
 	public SelectorType<CompoundEntitySelector> type() {
-		return LibraryRegistries.COMPOUND.get();
+		return LibraryObjects.COMPOUND.get();
 	}
 
 	@Override

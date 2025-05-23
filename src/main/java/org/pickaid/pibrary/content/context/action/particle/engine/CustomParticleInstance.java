@@ -12,7 +12,7 @@ import org.pickaid.pibrary.content.context.action.entity.core.Motion;
 import org.pickaid.pibrary.content.context.action.entity.motion.SimpleMotion;
 import org.pickaid.pibrary.content.context.action.particle.core.ClientParticleData;
 import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticleOption;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.particles.ParticleOptions;
 
 import java.util.Optional;
@@ -38,7 +38,7 @@ public record CustomParticleInstance(
 
 	@Override
 	public EngineType<CustomParticleInstance> type() {
-		return LibraryRegistries.CUSTOM_PARTICLE.get();
+		return LibraryObjects.CUSTOM_PARTICLE.get();
 	}
 
 	@Override

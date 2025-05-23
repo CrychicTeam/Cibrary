@@ -13,7 +13,7 @@ import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticl
 import org.pickaid.pibrary.content.context.action.particle.engine.RenderTypePreset;
 import org.pickaid.pibrary.content.context.action.particle.render.RandomColorParticle;
 import org.pickaid.pibrary.content.context.action.particle.render.TransitionParticleSprite;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.core.particles.ParticleOptions;
 
 public record TransitionParticleInstance(
@@ -32,7 +32,7 @@ public record TransitionParticleInstance(
 
 	@Override
 	public EngineType<TransitionParticleInstance> type() {
-		return LibraryRegistries.TRANSITION_PARTICLE.get();
+		return LibraryObjects.TRANSITION_PARTICLE.get();
 	}
 
 	@Override

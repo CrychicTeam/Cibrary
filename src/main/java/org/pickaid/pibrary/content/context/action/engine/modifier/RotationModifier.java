@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.context.LocationContext
 import org.pickaid.pibrary.content.context.action.engine.core.Modifier;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 
 public record RotationModifier(
 		DoubleVariable degree,
@@ -29,7 +29,7 @@ public record RotationModifier(
 
 	@Override
 	public ModifierType<RotationModifier> type() {
-		return LibraryRegistries.ROTATE.get();
+		return LibraryObjects.ROTATE.get();
 	}
 
 	@Override

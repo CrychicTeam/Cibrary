@@ -7,7 +7,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.EntityProcessor;
 import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.action.engine.helper.Orientation;
 import org.pickaid.pibrary.content.context.variable.DoubleVariable;
-import org.pickaid.pibrary.init.LibraryRegistries;
+import org.pickaid.pibrary.init.LibraryObjects;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ public record KnockBackProcessor(
 
 	@Override
 	public ProcessorType<KnockBackProcessor> type() {
-		return LibraryRegistries.KB.get();
+		return LibraryObjects.KB.get();
 	}
 
 	@Override
