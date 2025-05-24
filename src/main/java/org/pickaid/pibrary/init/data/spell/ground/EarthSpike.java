@@ -49,7 +49,7 @@ public class EarthSpike extends SpellDataGenEntry {
 
     private static ConfiguredEngine<?> earthSpike(DataGenContext ctx) {
         return new ListLogic(List.of(
-                new ProcessorEngine(  // Damage
+                new ProcessorEngine(
                         SelectionType.ENEMY,
                         new ApproxCylinderSelector(
                                 DoubleVariable.of("1.5"),

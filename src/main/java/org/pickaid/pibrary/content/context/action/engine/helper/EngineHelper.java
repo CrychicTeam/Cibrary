@@ -9,6 +9,7 @@ import org.pickaid.pibrary.content.context.action.engine.core.Verifiable;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,15 +35,25 @@ public class EngineHelper {
 			throw new IllegalStateException("class " + cls.getSimpleName() + " is not a record");
 		try {
 			var set = obj.verificationParameters();
-			for (var e : get(cls).children) {
-				Verifiable v = (Verifiable) e.get(obj);
-				if (v != null) v.verify(ctx.of(e.getName(), set));
+			var helper = get(cls);
+
+			// 使用访问器方法而不是直接访问字段
+			for (var accessor : helper.childAccessors) {
+				Verifiable v = (Verifiable) accessor.invoke(obj);
+				if (v != null) {
+					String fieldName = accessor.getName();
+					v.verify(ctx.of(fieldName, set));
+				}
 			}
-			for (var e : get(cls).collections) {
-				List l = (List) e.get(obj);
-				for (int i = 0; i < l.size(); i++) {
-					if (l.get(i) instanceof Verifiable v)
-						v.verify(ctx.of(e.getName() + "[" + i + "]"));
+
+			for (var accessor : helper.collectionAccessors) {
+				List l = (List) accessor.invoke(obj);
+				if (l != null) {
+					String fieldName = accessor.getName();
+					for (int i = 0; i < l.size(); i++) {
+						if (l.get(i) instanceof Verifiable v)
+							v.verify(ctx.of(fieldName + "[" + i + "]", set));
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -58,23 +69,35 @@ public class EngineHelper {
 		}
 	}
 
-	private final List<Field> children = new ArrayList<>();
-	private final List<Field> collections = new ArrayList<>();
+	private final List<Method> childAccessors = new ArrayList<>();
+	private final List<Method> collectionAccessors = new ArrayList<>();
 
 	public EngineHelper(Class<?> cls) throws Exception {
-		assert cls.isRecord();
-		RecordComponent[] components = cls.getRecordComponents();
-		if (components == null) {
-			throw new IllegalStateException("Class " + cls.getSimpleName() + " is not a record or has no components");
+		if (!cls.isRecord()) {
+			throw new IllegalStateException("Class " + cls.getSimpleName() + " is not a record");
 		}
+
+		RecordComponent[] components = cls.getRecordComponents();
+		if (components == null || components.length == 0) {
+			// 空记录也是有效的，只是没有组件需要验证
+			return;
+		}
+
 		for (RecordComponent component : components) {
-			Field field = cls.getDeclaredField(component.getName());
-			field.setAccessible(true);
-			if (Verifiable.class.isAssignableFrom(field.getType())) {
-				children.add(field);
-			}
-			if (List.class.isAssignableFrom(field.getType())) {
-				collections.add(field);
+			try {
+				// 使用记录组件的访问器方法，而不是直接访问字段
+				Method accessor = component.getAccessor();
+				Class<?> fieldType = component.getType();
+
+				if (Verifiable.class.isAssignableFrom(fieldType)) {
+					childAccessors.add(accessor);
+				}
+
+				if (List.class.isAssignableFrom(fieldType)) {
+					collectionAccessors.add(accessor);
+				}
+			} catch (Exception e) {
+				throw new IllegalStateException("Failed to process component " + component.getName() + " in class " + cls.getSimpleName(), e);
 			}
 		}
 	}

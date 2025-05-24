@@ -84,6 +84,8 @@ public class LibraryRegistries {
         MOTION_REGISTRY.register(bus);
         PARTICLE_RENDERER_REGISTRY.register(bus);
         PROJECTILE_RENDERER_REGISTRY.register(bus);
+        ENTITY.register(bus);
+        PARTICLE_TYPE.register(bus);
         bus.addListener(LibraryRegistries::onDataPackRegistryNewRegistry);
     }
 }

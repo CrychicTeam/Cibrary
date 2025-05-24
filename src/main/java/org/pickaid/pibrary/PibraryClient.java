@@ -14,10 +14,10 @@ import org.pickaid.pibrary.content.context.action.entity.renderer.PirojectileRen
 import org.pickaid.pibrary.content.context.action.particle.core.PiGenericParticleProvider;
 import org.pickaid.pibrary.init.LibraryObjects;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class PibraryClient {
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent
     public static void onParticleRegistryEvent(RegisterParticleProvidersEvent event) {
         event.registerSpecial(LibraryObjects.GENERIC_PARTICLE.get(), new PiGenericParticleProvider());
     }

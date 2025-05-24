@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.pickaid.pibrary.network.action.ActionPacket;
 import org.pickaid.pibrary.network.PibraryNetworkHandler;
 
 import java.util.Set;
@@ -63,7 +64,21 @@ public record InteractionAction(ConfiguredEngine<?> action, Item icon, int order
 	}
 
 	public boolean verify(ResourceLocation id) {
-		return action().verify(BuilderContext.withScheduler(Pibrary.LOGGER, id.toString(), params()));
+		Set<String> allParams = collectAllRequiredParams();
+		return action().verify(BuilderContext.withScheduler(Pibrary.LOGGER, id.toString(), allParams));
+	}
+
+	private Set<String> collectAllRequiredParams() {
+		Set<String> baseParams = params();
+		Set<String> actionParams = action().verificationParameters();
+
+		if (actionParams != null && !actionParams.isEmpty()) {
+			Set<String> allParams = new java.util.HashSet<>(baseParams);
+			allParams.addAll(actionParams);
+			return allParams;
+		}
+
+		return baseParams;
 	}
 
 	public void verifyOnBuild(BootstapContext<InteractionAction> ctx, ResourceKey<InteractionAction> id) {
