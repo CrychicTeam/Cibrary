@@ -30,7 +30,6 @@ import org.pickaid.pibrary.network.PibraryNetworkHandler;
 @Mod(Pibrary.MOD_ID)
 public class Pibrary {
 	public static final String MOD_ID = "pibrary";
-	public static final String MODID = MOD_ID; // 别名，方便其他类引用
 	public static Logger LOGGER = LogManager.getLogger();
 	public static final GlobalSoundManager SOUND_MANAGER = GlobalSoundManager.getInstance();
 	public static final ServerKeyHandler KEY_HANDLER = ServerKeyHandler.getInstance();

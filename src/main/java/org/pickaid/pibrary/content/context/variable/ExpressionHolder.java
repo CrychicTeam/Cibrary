@@ -36,7 +36,6 @@ public class ExpressionHolder implements Verifiable {
 			return constant;
 		}
 
-		// 如果表达式还没构建，在运行时构建
 		if (exp == null) {
 			buildExpressionAtRuntime(ctx);
 		}
@@ -62,7 +61,6 @@ public class ExpressionHolder implements Verifiable {
 					.functions(DefaultFunctions.FUNCTIONS)
 					.function(DefaultFunctions.rand(this::random));
 
-			// 使用运行时上下文的参数
 			if (ctx.parameters() != null && !ctx.parameters().isEmpty()) {
 				builder.variables(ctx.parameters().keySet());
 			}

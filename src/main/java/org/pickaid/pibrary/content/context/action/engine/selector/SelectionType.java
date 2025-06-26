@@ -23,7 +23,7 @@ import java.util.function.BiPredicate;
  * register it to the registry using:
  * SelectionType.register(MONSTERS_ONLY);
  */
-public class SelectionType implements ExtendedEnumLike<SelectionType> {
+public class SelectionType implements ExtendedSelectionLike<SelectionType> {
 	public static final SelectionType NONE = new SelectionType("none", (entity, user) -> false);
 	public static final SelectionType ENEMY = new SelectionType("enemy", (entity, user) ->
 			entity instanceof LivingEntity le && le.isAlive() &&

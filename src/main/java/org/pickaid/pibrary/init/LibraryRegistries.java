@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -16,7 +17,6 @@ import org.pickaid.pibrary.content.context.action.engine.core.EngineType;
 import org.pickaid.pibrary.content.context.action.engine.core.ModifierType;
 import org.pickaid.pibrary.content.context.action.engine.core.ProcessorType;
 import org.pickaid.pibrary.content.context.action.engine.core.SelectorType;
-import org.pickaid.pibrary.content.context.action.engine.helper.EngineRegistryInstance;
 import org.pickaid.pibrary.content.context.action.entity.core.MotionType;
 import org.pickaid.pibrary.content.context.action.entity.core.ProjectileConfig;
 import org.pickaid.pibrary.content.context.action.entity.renderer.ProjectileRenderType;
@@ -24,6 +24,8 @@ import org.pickaid.pibrary.content.context.action.particle.engine.ParticleRender
 import org.pickaid.pibrary.content.context.conditions.ContextConditionType;
 import org.pickaid.pibrary.content.context.conditions.ContextPredicate;
 import org.pickaid.pibrary.content.context.interaction.InteractionAction;
+import org.pickaid.pibrary.api.core.registries.BlockEntityHolder;
+import org.pickaid.pibrary.api.core.registries.EntityHolder;
 
 import java.util.function.Supplier;
 
@@ -75,7 +77,8 @@ public class LibraryRegistries {
         event.dataPackRegistry(PROJECTILE, ProjectileConfig.CODEC, ProjectileConfig.CODEC);
     }
 
-    public static void register(IEventBus bus) {
+    public static void register(IEventBus modEventBus) {
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         CONTEXT_PREDICATE_TYPE_DEFERRED.register(bus);
         MODIFIER_REGISTRY.register(bus);
         ENGINE_REGISTRY.register(bus);

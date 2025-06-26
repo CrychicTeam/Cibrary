@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import org.pickaid.pibrary.content.context.action.engine.context.EngineContext;
 
-public interface ExtendedEnumLike<T> {
+public interface ExtendedSelectionLike<T> {
     boolean test(Entity target, LivingEntity user);
 
     Iterable<Entity> select(ServerLevel sl, EngineContext ctx, AABB aabb);

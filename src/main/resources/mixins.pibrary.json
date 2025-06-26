@@ -10,7 +10,8 @@
     "ItemStackMixin",
     "LivingEntityMixin",
     "PersistentEntitySectionManagerAccessor",
-    "ServerLevelAccessor"
+    "ServerLevelAccessor",
+    "ponder.PonderSceneAccessor"
   ],
   "client": [
     "LocalPlayerMixin",
