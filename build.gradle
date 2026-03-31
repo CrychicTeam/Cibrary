@@ -221,7 +221,7 @@ repositories {
         }
     }
     maven { url = "https://maven.createmod.net" }
-    maven { url "https://maven.mihono.cn/repository/pickaid/" }
+    maven { url "https://maven.mihono.cn/repository/pickaid1201/" }
     flatDir { dirs "libraries/${config.mc_version}/all" }
     flatDir { dirs "libraries/${config.mc_version}/classpathOnly" }
     flatDir { dirs "libraries/${config.mc_version}/runtimeOnly" }
