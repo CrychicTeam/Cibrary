@@ -17,7 +17,7 @@ buildscript {
 
 plugins {
     id "com.modrinth.minotaur" version "2.+"
-    id 'net.neoforged.gradle' version '[6.0.13, 6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
@@ -35,6 +35,10 @@ tasks.jarJar.configure {
 
 tasks.jar.configure {
     it.archiveClassifier.set("slim")
+}
+
+tasks.matching { it.name == "reobfJar" }.configureEach {
+    enabled = false
 }
 
 ext.configFile = file("build.txt")
@@ -167,6 +171,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenLocal()
     maven {
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
@@ -208,7 +213,8 @@ repositories {
         }
     }
     maven {
-        url "https://maven.latvian.dev/releases"
+        name = "Lat's Maven"
+        url = "https://maven.latvian.dev/releases"
         content {
             includeGroup "dev.latvian.mods"
             includeGroup "dev.latvian.apps"
@@ -229,14 +235,26 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.neoforged:forge:${config.mc_version}-${config.forge_version}"
+    minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
     compileOnly(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${config.mixin_extras_version}"))
+    annotationProcessor("com.mihono.pickaid:piserializekit:0.0.1") {
+        transitive = false
+    }
+    implementation("com.mihono.pickaid:piserializekit:0.0.1") {
+        transitive = false
+    }
+    implementation("com.mihono.pickaid:pinet:0.0.1") {
+        transitive = false
+    }
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
     compileOnly fg.deobf("com.tterrag.registrate:Registrate:${config.registrate_version}")
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.20,MC1.21)")
 
     if (hasConfig("jei_version") && !config.jei_version.isEmpty()) {
-        compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}-server-api:${config.jei_version}")
+        compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}-common-api:${config.jei_version}")
         compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}-forge-api:${config.jei_version}")
         runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}-forge:${config.jei_version}")
     }
@@ -294,9 +312,13 @@ dependencies {
     compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${config.rhino_version}")
     implementation fg.deobf("dev.architectury:architectury-forge:${config.architectury_version}")
 
-    implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${config.mc_version}:${config.ponder_version}"))
-    compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${config.mc_version}:${config.flywheel_version}"))
-    runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${config.mc_version}:${config.flywheel_version}"))
+    if (hasConfig("ponder_version") && !config.ponder_version.isEmpty()) {
+        implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${config.mc_version}:${config.ponder_version}"))
+    }
+    if (hasConfig("flywheel_version") && !config.flywheel_version.isEmpty()) {
+        compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${config.mc_version}:${config.flywheel_version}"))
+        runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${config.mc_version}:${config.flywheel_version}"))
+    }
 
     def libraries = new File(file("libraries"), "${config.mc_version}")
     if (!libraries.isDirectory()) libraries.mkdirs()
@@ -360,9 +382,14 @@ dependencies {
     } else libDir.mkdir();
 }
 
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
 def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta']
 def replaceProperties = [
         minecraft_version: config.mc_version, minecraft_version_range: config.mc_range,
+        loader_version_range: config.forge_range,
         forge_version    : "${config.mc_version}-${config.forge_version}", forge_version_range: config.forge_range,
         mod_id           : config.mod_id, mod_name: config.mod_name, mod_license: config.mod_license, mod_version: config.mod_version,
         mod_authors      : config.mod_authors, mod_description: config.mod_description,
@@ -398,8 +425,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-//            artifact(tasks.jarJar)
-            artifact jar
+            artifact(tasks.jarJar)
             artifactId = config.mod_id
 
             pom {
@@ -413,11 +439,15 @@ publishing {
     }
     repositories {
         maven {
-            url config.maven_url
-            if (hasConfig("maven_user") && !config.maven_user.isEmpty()) {
+            url = System.env.MAVEN_URL != null ? System.env.MAVEN_URL : config.maven_url
+
+            def mavenUser = System.env.MAVEN_USER != null ? System.env.MAVEN_USER : config.maven_user
+            def mavenPassword = System.env.MAVEN_PASSWORD != null ? System.env.MAVEN_PASSWORD : config.maven_passwd
+
+            if (mavenUser != null && !mavenUser.isEmpty()) {
                 credentials {
-                    username = config.maven_user
-                    password = config.maven_passwd
+                    username = mavenUser
+                    password = mavenPassword
                 }
             }
         }
@@ -457,7 +487,7 @@ modrinth {
     versionType = config.release_type
     uploadFile = jar
     gameVersions = [config.mc_version]
-    loaders = ['Forge', 'NeoForge']
+    loaders = ['Forge']
     dependencies {
         def mods = config.required_mods.split(";")
         if (mods.length > 0 && (mods.length > 1 || !mods[0].isEmpty()))
@@ -522,7 +552,6 @@ curseforge {
         releaseType = config.release_type
         addGameVersion config.mc_version
         addGameVersion "Forge"
-        addGameVersion "NeoForge"
         mainArtifact(jar) {
             displayName = "[${config.mc_version}] ${config.mod_name} - ${config.mod_version}"
         }

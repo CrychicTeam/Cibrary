@@ -1,99 +1,109 @@
 # Pibrary
 
-<div align="center">
-  <img height="200" src="https://docs.mihono.cn/logo.png" width="200"/>
-  <h3>A Powerful Utility Library for Minecraft Modding</h3>
-</div>
+[English](README_EN.md)
 
-## Overview
+`Pibrary` 是 PickAID 系列的根基础模组，不再承担“把所有引擎都塞进一个仓库”的职责。
 
-Pibrary is a utility library for Minecraft Forge mods that provides a wide range of tools and APIs to simplify mod development. To use this library in your project, change the import reference from `pickaid1201` to `pickaid{your_mc_version}` based on your Minecraft version.
+当前 Start stage 的目标很明确：
+1. 保留 `pibrary` 作为真正存在的公共核心模组；
+2. 把跨仓库都要依赖的基础边界沉淀成稳定 API；
+3. 为后续独立仓库提供统一的核心契约，而不是继续扩张旧单体实现；
+4. 让老代码可回溯、可迁移，但不再让 README 继续把它包装成最终架构。
 
-## Supported Versions
+## 当前定位
 
-| Version | Status           |
-|---------|------------------|
-| 1.19.2  | May implement    |
-| 1.20.1  | In development   | 
-| 1.21.1  | Coming soon      |
+`Pibrary` 现在负责以下长期核心能力：
+1. 核心服务定位与基础 service registry；
+2. 配置、诊断、状态、目标选择、注册等通用契约；
+3. 实体生命周期、实体选择与高性能 projectile trace 的公共边界；
+4. 面向可选 `PiJEICompat` 的 JEI 中立模块 / bootstrap / spec 契约；
+5. 作为 Pi 系列公共依赖的最小稳定根；
+6. 为独立基础库和 engine 模组提供共同语言。
 
-## Features
+以下内容不再定义为 `Pibrary` 自身最终边界：
+1. 网络传输实现；
+2. 序列化实现；
+3. KubeJS 插件加速层；
+4. 对象计数 / 反应图 / 数据图逻辑本体；
+5. 相机、叙事、UI、实体特效、数据图等独立引擎。
 
-- **Key Handling System**: Advanced key state machine for managing complex keyboard inputs and key combinations : record normal press, charging press, held pressing and rapid presses.
-- **Custom Effects Framework**: API for creating and managing player and entity effects.
-- **Global Sound Management**: Centralized sound system for better audio control across your mod
-- **Math Utilities**: Helper functions for common mathematical operations in game development
+## 仓库关系
 
-## Installation
+当前推荐关系如下：
+1. `Pibrary`：根核心模组与公共基础 API。
+2. `PiNet`：独立网络基础库。
+3. `PiSerializeKit`：独立序列化基础库。
+4. `PiKubeJSCompat`：独立 KubeJS / RecipeJS / builder compat 库。
+5. `PiJEICompat`：独立 JEI compat 库，把 `api/jei` 中立契约转成真实的 recipe viewer 插件。
+6. `PiDataGraph`：承载对象计数、反应链、图驱动逻辑，并使用 `PiSerializeKit` 做强类型序列化。
+7. 未来的 `PiEngine` 家族：承载相机、UI、动画、故事、渲染桥等上层引擎。
 
-Add the following to your `build.gradle`:
+## 现阶段代码状态
+
+这个仓库目前分成两层：
+1. `src/main/java/org/pickaid/pibrary/api/**`
+   这里开始建立新的核心 API 面。
+2. `src/main/java/org/pickaid/pibrary/content/**` 与其他旧包
+   这里仍保留旧单体时代代码，后续会逐步拆分迁移。
+
+历史单体快照保留在：
+`restore/legacy-monolith-20260331`
+
+它的作用是：
+1. 保留旧实现以便迁移和回看；
+2. 避免在 start stage 里把旧逻辑重新塞回新架构说明里；
+3. 让新 API 可以逐步接管旧内容，而不是一次性硬删。
+
+## Start Stage 已建立的核心 API 方向
+
+当前已经开始明确这些基础面：
+1. `api/core`
+   服务 key 与 service registry。
+2. `api/config`
+   配置条目与配置作用域边界。
+3. `api/diagnostics`
+   调试/诊断输出统一入口。
+4. `api/registry`
+   面向未来 registry kit 的注册请求与阶段定义。
+5. `api/state`
+   通用状态 key 与同步策略。
+6. `api/targeting`
+   目标选择查询与 resolver 契约。
+7. `api/entity`
+   实体生命周期与受击处理边界。
+8. `api/projectile`
+   面向性能优化的 projectile trace / impact 契约。
+9. `api/jei`
+   JEI 中立的 recipe-viewer 契约、模块收集面与 GUI / alias / transfer 规格。
+
+这些类目前刻意保持轻量：
+1. 先把边界做对；
+2. 先能被多个 repo 共同引用；
+3. 等实际 engine/compat 模组接入后，再决定哪些部分需要沉淀成实现。
+
+## 当前不在本阶段直接做满的内容
+
+以下内容本阶段只保留边界，不急着做重量级实现：
+1. 自动配置装配器；
+2. 通用网络同步框架；
+3. 完整 registry helper runtime；
+4. 复杂 targeting 几何实现；
+5. 旧单体功能的一次性迁移。
+6. 对象计数逻辑本体。
+
+## Maven
+
+当前仓库仍使用已有发布仓路径：
 
 ```gradle
 repositories {
-    // Add Pibrary repository
     maven { url = 'https://maven.mihono.cn/repository/pickaid1201/' }
 }
-
-dependencies {
-    implementation 'com.mihono.pickaid:pibrary:VERSION' // Replace VERSION with the desired version
-}
 ```
 
-## Usage
+## 下一步重点
 
-### KeyConfig
-
-To register a KeyConfig, you can use the following code:
-
-```java
-    KEY = new KeyConfig.Builder(Pibrary.MOD_ID, "testskill", GLFW.GLFW_KEY_G)
-                .category("category") // The category of the key
-                .enableCharging() // Enable charging
-                .maxPower(4.0f) // The max power of the key
-                .autoReleaseOnMax(true) // Auto release on max power
-                .setChargingTimeTolerance(500) // The charging time tolerance
-                .setTimeoutTime(100000) // The timeout time
-                .enableRapidClick() // Enable rapid click
-                .setMaxRapidClickCount(10) // The max rapid click count
-                .showDebugMessage() // Show debug message
-//                        .setKeyModifier(KeyModifier.ALT)
-                .build();
-
-```
-
-To include a existing keymaaping inside the keyconfig, you can use the following code:
-
-```java
-    KEY = new KeyConfig.Builder("minecraft", "forward", Minecraft.getInstance().options.keyUp)
-                .build());
-```
-
-As complex state machine, you might shouldn't use all key features of the keyConfig. If some functions work weird, disable normal click expecially when enable rapid click.
-
-When enable rapid click, be aware that the first click of rapid clicks is Normal Pressed type.
-
-### Combo System
-
-Can be used but still in development.
-
-### Custom Effect
-
-Now there's only one handled effect: playerEffect.
-
-For include your own effect in handler, you need to put your player and effect in a map in Pibrary.
-
-```java
-    Pibrary.activeEffects.put(player, new PlayerEffect());
-```
-
-and remove the effect from the map when the effect is finished.
-
-```java
-    Pibrary.activeEffects.remove(player);
-```
-
-This part is still weak and need to be improved.
-
-## Credits
-
-Developed by Pickaid Team
+1. 让 `Pibrary` 的核心 API 被 `PiNet`、`PiSerializeKit`、`PiKubeJSCompat` 和后续 engine repos 实际消费；
+2. 让 `PiDataGraph` 承担对象计数与图驱动逻辑，`PiSerializeKit` 负责强类型序列化边界；
+3. 逐步把旧单体中的通用部分抽离成稳定基础契约；
+4. 按 repo 规划继续拆分引擎实现，而不是让 `pibrary` 再变回总包仓。

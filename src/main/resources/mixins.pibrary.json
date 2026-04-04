@@ -1,23 +1,12 @@
 {
-  "required": true,
-  "priority": 1000,
+  "required": false,
   "minVersion": "0.8",
   "package": "org.pickaid.pibrary.mixin",
-  "refmap": "pibrary.refmap.json",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "EntityMixin",
-    "ItemStackMixin",
-    "LivingEntityMixin",
-    "PersistentEntitySectionManagerAccessor",
-    "ServerLevelAccessor",
-    "ponder.PonderSceneAccessor"
-  ],
-  "client": [
-    "LocalPlayerMixin",
-    "ParticleEngineAccessor",
-    "ParticleMixin"
-  ],
-  "server": [
-  ]
+  "refmap": "pibrary.refmap.json",
+  "mixins": [],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

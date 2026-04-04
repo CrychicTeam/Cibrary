@@ -2,8 +2,8 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name = 'NeoForged'
-            url = 'https://maven.neoforged.net/releases'
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
         }
         maven { url = 'https://maven.parchmentmc.org' }
     }
@@ -12,3 +12,20 @@ pluginManagement {
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
 }
+
+rootProject.name = 'Pibrary'
+
+def includeSiblingBuild = { String relativePath, String groupId, String moduleId ->
+    File siblingDir = file(relativePath)
+    if (!siblingDir.isDirectory()) {
+        return
+    }
+    includeBuild(siblingDir) {
+        dependencySubstitution {
+            substitute(module("${groupId}:${moduleId}")).using(project(":"))
+        }
+    }
+}
+
+includeSiblingBuild("../PiSerializeKit", "com.mihono.pickaid", "piserializekit")
+includeSiblingBuild("../PiNet", "com.mihono.pickaid", "pinet")
