@@ -6,7 +6,7 @@ Define the long-term presentation core that belongs in `Pibrary`.
 
 This design extends the earlier render-boundary draft. It makes one stronger decision:
 
-`Pibrary` does not stop at thin render hooks. It owns the stable presentation contracts that connect host state, sync, invalidation, and client-facing projections across world render, HUD, and screen surfaces.
+`Pibrary` does not stop at thin render hooks. It owns the stable presentation contracts that connect host state, sync, invalidation, and client-facing projections across `world_render`, `hud`, and `screen` surfaces.
 
 `Pibrary` still does not become a render engine or a UI engine.
 
@@ -16,7 +16,7 @@ This design extends the earlier render-boundary draft. It makes one stronger dec
 - host truth;
 - schema-backed state and dirty tracking;
 - sync boundaries and client-apply hooks;
-- presentation contracts for `world`, `hud`, and `screen`;
+- presentation contracts for `world_render`, `hud`, and `screen`;
 - projection scope, cache, and invalidation policy;
 - author-facing APIs that hide generated schema details.
 
@@ -50,12 +50,7 @@ That approach is acceptable for isolated features. It is weak for a platform.
 
 `host owns truth, clients consume projections`
 
-That rule is stable across:
-- `BlockEntity`;
-- `Entity` and `Projectile`;
-- `LivingEntity` services and capability-backed state;
-- `HUD`;
-- `Screen`.
+That rule is stable across multiple host families and multiple surface families.
 
 ## Non-Goals
 
@@ -71,6 +66,32 @@ This design does not put these in `Pibrary`:
 This design also does not replace vanilla or Forge registration. `Pibrary` defines stable contracts. Client packs still register renderers, layers, overlays, and screens through the normal platform entry points.
 
 ## Core Model
+
+### 0. Two Axes
+
+This design is intentionally two-dimensional.
+
+The first axis is host family:
+- `block_entity_host`;
+- `entity_host`;
+- `projectile_host`;
+- `living_service_host`;
+- `level_service_host`;
+- `menu_host`.
+
+The second axis is surface family:
+- `world_render`;
+- `hud`;
+- `screen`.
+
+These axes are orthogonal.
+
+That means:
+- a `BlockEntity` host may contribute projections to `world_render`, `screen`, or a future `viewer`;
+- a living service host may contribute projections to `world_render`, `hud`, and `screen`;
+- `world_render` is a surface name, not a synonym for `Level` or `World` host state.
+
+This distinction is required. Without it, `BlockEntity`, `Entity`, `LivingService`, and `LevelService` appear to be mixed into one object family, which is not the intended design.
 
 ### 1. Host
 
@@ -98,7 +119,7 @@ The host does not own:
 A presentation surface is a consumer family with its own lifecycle.
 
 This design defines three core surfaces:
-- `world`
+- `world_render`
   - used by `BlockEntityRenderer`, `EntityRenderer`, and player `RenderLayer`;
 - `hud`
   - used by overlays, crosshair-adjacent displays, bars, local status panels, and other owner-local UI;
@@ -107,7 +128,7 @@ This design defines three core surfaces:
 
 These surfaces share one mental model but not one lifecycle.
 
-`world` cares about:
+`world_render` cares about:
 - partial tick;
 - render distance;
 - tracking scope;
@@ -205,12 +226,12 @@ public final class RuneMantleService extends PiStatePlayerService<RuneMantleStat
 
     @Override
     public void contributePresentation(PiPresentationContext context) {
-        context.world().snapshot(
+        context.worldRender().snapshot(
                 RuneMantleWorldVisual.class,
                 PiPresentationScope.OWNER_AND_TRACKING,
                 partialTick -> RuneMantleWorldVisual.from(viewState(), partialTick)
         );
-        context.world().refreshOnClientApply(RuneMantleWorldVisual.class);
+        context.worldRender().refreshOnClientApply(RuneMantleWorldVisual.class);
 
         context.hud().snapshot(
                 RuneMantleHudModel.class,
@@ -226,7 +247,7 @@ The render or UI consumer then resolves a typed projection:
 
 ```java
 RuneMantleWorldVisual visual =
-        PiPresentations.world().resolve(player, RuneMantleWorldVisual.class, partialTick);
+        PiPresentations.worldRender().resolve(player, RuneMantleWorldVisual.class, partialTick);
 ```
 
 or:
@@ -247,9 +268,9 @@ This keeps author code short without hiding ownership boundaries.
 
 ## Surface Contracts
 
-### World Surface
+### World Render Surface
 
-`world` exists for world-space consumers.
+`world_render` exists for world-space consumers.
 
 Core responsibilities:
 - typed projection registration;
@@ -361,7 +382,7 @@ Owns:
 - schema-backed state;
 - dirty and route-aware sync boundaries;
 - capability-backed living service attachment and lifecycle;
-- presentation contracts for `world`, `hud`, and `screen`;
+- presentation contracts for `world_render`, `hud`, and `screen`;
 - typed projection scope, cache, and invalidation policy;
 - small host-focused examples and integration tests.
 
@@ -439,7 +460,7 @@ That means:
 Add the core contracts for:
 - `PiPresentationHost`;
 - `PiPresentationContext`;
-- `world`, `hud`, and `screen` subcontexts;
+- `worldRender`, `hud`, and `screen` subcontexts;
 - scope;
 - cache and invalidation policies;
 - session contracts for screens.
@@ -471,7 +492,7 @@ Those repos should grow their own helper APIs on top of the core contracts.
 ### Phase 5. Build Production Examples
 
 Add examples that prove:
-- a block entity world projection;
+- a block entity `world_render` projection;
 - a player layer projection from a living service;
 - a HUD projection from the same service;
 - a screen model plus local session split.
