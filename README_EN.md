@@ -15,17 +15,61 @@ The start-stage goals are explicit:
 `Pibrary` now owns these long-term core responsibilities:
 1. core service location and lightweight service registry contracts;
 2. shared API boundaries for config, diagnostics, state, targeting, and registry support;
-3. shared boundaries for entity lifecycle, targeting, and high-performance projectile tracing;
+3. shared boundaries for entity lifecycle, vehicle lifecycle, targeting, high-performance projectile tracing, projectile lifecycle, and projectile impact handling;
 4. JEI-neutral module, bootstrap, and spec contracts for an optional `PiJEICompat` runtime;
-5. the minimum stable root dependency for the Pi series;
-6. shared language for the independent foundation libs and higher-level engine mods.
+5. the presentation core for `world_render`, `hud`, and `screen`, including typed projection contracts, cache, invalidation, and local screen-session boundaries;
+6. minimal render-core bridge hooks where host sync or host refresh state must stay in core;
+7. the minimum stable root dependency for the Pi series;
+8. shared language for the independent foundation libs and higher-level engine mods.
 
 These are no longer part of `Pibrary`'s final scope:
 1. networking runtime implementation;
 2. serialization runtime implementation;
 3. KubeJS plugin acceleration and RecipeJS compat;
 4. object-counter and reaction-graph gameplay logic itself;
-5. camera, narrative, UI, animation, entity FX, and data-graph engines.
+5. camera, narrative, UI, animation, entity FX, and data-graph engines;
+6. the render engine runtime, backend compatibility, and visual effect pipelines.
+
+## Presentation Core
+
+`Pibrary` now follows one stable rule:
+
+`host owns truth, clients consume projections`
+
+That means:
+1. block entities, living services, and future hosts keep the authoritative state;
+2. `world_render`, `hud`, and `screen` consumers resolve typed projections instead of reading raw host fields directly;
+3. client apply, sync apply, menu data, and explicit invalidation refresh projection caches in one core path;
+4. local screen session state remains client-local and does not silently overwrite host truth;
+5. render-family packs and `PiUI` consume these contracts instead of redefining sync ownership themselves.
+
+## Living Services
+
+If you want a player service with persistent state, register the typed handle once and use that handle everywhere you resolve the service.
+
+```java
+@PiLivingService(namespace = "example", path = "counter_player")
+public final class CounterPlayerService extends PiStatePlayerService<CounterState> {
+    public CounterPlayerService(PiLivingServiceContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleLivingServices {
+    public static final PiLivingServiceType<CounterPlayerService> COUNTER_PLAYER =
+            PiLivingServices.host(CounterPlayerService.class).register();
+
+    private ExampleLivingServices() {
+    }
+
+    public static void register() {
+    }
+}
+
+CounterPlayerService service = ExampleLivingServices.COUNTER_PLAYER.get(player);
+```
+
+Call `ExampleLivingServices.register()` during common bootstrap after descriptor discovery and before sync/bootstrap code that depends on active living services. The empty method is there to force class loading, so the handle field registers exactly once in a place you control.
 
 ## Repo Relationships
 
@@ -37,6 +81,11 @@ Recommended structure at this stage:
 5. `PiJEICompat`: independent JEI compat repo that turns the neutral `api/jei` contracts into a real recipe-viewer plugin.
 6. `PiDataGraph`: object counters, reaction chains, and graph-driven logic built on top of `PiSerializeKit`.
 7. future `PiEngine` family repos: camera, UI, animation, story, render bridge, and other engine-level packs.
+
+In that split:
+1. `Pibrary` owns host truth, presentation contracts, and invalidation policy.
+2. `PiRenderBridge` and render-family packs own the real world render runtime.
+3. `PiUI` owns HUD runtime, screen runtime, widgets, and richer client-side view systems.
 
 ## Current Code State
 
@@ -70,9 +119,9 @@ The current core-facing packages are being defined around:
 6. `api/targeting`
    target query contracts and resolvers.
 7. `api/entity`
-   entity lifecycle and hurt-handling boundaries.
+   entity lifecycle, vehicle lifecycle, and hurt-handling boundaries.
 8. `api/projectile`
-   performance-oriented projectile tracing and impact contracts.
+   performance-oriented projectile tracing, lifecycle hooks, impact handling, and isolated projectile runtime contracts.
 9. `api/jei`
    JEI-neutral recipe-viewer contracts, module bootstrap surfaces, and GUI / alias / transfer specs.
 

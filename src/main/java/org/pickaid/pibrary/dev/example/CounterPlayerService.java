@@ -8,7 +8,6 @@ import org.pickaid.pibrary.api.service.PiAttachedLivingService;
 import org.pickaid.pibrary.api.service.PiCloneAwareLivingService;
 import org.pickaid.pibrary.api.service.PiLivingService;
 import org.pickaid.pibrary.api.service.PiLivingServiceContext;
-import org.pickaid.pibrary.api.service.PiLivingServices;
 import org.pickaid.pibrary.api.service.PiStatePlayerService;
 
 /**
@@ -33,7 +32,7 @@ public final class CounterPlayerService extends PiStatePlayerService<CounterStat
      * @return attached counter service
      */
     public static CounterPlayerService get(Player player) {
-        return PiLivingServices.require(player, CounterPlayerService.class);
+        return CounterLivingServices.COUNTER_PLAYER.get(player);
     }
 
     /**

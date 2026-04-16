@@ -10,8 +10,11 @@ These responsibilities stay in `Pibrary`:
 1. shared core contracts;
 2. service location and public base abstractions;
 3. common config, diagnostics, registry, state, and targeting boundaries;
-4. entity lifecycle, projectile tracing, and JEI-neutral recipe-viewer contracts for the optional compat layer;
-5. migration-safe root mod bootstrap.
+4. entity lifecycle, vehicle lifecycle, projectile lifecycle, projectile tracing, projectile impact runtime, and JEI-neutral recipe-viewer contracts for the optional compat layer;
+5. minimal render-core bridge hooks that expose host-side refresh and extracted-state boundaries;
+6. migration-safe root mod bootstrap.
+
+Living services are explicit activation points: descriptor discovery may be generated, but runtime attachment and sync are driven by registered service handles.
 
 ## Independent Foundation Repos
 
@@ -30,7 +33,7 @@ These belong to engine families, not the root core repo:
 1. camera systems;
 2. UI / HUD / animated screen systems;
 3. story / dialogue / mission systems;
-4. animation and render bridge systems;
+4. render bridge, geo render, player animation, and other visual runtime systems;
 5. entity FX and data-graph gameplay engines.
 
 ## Legacy Code
