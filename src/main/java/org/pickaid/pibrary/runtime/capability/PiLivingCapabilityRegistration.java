@@ -21,8 +21,12 @@ public final class PiLivingCapabilityRegistration {
      */
     @SubscribeEvent
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
-            descriptor.registerCapability(event);
+        try {
+            for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
+                descriptor.registerCapability(event);
+            }
+        } finally {
+            PiActiveLivingServiceRegistry.closeRegistration();
         }
     }
 }

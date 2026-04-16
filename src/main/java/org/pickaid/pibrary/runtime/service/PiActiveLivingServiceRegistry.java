@@ -12,6 +12,7 @@ public final class PiActiveLivingServiceRegistry {
     private static final Map<Class<?>, PiGeneratedLivingServiceDescriptor<?, ?>> BY_TYPE = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, PiGeneratedLivingServiceDescriptor<?, ?>> BY_ID = new ConcurrentHashMap<>();
     private static volatile List<PiGeneratedLivingServiceDescriptor<?, ?>> SNAPSHOT = List.of();
+    private static volatile boolean REGISTRATION_OPEN = true;
 
     private PiActiveLivingServiceRegistry() {
     }
@@ -20,17 +21,24 @@ public final class PiActiveLivingServiceRegistry {
         return register(PiLivingServiceDescriptors.requireGenerated(serviceType));
     }
 
-    public static <T extends PiStateLivingEntityService<?>> PiLivingServiceType<T> register(PiGeneratedLivingServiceDescriptor<T, ?> descriptor) {
-        PiGeneratedLivingServiceDescriptor<?, ?> existingByType = BY_TYPE.putIfAbsent(descriptor.serviceType(), descriptor);
+    public static synchronized <T extends PiStateLivingEntityService<?>> PiLivingServiceType<T> register(PiGeneratedLivingServiceDescriptor<T, ?> descriptor) {
+        if (!REGISTRATION_OPEN) {
+            throw new IllegalStateException(
+                    "Pi living service registration is closed after Forge capability registration has started");
+        }
+
+        PiGeneratedLivingServiceDescriptor<?, ?> existingByType = BY_TYPE.get(descriptor.serviceType());
         if (existingByType != null) {
             return cast(existingByType);
         }
 
-        PiGeneratedLivingServiceDescriptor<?, ?> existingById = BY_ID.putIfAbsent(descriptor.id(), descriptor);
+        PiGeneratedLivingServiceDescriptor<?, ?> existingById = BY_ID.get(descriptor.id());
         if (existingById != null) {
             throw new IllegalStateException("Duplicate active Pi living service id " + descriptor.id());
         }
 
+        BY_TYPE.put(descriptor.serviceType(), descriptor);
+        BY_ID.put(descriptor.id(), descriptor);
         SNAPSHOT = List.copyOf(BY_TYPE.values());
         return descriptor;
     }
@@ -56,10 +64,15 @@ public final class PiActiveLivingServiceRegistry {
                 new IllegalStateException("Pi living service " + serviceType.getName() + " is discovered but not registered"));
     }
 
-    static void clearForTests() {
+    public static synchronized void closeRegistration() {
+        REGISTRATION_OPEN = false;
+    }
+
+    static synchronized void clearForTests() {
         BY_TYPE.clear();
         BY_ID.clear();
         SNAPSHOT = List.of();
+        REGISTRATION_OPEN = true;
     }
 
     @SuppressWarnings("unchecked")
