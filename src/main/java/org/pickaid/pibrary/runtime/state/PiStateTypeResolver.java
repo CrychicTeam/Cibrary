@@ -2,6 +2,9 @@ package org.pickaid.pibrary.runtime.state;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
+import java.util.Map;
 import org.pickaid.pibrary.api.service.PiStateLivingEntityService;
 
 public final class PiStateTypeResolver {
@@ -22,12 +25,18 @@ public final class PiStateTypeResolver {
 
     private static Class<?> resolveTypeArgument(Class<?> leafType, Class<?> targetBase, int index) {
         Class<?> current = leafType;
+        Map<TypeVariable<?>, Type> bindings = new HashMap<>();
         while (current != null && current != Object.class) {
             Type generic = current.getGenericSuperclass();
             if (generic instanceof ParameterizedType parameterized
                     && parameterized.getRawType() instanceof Class<?> rawClass) {
+                TypeVariable<?>[] variables = rawClass.getTypeParameters();
+                Type[] arguments = parameterized.getActualTypeArguments();
+                for (int i = 0; i < variables.length && i < arguments.length; i++) {
+                    bindings.put(variables[i], substitute(arguments[i], bindings));
+                }
                 if (rawClass == targetBase) {
-                    Type actual = parameterized.getActualTypeArguments()[index];
+                    Type actual = substitute(parameterized.getActualTypeArguments()[index], bindings);
                     if (actual instanceof Class<?> actualClass) {
                         return actualClass;
                     }
@@ -47,5 +56,13 @@ public final class PiStateTypeResolver {
             break;
         }
         throw new IllegalStateException("Could not resolve Pi state type for " + leafType.getName());
+    }
+
+    private static Type substitute(Type type, Map<TypeVariable<?>, Type> bindings) {
+        Type current = type;
+        while (current instanceof TypeVariable<?> variable && bindings.containsKey(variable)) {
+            current = bindings.get(variable);
+        }
+        return current;
     }
 }
