@@ -38,6 +38,60 @@ CounterPlayerService service = ExampleLivingServices.COUNTER_PLAYER.get(player);
 
 Call `ExampleLivingServices.register()` during common bootstrap after descriptor discovery and before sync/bootstrap code that depends on active living services. The empty method is there to force class loading, so the handle field registers exactly once in a place you control.
 
+If you want one persistent level service, use the same pattern: define the service class, register one typed handle, and resolve through that handle.
+
+```java
+@PiLevelService(namespace = "example", path = "counter_level")
+public final class CounterLevelService extends PiStateLevelService<CounterState> {
+    public CounterLevelService(PiLevelServiceContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleLevelServices {
+    public static final PiLevelServiceType<CounterLevelService> COUNTER_LEVEL =
+            PiLevelServices.host(CounterLevelService.class).register();
+
+    private ExampleLevelServices() {
+    }
+
+    public static void register() {
+    }
+}
+
+CounterLevelService service = ExampleLevelServices.COUNTER_LEVEL.get(level);
+```
+
+Call `ExampleLevelServices.register()` during your own mod bootstrap. `Pibrary` bootstraps descriptor discovery, but your mod still decides which discovered services become active.
+
+If you want one persistent chunk service, keep the same handle-first pattern.
+
+```java
+@PiChunkService(namespace = "example", path = "counter_chunk")
+public final class CounterChunkService extends PiStateChunkService<CounterState> {
+    public CounterChunkService(PiChunkServiceContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleChunkServices {
+    public static final PiChunkServiceType<CounterChunkService> COUNTER_CHUNK =
+            PiChunkServices.host(CounterChunkService.class).register();
+
+    private ExampleChunkServices() {
+    }
+
+    public static void register() {
+    }
+}
+
+CounterChunkService service = ExampleChunkServices.COUNTER_CHUNK.get(chunk);
+Optional<CounterChunkService> existing = PiChunkServices.find(level, chunkPos, CounterChunkService.class);
+CounterChunkService resolved = PiChunkServices.resolve(level, chunkPos, CounterChunkService.class);
+```
+
+`find(level, chunkPos, ...)` never loads a chunk. `resolve(level, chunkPos, ...)` is the explicit path that may resolve it.
+
 ## Repo Direction
 
 `Pibrary` is being shaped around these long-term responsibilities:

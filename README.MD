@@ -27,6 +27,86 @@
 4. 对象计数 / 反应图 / 数据图逻辑本体；
 5. 相机、叙事、UI、实体特效、数据图等独立引擎。
 
+## 现在怎么用
+
+如果你要做一个持久化的 living service，做法和现在的 `CounterPlayerService` 一样：定义 service 类，注册 typed handle，然后一直通过这个 handle 获取实例。
+
+```java
+@PiLivingService(namespace = "example", path = "counter_player")
+public final class CounterPlayerService extends PiStatePlayerService<CounterState> {
+    public CounterPlayerService(PiLivingServiceContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleLivingServices {
+    public static final PiLivingServiceType<CounterPlayerService> COUNTER_PLAYER =
+            PiLivingServices.host(CounterPlayerService.class).register();
+
+    private ExampleLivingServices() {
+    }
+
+    public static void register() {
+    }
+}
+
+CounterPlayerService service = ExampleLivingServices.COUNTER_PLAYER.get(player);
+```
+
+如果你要做一个持久化的 level service，也用同样的方式：定义 service 类，注册一个 typed handle，然后通过这个 handle 获取实例。
+
+```java
+@PiLevelService(namespace = "example", path = "counter_level")
+public final class CounterLevelService extends PiStateLevelService<CounterState> {
+    public CounterLevelService(PiLevelServiceContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleLevelServices {
+    public static final PiLevelServiceType<CounterLevelService> COUNTER_LEVEL =
+            PiLevelServices.host(CounterLevelService.class).register();
+
+    private ExampleLevelServices() {
+    }
+
+    public static void register() {
+    }
+}
+
+CounterLevelService service = ExampleLevelServices.COUNTER_LEVEL.get(level);
+```
+
+`Pibrary` 只负责 bootstrap 已生成的 descriptor。真正要让这个 service 进入运行时，仍然应该由你的模组在自己的初始化阶段调用 `ExampleLevelServices.register()`。
+
+如果你要做一个持久化的 chunk service，也延续同样的 handle-first 用法。
+
+```java
+@PiChunkService(namespace = "example", path = "counter_chunk")
+public final class CounterChunkService extends PiStateChunkService<CounterState> {
+    public CounterChunkService(PiChunkServiceContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleChunkServices {
+    public static final PiChunkServiceType<CounterChunkService> COUNTER_CHUNK =
+            PiChunkServices.host(CounterChunkService.class).register();
+
+    private ExampleChunkServices() {
+    }
+
+    public static void register() {
+    }
+}
+
+CounterChunkService service = ExampleChunkServices.COUNTER_CHUNK.get(chunk);
+Optional<CounterChunkService> existing = PiChunkServices.find(level, chunkPos, CounterChunkService.class);
+CounterChunkService resolved = PiChunkServices.resolve(level, chunkPos, CounterChunkService.class);
+```
+
+`find(level, chunkPos, ...)` 不会加载区块。`resolve(level, chunkPos, ...)` 才是允许显式解析区块的路径。
+
 ## 仓库关系
 
 当前推荐关系如下：
