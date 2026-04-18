@@ -7,6 +7,18 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.pickaid.pibrary.api.targeting.PiTargetQuery;
 
+/**
+ * Immutable projectile trace request.
+ *
+ * @param level level where the trace runs
+ * @param source source entity of the trace
+ * @param from trace start position
+ * @param to trace end position
+ * @param sweepBounds local projectile bounds used for swept tests
+ * @param targetQuery targeting policy used when filtering entities
+ * @param collisionMode block and entity collision behavior
+ * @param maxEntityHits maximum number of entity hits to keep
+ */
 public record PiProjectileTraceRequest(
         Level level,
         Entity source,
