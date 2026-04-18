@@ -42,6 +42,9 @@ public final class PiChunkServiceContext {
             PibraryServiceContext sharedServices,
             PibraryServiceContext services
     ) {
+        if (chunk == null ^ level == null) {
+            throw new IllegalArgumentException("chunk and level must both be present or both be null");
+        }
         this.chunk = chunk;
         this.level = level;
         this.chunkPos = chunk == null ? new ChunkPos(0, 0) : chunk.getPos();

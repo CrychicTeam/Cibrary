@@ -4,7 +4,6 @@ import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Helpers for chunk-scoped services.
@@ -24,13 +23,13 @@ public final class PiChunkServices {
         throw deferred("type", serviceType);
     }
 
-    public static <T extends PiStateChunkService<?>> Optional<T> find(@Nullable LevelChunk chunk, Class<T> serviceType) {
+    public static <T extends PiStateChunkService<?>> Optional<T> find(LevelChunk chunk, Class<T> serviceType) {
         throw deferred("find(levelChunk)", serviceType);
     }
 
     public static <T extends PiStateChunkService<?>> Optional<T> find(
-            @Nullable ServerLevel level,
-            @Nullable ChunkPos chunkPos,
+            ServerLevel level,
+            ChunkPos chunkPos,
             Class<T> serviceType
     ) {
         throw deferred("find(level,chunkPos)", serviceType);
