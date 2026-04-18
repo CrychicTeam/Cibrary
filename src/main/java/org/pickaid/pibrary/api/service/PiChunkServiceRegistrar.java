@@ -1,6 +1,7 @@
 package org.pickaid.pibrary.api.service;
 
 import java.util.Objects;
+import org.pickaid.pibrary.runtime.chunk.PiActiveChunkServiceRegistry;
 
 /**
  * Registration handle for chunk services.
@@ -20,7 +21,6 @@ public final class PiChunkServiceRegistrar<T extends PiStateChunkService<?>> {
      * @return registered chunk service type
      */
     public PiChunkServiceType<T> register() {
-        throw new UnsupportedOperationException(
-                "Chunk service registration for " + serviceType.getName() + " is deferred until Task 3");
+        return PiActiveChunkServiceRegistry.register(serviceType);
     }
 }

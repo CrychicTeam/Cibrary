@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.pickaid.pibrary.runtime.chunk.PiChunkRuntimeAccess;
 
 /**
  * Typed handle for a registered chunk service.
@@ -18,8 +19,7 @@ public interface PiChunkServiceType<T extends PiStateChunkService<?>> {
     boolean isRegistered();
 
     default Optional<T> find(LevelChunk chunk) {
-        throw new UnsupportedOperationException(
-                "Chunk service lookup for " + serviceType().getName() + " is deferred until Task 3");
+        return PiChunkRuntimeAccess.find(chunk, serviceType());
     }
 
     default T get(LevelChunk chunk) {
