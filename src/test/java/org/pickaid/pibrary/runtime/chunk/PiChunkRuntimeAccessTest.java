@@ -33,7 +33,7 @@ class PiChunkRuntimeAccessTest {
         PiChunkRuntimeAccess.install(access);
         PiChunkServices.host(CounterChunkService.class).register();
 
-        Optional<CounterChunkService> found = PiChunkRuntimeAccess.find(level, pos, CounterChunkService.class);
+        Optional<CounterChunkService> found = PiChunkServices.find(level, pos, CounterChunkService.class);
 
         assertTrue(found.isPresent());
         assertSame(service, found.orElseThrow());
@@ -52,7 +52,7 @@ class PiChunkRuntimeAccessTest {
         PiChunkRuntimeAccess.install(access);
         PiChunkServices.host(CounterChunkService.class).register();
 
-        CounterChunkService resolved = PiChunkRuntimeAccess.resolve(level, pos, CounterChunkService.class);
+        CounterChunkService resolved = PiChunkServices.resolve(level, pos, CounterChunkService.class);
 
         assertSame(service, resolved);
         assertSame(level, access.resolveLevel);
