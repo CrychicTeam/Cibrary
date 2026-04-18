@@ -4,6 +4,12 @@ import java.util.List;
 import java.util.Objects;
 import net.minecraft.world.item.ItemStack;
 
+/**
+ * Alias mapping from one or more item stacks to searchable JEI alias strings.
+ *
+ * @param itemStacks aliased item stacks
+ * @param aliases searchable alias strings
+ */
 public record PiJeiAliasSpec(
         List<ItemStack> itemStacks,
         List<String> aliases

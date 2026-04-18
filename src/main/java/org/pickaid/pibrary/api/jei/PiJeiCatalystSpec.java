@@ -4,6 +4,12 @@ import java.util.List;
 import java.util.Objects;
 import net.minecraft.world.item.ItemStack;
 
+/**
+ * Item stacks that should appear as catalysts for one recipe type.
+ *
+ * @param recipeType target recipe type
+ * @param itemStacks catalyst stacks
+ */
 public record PiJeiCatalystSpec(
         PiJeiRecipeTypeKey<?> recipeType,
         List<ItemStack> itemStacks

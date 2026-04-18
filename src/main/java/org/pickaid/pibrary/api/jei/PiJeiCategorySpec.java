@@ -3,6 +3,16 @@ package org.pickaid.pibrary.api.jei;
 import java.util.Objects;
 import net.minecraft.network.chat.Component;
 
+/**
+ * Neutral recipe category description.
+ *
+ * @param recipeType recipe type key
+ * @param title visible category title
+ * @param width display width
+ * @param height display height
+ * @param sortOrder relative sort order
+ * @param <R> recipe type
+ */
 public record PiJeiCategorySpec<R>(
         PiJeiRecipeTypeKey<R> recipeType,
         Component title,
