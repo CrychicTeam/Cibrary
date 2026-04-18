@@ -13,7 +13,7 @@ import org.pickaid.pibrary.api.core.PibraryServiceContext;
 public final class PiChunkServiceContext {
     private final @Nullable LevelChunk chunk;
     private final @Nullable ServerLevel level;
-    private final ChunkPos chunkPos;
+    private final @Nullable ChunkPos chunkPos;
     private final PibraryServiceContext sharedServices;
     private final PibraryServiceContext services;
 
@@ -45,9 +45,12 @@ public final class PiChunkServiceContext {
         if (chunk == null ^ level == null) {
             throw new IllegalArgumentException("chunk and level must both be present or both be null");
         }
+        if (chunk != null && chunk.getLevel() != level) {
+            throw new IllegalArgumentException("chunk must belong to the provided level");
+        }
         this.chunk = chunk;
         this.level = level;
-        this.chunkPos = chunk == null ? new ChunkPos(0, 0) : chunk.getPos();
+        this.chunkPos = chunk == null ? null : chunk.getPos();
         this.sharedServices = Objects.requireNonNull(sharedServices, "sharedServices");
         this.services = Objects.requireNonNull(services, "services");
     }
@@ -85,6 +88,9 @@ public final class PiChunkServiceContext {
      * @return chunk position
      */
     public ChunkPos chunkPos() {
+        if (chunkPos == null) {
+            throw new IllegalStateException("Detached chunk service context has no chunk position");
+        }
         return chunkPos;
     }
 
