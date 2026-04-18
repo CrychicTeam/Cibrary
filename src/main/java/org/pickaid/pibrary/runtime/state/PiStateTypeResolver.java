@@ -5,6 +5,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
+import org.pickaid.pibrary.api.service.PiStateChunkService;
+import org.pickaid.pibrary.api.service.PiStateLevelService;
 import org.pickaid.pibrary.api.service.PiStateLivingEntityService;
 
 public final class PiStateTypeResolver {
@@ -14,6 +16,18 @@ public final class PiStateTypeResolver {
             return resolveTypeArgument(type, PiStateLivingEntityService.class, 0);
         }
     };
+    private static final ClassValue<Class<?>> LEVEL_SERVICE_STATE_TYPES = new ClassValue<>() {
+        @Override
+        protected Class<?> computeValue(Class<?> type) {
+            return resolveTypeArgument(type, PiStateLevelService.class, 0);
+        }
+    };
+    private static final ClassValue<Class<?>> CHUNK_SERVICE_STATE_TYPES = new ClassValue<>() {
+        @Override
+        protected Class<?> computeValue(Class<?> type) {
+            return resolveTypeArgument(type, PiStateChunkService.class, 0);
+        }
+    };
 
     private PiStateTypeResolver() {
     }
@@ -21,6 +35,16 @@ public final class PiStateTypeResolver {
     @SuppressWarnings("unchecked")
     public static <S> Class<S> livingServiceStateType(Class<? extends PiStateLivingEntityService<S>> serviceType) {
         return (Class<S>) LIVING_SERVICE_STATE_TYPES.get(serviceType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <S> Class<S> levelServiceStateType(Class<? extends PiStateLevelService<S>> serviceType) {
+        return (Class<S>) LEVEL_SERVICE_STATE_TYPES.get(serviceType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <S> Class<S> chunkServiceStateType(Class<? extends PiStateChunkService<S>> serviceType) {
+        return (Class<S>) CHUNK_SERVICE_STATE_TYPES.get(serviceType);
     }
 
     private static Class<?> resolveTypeArgument(Class<?> leafType, Class<?> targetBase, int index) {
