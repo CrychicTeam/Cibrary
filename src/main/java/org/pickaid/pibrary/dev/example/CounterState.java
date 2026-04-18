@@ -6,7 +6,10 @@ import org.pickaid.piserializekit.api.schema.PiField;
 import org.pickaid.piserializekit.api.schema.PiSyncModel;
 import org.pickaid.piserializekit.api.schema.PiSyncScope;
 
-@PiSyncModel(version = 1)
+/**
+ * Sample generated state model shared by the block entity and living-service examples.
+ */
+@PiSyncModel(id = "pibrary:counter_state", version = 1)
 public final class CounterState {
     @PiField(id = "count", sync = PiSyncScope.CHUNK, persist = true)
     public int count;
@@ -25,4 +28,7 @@ public final class CounterState {
 
     @PiField(id = "trial", sync = PiSyncScope.TRACKING, persist = true)
     public ResourceLocation trial = ResourceLocation.parse("pibrary:counter");
+
+    @PiField(id = "session_glow", sync = PiSyncScope.CHUNK, persist = false)
+    public int sessionGlow;
 }

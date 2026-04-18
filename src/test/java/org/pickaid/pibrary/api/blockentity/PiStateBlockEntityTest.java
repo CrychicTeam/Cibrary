@@ -1,6 +1,8 @@
 package org.pickaid.pibrary.api.blockentity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import net.minecraft.core.BlockPos;
@@ -45,6 +47,49 @@ class PiStateBlockEntityTest {
 
         assertEquals(1, target.viewState().count);
         assertEquals(1, target.renderRefreshCalls);
+    }
+
+    @Test
+    void persistentAndClientStateUseDedicatedStateSlot() {
+        TestBlockEntity blockEntity = new TestBlockEntity();
+        blockEntity.increment();
+
+        CompoundTag persistentTag = new CompoundTag();
+        blockEntity.saveAdditional(persistentTag);
+        assertTrue(persistentTag.contains(PiStateBlockEntity.STATE_TAG));
+        assertTrue(persistentTag.getCompound(PiStateBlockEntity.STATE_TAG).contains("count"));
+        assertFalse(persistentTag.contains("count"));
+
+        CompoundTag updateTag = blockEntity.getUpdateTag();
+        assertTrue(updateTag.contains(PiStateBlockEntity.STATE_TAG));
+        assertTrue(updateTag.getCompound(PiStateBlockEntity.STATE_TAG).contains("count"));
+        assertFalse(updateTag.contains("count"));
+    }
+
+    @Test
+    void persistentStateUsesPersistedProjectionInsteadOfFullState() {
+        TestBlockEntity blockEntity = new TestBlockEntity();
+        blockEntity.updateState(state -> {
+            state.count = 3;
+            state.sessionGlow = 8;
+            state.energy = 5;
+        });
+
+        CompoundTag persistentTag = new CompoundTag();
+        blockEntity.saveAdditional(persistentTag);
+        CompoundTag stateTag = persistentTag.getCompound(PiStateBlockEntity.STATE_TAG);
+
+        assertTrue(stateTag.contains("count"));
+        assertTrue(stateTag.contains("energy"));
+        assertFalse(stateTag.contains("session_glow"));
+
+        TestBlockEntity restored = new TestBlockEntity();
+        restored.viewState().sessionGlow = 42;
+        restored.load(persistentTag);
+
+        assertEquals(3, restored.viewState().count);
+        assertEquals(5, restored.viewState().energy);
+        assertEquals(42, restored.viewState().sessionGlow);
     }
 
     private static ClientboundBlockEntityDataPacket createPacket(CompoundTag tag) {
