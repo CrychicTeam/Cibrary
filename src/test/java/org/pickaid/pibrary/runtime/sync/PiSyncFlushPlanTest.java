@@ -9,6 +9,8 @@ import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
+import org.pickaid.pibrary.api.core.PibraryServiceContext;
+import org.pickaid.pibrary.api.core.PibraryServices;
 import org.pickaid.pibrary.api.service.PiLivingServiceContext;
 import org.pickaid.pibrary.api.service.PiLivingServiceHost;
 import org.pickaid.pibrary.dev.example.CounterPlayerService;
@@ -21,10 +23,17 @@ import org.pickaid.piserializekit.api.schema.PiFieldKey;
 import org.pickaid.piserializekit.api.schema.PiSyncScope;
 
 class PiSyncFlushPlanTest {
+    private static final PibraryServiceContext DETACHED_SERVICES = PibraryServices.create();
+
     private static final PiLivingServiceHost DETACHED_HOST = new PiLivingServiceHost() {
         @Override
         public net.minecraft.world.entity.LivingEntity living() {
             return null;
+        }
+
+        @Override
+        public PibraryServiceContext services() {
+            return DETACHED_SERVICES;
         }
 
         @Override

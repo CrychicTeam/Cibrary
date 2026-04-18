@@ -5,15 +5,23 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.pickaid.pinet.api.channel.PiChannelId;
 import org.pickaid.pinet.api.service.PiNetService;
-import org.pickaid.pinet.api.sync.PiSyncEnvelope;
+import org.pickaid.pinet.api.sync.model.PiSyncEnvelope;
 import org.pickaid.pibrary.api.sync.PiSyncBridge;
 
+/**
+ * Default {@link PiSyncBridge} implementation backed by {@code PiNet}.
+ */
 public final class PiNetSyncBridge implements PiSyncBridge {
     private static final PiChannelId SYNC_CHANNEL =
             new PiChannelId(ResourceLocation.fromNamespaceAndPath("pibrary", "sync"));
 
     private final PiNetService netService;
 
+    /**
+     * Creates a sync bridge using the provided PiNet service.
+     *
+     * @param netService PiNet service used for message delivery
+     */
     public PiNetSyncBridge(PiNetService netService) {
         this.netService = netService;
     }

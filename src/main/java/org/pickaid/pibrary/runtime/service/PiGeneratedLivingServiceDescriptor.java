@@ -184,7 +184,7 @@ public abstract class PiGeneratedLivingServiceDescriptor<T extends PiStateLiving
     }
 
     /**
-     * Creates a query context for author-facing lookups.
+     * Creates a query context for resolving services against one living entity.
      *
      * @param living owning entity, when available
      * @return living service context
