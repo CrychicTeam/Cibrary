@@ -14,7 +14,7 @@ import org.pickaid.pibrary.api.service.PiChunkServiceContext;
 import org.pickaid.pibrary.api.service.PiChunkServices;
 import org.pickaid.pibrary.api.service.PiStateChunkService;
 import org.pickaid.pibrary.api.core.PibraryServices;
-import org.pickaid.pibrary.dev.example.CounterState;
+import org.pickaid.pibrary.dev.example.CounterChunkService;
 import sun.misc.Unsafe;
 
 class PiChunkRuntimeAccessTest {
@@ -28,12 +28,12 @@ class PiChunkRuntimeAccessTest {
     void findUsesLoadedLookupWithoutResolvingChunks() {
         ServerLevel level = null;
         ChunkPos pos = new ChunkPos(5, 6);
-        TestChunkService service = new TestChunkService(new PiChunkServiceContext(null, null, PibraryServices.create()));
+        CounterChunkService service = new CounterChunkService(new PiChunkServiceContext(null, null, PibraryServices.create()));
         FakeChunkRuntimeAccess access = new FakeChunkRuntimeAccess(service);
         PiChunkRuntimeAccess.install(access);
-        PiChunkServices.host(TestChunkService.class).register();
+        PiChunkServices.host(CounterChunkService.class).register();
 
-        Optional<TestChunkService> found = PiChunkServices.find(level, pos, TestChunkService.class);
+        Optional<CounterChunkService> found = PiChunkRuntimeAccess.find(level, pos, CounterChunkService.class);
 
         assertTrue(found.isPresent());
         assertSame(service, found.orElseThrow());
@@ -47,12 +47,12 @@ class PiChunkRuntimeAccessTest {
     void resolveUsesExplicitResolvingPath() {
         ServerLevel level = null;
         ChunkPos pos = new ChunkPos(7, 8);
-        TestChunkService service = new TestChunkService(new PiChunkServiceContext(null, null, PibraryServices.create()));
+        CounterChunkService service = new CounterChunkService(new PiChunkServiceContext(null, null, PibraryServices.create()));
         FakeChunkRuntimeAccess access = new FakeChunkRuntimeAccess(service);
         PiChunkRuntimeAccess.install(access);
-        PiChunkServices.host(TestChunkService.class).register();
+        PiChunkServices.host(CounterChunkService.class).register();
 
-        TestChunkService resolved = PiChunkServices.resolve(level, pos, TestChunkService.class);
+        CounterChunkService resolved = PiChunkRuntimeAccess.resolve(level, pos, CounterChunkService.class);
 
         assertSame(service, resolved);
         assertSame(level, access.resolveLevel);
@@ -62,7 +62,7 @@ class PiChunkRuntimeAccessTest {
     }
 
     private static final class FakeChunkRuntimeAccess implements PiChunkRuntimeAccess.Access {
-        private final TestChunkService service;
+        private final CounterChunkService service;
         private ServerLevel loadedLookupLevel;
         private ChunkPos loadedLookupPos;
         private ServerLevel resolveLevel;
@@ -70,7 +70,7 @@ class PiChunkRuntimeAccessTest {
         private int loadedLookupCalls;
         private int resolveCalls;
 
-        private FakeChunkRuntimeAccess(TestChunkService service) {
+        private FakeChunkRuntimeAccess(CounterChunkService service) {
             this.service = service;
         }
 
@@ -93,12 +93,6 @@ class PiChunkRuntimeAccessTest {
         @Override
         public <T extends PiStateChunkService<?>> Optional<T> find(LevelChunk chunk, Class<T> serviceType) {
             return Optional.of(serviceType.cast(service));
-        }
-    }
-
-    private static final class TestChunkService extends PiStateChunkService<CounterState> {
-        private TestChunkService(PiChunkServiceContext context) {
-            super(context);
         }
     }
 

@@ -31,17 +31,16 @@ public final class PiChunkRuntimeAccess {
             ChunkPos chunkPos,
             Class<T> serviceType
     ) {
-        if (chunkPos == null) {
-            return Optional.empty();
-        }
+        Objects.requireNonNull(chunkPos, "chunkPos");
+        Objects.requireNonNull(serviceType, "serviceType");
         LevelChunk chunk = access.getLoadedChunk(level, chunkPos);
         return chunk == null ? Optional.empty() : access.find(chunk, serviceType);
     }
 
     public static <T extends PiStateChunkService<?>> T resolve(ServerLevel level, ChunkPos chunkPos, Class<T> serviceType) {
-        LevelChunk chunk = access.getOrCreateChunk(
-                level,
-                Objects.requireNonNull(chunkPos, "chunkPos"));
+        Objects.requireNonNull(chunkPos, "chunkPos");
+        Objects.requireNonNull(serviceType, "serviceType");
+        LevelChunk chunk = access.getOrCreateChunk(level, chunkPos);
         return access.find(chunk, serviceType).orElseThrow(() ->
                 new IllegalStateException("Missing Pi chunk service " + serviceType.getName() + " on " + chunkPos));
     }

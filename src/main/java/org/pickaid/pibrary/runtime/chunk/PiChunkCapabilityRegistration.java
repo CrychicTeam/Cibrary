@@ -13,8 +13,10 @@ public final class PiChunkCapabilityRegistration {
     @SubscribeEvent
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         try {
-            for (var descriptor : PiActiveChunkServiceRegistry.activeDescriptors()) {
-                descriptor.registerCapability(event);
+            if (event != null) {
+                for (var descriptor : PiActiveChunkServiceRegistry.activeDescriptors()) {
+                    descriptor.registerCapability(event);
+                }
             }
         } finally {
             PiActiveChunkServiceRegistry.closeRegistration();

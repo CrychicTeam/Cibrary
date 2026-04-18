@@ -77,45 +77,24 @@ class PiStateChunkServiceTest {
     }
 
     @Test
-    void deferredChunkApiContractsAreExplicit() {
+    void chunkApiContractsAreLiveAndNullSafe() {
         LevelChunk chunk = allocate(LevelChunk.class);
         ChunkPos pos = new ChunkPos(5, 6);
 
-        UnsupportedOperationException register = assertThrows(
-                UnsupportedOperationException.class,
+        IllegalStateException register = assertThrows(
+                IllegalStateException.class,
                 () -> PiChunkServices.host(TestChunkService.class).register()
         );
-        assertTrue(register.getMessage().contains("Task 3"));
+        assertTrue(register.getMessage().contains("descriptor"));
 
-        UnsupportedOperationException type = assertThrows(
-                UnsupportedOperationException.class,
+        IllegalStateException type = assertThrows(
+                IllegalStateException.class,
                 () -> PiChunkServices.type(TestChunkService.class)
         );
-        assertTrue(type.getMessage().contains("Task 3"));
+        assertTrue(type.getMessage().contains("not registered"));
 
-        UnsupportedOperationException findChunk = assertThrows(
-                UnsupportedOperationException.class,
-                () -> PiChunkServices.find(chunk, TestChunkService.class)
-        );
-        assertTrue(findChunk.getMessage().contains("Task 3"));
-
-        UnsupportedOperationException findPos = assertThrows(
-                UnsupportedOperationException.class,
-                () -> PiChunkServices.find((ServerLevel) null, pos, TestChunkService.class)
-        );
-        assertTrue(findPos.getMessage().contains("Task 3"));
-
-        UnsupportedOperationException require = assertThrows(
-                UnsupportedOperationException.class,
-                () -> PiChunkServices.require(chunk, TestChunkService.class)
-        );
-        assertTrue(require.getMessage().contains("Task 3"));
-
-        UnsupportedOperationException resolve = assertThrows(
-                UnsupportedOperationException.class,
-                () -> PiChunkServices.resolve((ServerLevel) null, pos, TestChunkService.class)
-        );
-        assertTrue(resolve.getMessage().contains("Task 3"));
+        assertTrue(PiChunkServices.find((LevelChunk) null, TestChunkService.class).isEmpty());
+        assertTrue(PiChunkServices.find((ServerLevel) null, pos, TestChunkService.class).isEmpty());
 
         PiChunkServiceType<TestChunkService> typeHandle = new PiChunkServiceType<>() {
             @Override
@@ -134,11 +113,7 @@ class PiStateChunkServiceTest {
             }
         };
 
-        UnsupportedOperationException directFind = assertThrows(
-                UnsupportedOperationException.class,
-                () -> typeHandle.find(chunk)
-        );
-        assertTrue(directFind.getMessage().contains("Task 3"));
+        assertTrue(typeHandle.find(chunk).isEmpty());
     }
 
     private static final class TestChunkService extends PiStateChunkService<CounterState> {

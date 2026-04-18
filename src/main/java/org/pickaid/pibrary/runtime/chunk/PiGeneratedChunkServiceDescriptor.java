@@ -65,7 +65,9 @@ public abstract class PiGeneratedChunkServiceDescriptor<T extends PiStateChunkSe
     }
 
     public void registerCapability(RegisterCapabilitiesEvent event) {
-        event.register(serviceType);
+        if (event != null) {
+            event.register(serviceType);
+        }
     }
 
     public final PiChunkServiceContext context(LevelChunk chunk) {
