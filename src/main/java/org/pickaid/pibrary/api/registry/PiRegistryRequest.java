@@ -6,6 +6,15 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
+/**
+ * Immutable registration request for a future registry helper runtime.
+ *
+ * @param registryKey target registry key
+ * @param id registered entry id
+ * @param factory factory creating the value
+ * @param phase requested registration phase
+ * @param <T> registered value type
+ */
 public record PiRegistryRequest<T>(
         ResourceKey<? extends Registry<T>> registryKey,
         ResourceLocation id,
