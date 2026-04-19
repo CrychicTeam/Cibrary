@@ -3,13 +3,15 @@ package org.pickaid.pibrary.runtime.service;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.pickaid.pibrary.api.registrate.PiRegistrate;
+import org.pickaid.pibrary.api.registrate.PiRegistrateTestSupport;
 import org.pickaid.pibrary.api.service.PiLivingServiceType;
 import org.pickaid.pibrary.api.service.PiLivingServiceContext;
 import org.pickaid.pibrary.api.service.PiLivingServices;
@@ -19,6 +21,11 @@ import org.pickaid.pibrary.runtime.capability.PiLivingCapabilityRegistration;
 
 class PiLivingServiceRegistrationTest {
     private static final ResourceLocation DUPLICATE_ID = ResourceLocation.fromNamespaceAndPath("test", "duplicate");
+
+    @BeforeEach
+    void resetRegistryBeforeTest() {
+        PiActiveLivingServiceRegistry.clearForTests();
+    }
 
     @AfterEach
     void clearRegistry() {
@@ -36,6 +43,24 @@ class PiLivingServiceRegistrationTest {
     void hostRegisterReturnsStableTypedHandle() {
         PiLivingServiceType<CounterPlayerService> first = PiLivingServices.host(CounterPlayerService.class).register();
         PiLivingServiceType<CounterPlayerService> second = PiLivingServices.host(CounterPlayerService.class).register();
+
+        assertSame(first, second);
+        assertSame(first, PiLivingServices.type(CounterPlayerService.class));
+        assertTrue(first.isRegistered());
+    }
+
+    @Test
+    void registratePlayerEntryReturnsStableTypedHandle() {
+        PiRegistrate registrate = PiRegistrateTestSupport.create("pibrary");
+
+        PiLivingServiceType<CounterPlayerService> first = registrate
+                .playerService("counter_player", CounterState.class, CounterPlayerService::new)
+                .ownerSync()
+                .persisted()
+                .register(CounterPlayerService.class);
+        PiLivingServiceType<CounterPlayerService> second = registrate
+                .playerService("counter_player", CounterState.class, CounterPlayerService::new)
+                .register(CounterPlayerService.class);
 
         assertSame(first, second);
         assertSame(first, PiLivingServices.type(CounterPlayerService.class));

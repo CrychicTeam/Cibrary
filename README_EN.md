@@ -10,6 +10,37 @@ The start-stage goals are explicit:
 3. provide one common root for future independent repos instead of growing the old monolith further;
 4. preserve legacy code for migration, without letting the README pretend that legacy structure is still the target architecture.
 
+## PiRegistrate
+
+`PiRegistrate` is now the preferred main registration root. Normal content, registries, host services, config, and creative tabs can all start from one place instead of scattering registration code across unrelated helpers.
+
+```java
+public static final PiRegistrate REG = PiRegistrate.create(MODID);
+
+public static final PiRegistryHandle<SpellType> SPELL_TYPES =
+        REG.customRegistry("spell_type", SpellType.class)
+                .codec(SpellType.CODEC)
+                .defaultKey("basic")
+                .register();
+
+public static final PiLevelServiceType<WeatherService> WEATHER =
+        REG.levelService("weather", WeatherState.class, WeatherService::new)
+                .persisted()
+                .noSyncByDefault()
+                .register(WeatherService.class);
+
+public static final PiConfigEntry<Integer> COMBAT =
+        REG.config("combat", Codec.INT, 5)
+                .scope(PiConfigScope.SERVER_DATA_PACK)
+                .register();
+
+public static final PiCreativeTabRegistration MAIN_TAB =
+        REG.creativeTab("main", "PickAID")
+                .register();
+```
+
+If you already use direct `PiLivingServices.host(...)`, `PiChunkServices.host(...)`, or `PiLevelServices.host(...)` registration, that path still works. The main change is that `PiRegistrate` is now the cleaner default entry point for new code.
+
 ## Use It Today
 
 If you want a player service with persistent state, register the typed handle once and use that handle everywhere you resolve the service.

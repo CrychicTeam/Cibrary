@@ -27,6 +27,37 @@
 4. 对象计数 / 反应图 / 数据图逻辑本体；
 5. 相机、叙事、UI、实体特效、数据图等独立引擎。
 
+## PiRegistrate
+
+现在推荐把 `PiRegistrate` 当成主注册入口。常见内容、registry、host service、config、creative tab 都从一个根出去，初始化代码会明显更集中。
+
+```java
+public static final PiRegistrate REG = PiRegistrate.create(MODID);
+
+public static final PiRegistryHandle<SpellType> SPELL_TYPES =
+        REG.customRegistry("spell_type", SpellType.class)
+                .codec(SpellType.CODEC)
+                .defaultKey("basic")
+                .register();
+
+public static final PiLevelServiceType<WeatherService> WEATHER =
+        REG.levelService("weather", WeatherState.class, WeatherService::new)
+                .persisted()
+                .noSyncByDefault()
+                .register(WeatherService.class);
+
+public static final PiConfigEntry<Integer> COMBAT =
+        REG.config("combat", Codec.INT, 5)
+                .scope(PiConfigScope.SERVER_DATA_PACK)
+                .register();
+
+public static final PiCreativeTabRegistration MAIN_TAB =
+        REG.creativeTab("main", "PickAID")
+                .register();
+```
+
+如果你已经在用 `PiLivingServices.host(...)`、`PiChunkServices.host(...)`、`PiLevelServices.host(...)` 这条直接路径，也不用改旧代码。那条路径仍然成立；只是新代码更建议从 `PiRegistrate` 收束。
+
 ## 现在怎么用
 
 如果你要做一个持久化的 living service，做法和现在的 `CounterPlayerService` 一样：定义 service 类，注册 typed handle，然后一直通过这个 handle 获取实例。

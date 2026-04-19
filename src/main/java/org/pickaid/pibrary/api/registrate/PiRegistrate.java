@@ -10,10 +10,22 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.RegisterEvent;
 import org.jetbrains.annotations.Nullable;
+import org.pickaid.pibrary.api.blockentity.PiStateBlockEntity;
+import org.pickaid.pibrary.api.registrate.config.PiConfigRegistration;
+import org.pickaid.pibrary.api.registrate.config.PiCreativeTabRegistration;
+import org.pickaid.pibrary.api.registrate.host.PiBlockEntityStateEntry;
+import org.pickaid.pibrary.api.registrate.host.PiChunkServiceEntry;
+import org.pickaid.pibrary.api.registrate.host.PiEntityServiceEntry;
 import org.pickaid.pibrary.api.registrate.host.PiLevelServiceEntry;
+import org.pickaid.pibrary.api.registrate.host.PiPlayerServiceEntry;
 import org.pickaid.pibrary.api.registrate.registry.PiCustomRegistryBuilder;
 import org.pickaid.pibrary.api.registrate.registry.PiDatapackRegistryBuilder;
+import org.pickaid.pibrary.api.service.PiChunkServiceContext;
+import org.pickaid.pibrary.api.service.PiStateChunkService;
 import org.pickaid.pibrary.api.service.PiLevelServiceContext;
+import org.pickaid.pibrary.api.service.PiLivingServiceContext;
+import org.pickaid.pibrary.api.service.PiStateLevelService;
+import org.pickaid.pibrary.api.service.PiStateLivingEntityService;
 
 public final class PiRegistrate extends AbstractRegistrate<PiRegistrate> {
     private final PiRegistrateContext context;
@@ -83,7 +95,51 @@ public final class PiRegistrate extends AbstractRegistrate<PiRegistrate> {
         return new PiDatapackRegistryBuilder<>(this, path, directCodec, networkCodec);
     }
 
-    public <S, T> PiLevelServiceEntry<S, T> levelService(String path, Class<S> stateType, Function<PiLevelServiceContext, T> factory) {
+    public <T> PiConfigRegistration<T> config(String path, Codec<T> codec, T defaultValue) {
+        return new PiConfigRegistration<>(this, path, codec, defaultValue);
+    }
+
+    public PiCreativeTabRegistration creativeTab(String path, String title) {
+        return new PiCreativeTabRegistration(this, path, title);
+    }
+
+    public <S, T extends PiStateLivingEntityService<S>> PiEntityServiceEntry<S, T> entityService(
+            String path,
+            Class<S> stateType,
+            Function<PiLivingServiceContext, T> factory
+    ) {
+        return new PiEntityServiceEntry<>(this, path, stateType, factory);
+    }
+
+    public <S, T extends PiStateLivingEntityService<S>> PiPlayerServiceEntry<S, T> playerService(
+            String path,
+            Class<S> stateType,
+            Function<PiLivingServiceContext, T> factory
+    ) {
+        return new PiPlayerServiceEntry<>(this, path, stateType, factory);
+    }
+
+    public <S, T extends PiStateChunkService<S>> PiChunkServiceEntry<S, T> chunkService(
+            String path,
+            Class<S> stateType,
+            Function<PiChunkServiceContext, T> factory
+    ) {
+        return new PiChunkServiceEntry<>(this, path, stateType, factory);
+    }
+
+    public <S, T extends PiStateLevelService<S>> PiLevelServiceEntry<S, T> levelService(
+            String path,
+            Class<S> stateType,
+            Function<PiLevelServiceContext, T> factory
+    ) {
         return new PiLevelServiceEntry<>(this, path, stateType, factory);
+    }
+
+    public <S, T extends PiStateBlockEntity<S>> PiBlockEntityStateEntry<S, T> blockEntityService(
+            String path,
+            Class<S> stateType,
+            Class<T> blockEntityType
+    ) {
+        return new PiBlockEntityStateEntry<>(this, path, stateType, blockEntityType);
     }
 }

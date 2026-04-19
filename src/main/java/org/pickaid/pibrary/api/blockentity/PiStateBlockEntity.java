@@ -1,5 +1,6 @@
 package org.pickaid.pibrary.api.blockentity;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,11 +31,22 @@ public abstract class PiStateBlockEntity<S> extends BlockEntity {
      */
     public static final String STATE_TAG = "__pi_state";
 
+    private final Class<S> stateType;
     private final PiHostState<S> host;
 
     protected PiStateBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, Class<S> stateType) {
         super(type, pos, state);
-        this.host = new PiHostState<>(stateType);
+        this.stateType = Objects.requireNonNull(stateType, "stateType");
+        this.host = new PiHostState<>(this.stateType);
+    }
+
+    /**
+     * Returns the declared backing state type for registration and tooling.
+     *
+     * @return backing state type
+     */
+    public final Class<S> stateType() {
+        return stateType;
     }
 
     /**

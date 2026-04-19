@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraft.resources.ResourceLocation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.pickaid.pibrary.api.registrate.PiRegistrate;
+import org.pickaid.pibrary.api.registrate.PiRegistrateTestSupport;
 import org.pickaid.pibrary.api.service.PiLevelServiceContext;
 import org.pickaid.pibrary.api.service.PiLevelServiceStorage;
 import org.pickaid.pibrary.api.service.PiLevelServiceStorages;
@@ -18,6 +21,11 @@ import org.pickaid.pibrary.dev.example.CounterState;
 
 class PiLevelServiceRegistrationTest {
     private static final ResourceLocation DUPLICATE_ID = ResourceLocation.fromNamespaceAndPath("test", "duplicate_level");
+
+    @BeforeEach
+    void resetRegistryBeforeTest() {
+        PiActiveLevelServiceRegistry.clearForTests();
+    }
 
     @AfterEach
     void clearRegistry() {
@@ -34,6 +42,24 @@ class PiLevelServiceRegistrationTest {
     void hostRegisterReturnsStableTypedHandle() {
         PiLevelServiceType<CounterLevelService> first = PiLevelServices.host(CounterLevelService.class).register();
         PiLevelServiceType<CounterLevelService> second = PiLevelServices.host(CounterLevelService.class).register();
+
+        assertSame(first, second);
+        assertSame(first, PiLevelServices.type(CounterLevelService.class));
+        assertTrue(first.isRegistered());
+    }
+
+    @Test
+    void registrateLevelEntryReturnsStableTypedHandle() {
+        PiRegistrate registrate = PiRegistrateTestSupport.create("pibrary");
+
+        PiLevelServiceType<CounterLevelService> first = registrate
+                .levelService("counter_level", CounterState.class, CounterLevelService::new)
+                .noSyncByDefault()
+                .persisted()
+                .register(CounterLevelService.class);
+        PiLevelServiceType<CounterLevelService> second = registrate
+                .levelService("counter_level", CounterState.class, CounterLevelService::new)
+                .register(CounterLevelService.class);
 
         assertSame(first, second);
         assertSame(first, PiLevelServices.type(CounterLevelService.class));

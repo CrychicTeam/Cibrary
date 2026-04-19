@@ -21,6 +21,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.RegisterEvent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.pickaid.pibrary.dev.example.CounterBlockEntity;
+import org.pickaid.pibrary.dev.example.CounterChunkService;
+import org.pickaid.pibrary.dev.example.CounterLevelService;
+import org.pickaid.pibrary.dev.example.CounterPlayerService;
+import org.pickaid.pibrary.dev.example.CounterState;
 
 class PiRegistrateTest {
     @BeforeAll
@@ -68,7 +73,13 @@ class PiRegistrateTest {
 
         assertNotNull(registrate.customRegistry("spell_type", String.class));
         assertNotNull(registrate.datapackRegistry("spell_preset", Codec.STRING, Codec.STRING));
-        assertNotNull(registrate.levelService("weather", Object.class, context -> null));
+        assertNotNull(registrate.entityService("counter_entity", CounterState.class, CounterPlayerService::new));
+        assertNotNull(registrate.playerService("counter_player", CounterState.class, CounterPlayerService::new));
+        assertNotNull(registrate.chunkService("counter_chunk", CounterState.class, CounterChunkService::new));
+        assertNotNull(registrate.levelService("counter_level", CounterState.class, CounterLevelService::new));
+        assertNotNull(registrate.blockEntityService("counter_block", CounterState.class, CounterBlockEntity.class));
+        assertNotNull(registrate.config("combat", Codec.INT, 5));
+        assertNotNull(registrate.creativeTab("main", "PickAID"));
     }
 
     private static boolean isKnownNetworkBootstrapIssue(ExceptionInInitializerError exception) {
