@@ -16,8 +16,8 @@ public final class PiDatapackRegistryBuilder<T> {
     public PiDatapackRegistryBuilder(PiRegistrate owner, String path, Codec<T> directCodec, Codec<T> networkCodec) {
         this.owner = Objects.requireNonNull(owner, "owner");
         this.path = Objects.requireNonNull(path, "path");
-        this.directCodec = directCodec;
-        this.networkCodec = networkCodec;
+        this.directCodec = Objects.requireNonNull(directCodec, "directCodec");
+        this.networkCodec = Objects.requireNonNull(networkCodec, "networkCodec");
     }
 
     public PiDatapackRegistryBuilder<T> syncToClient() {

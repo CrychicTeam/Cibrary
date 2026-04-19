@@ -85,7 +85,7 @@ class PiCustomRegistryBuilderTest {
                 IllegalStateException.class,
                 () -> PiRegistryCatalog.require(missingKey));
 
-        assertEquals("Missing custom registry: pickaid:missing", exception.getMessage());
+        assertEquals("Missing registry: pickaid:missing", exception.getMessage());
     }
 
     private static PiRegistrate createRegistrate() {

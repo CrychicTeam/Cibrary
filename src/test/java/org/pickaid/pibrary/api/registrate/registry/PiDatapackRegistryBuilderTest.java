@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.serialization.Codec;
@@ -50,9 +51,8 @@ class PiDatapackRegistryBuilderTest {
     void registerCapturesDirectAndNetworkCodec() {
         PiRegistrate registrate = createRegistrate();
 
-        PiDatapackRegistryHandle<String> handle = registrate.datapackRegistry("spell_preset", Codec.STRING, Codec.STRING)
-                .syncToClient()
-                .register();
+        PiDatapackRegistryHandle<String> handle =
+                registrate.datapackRegistry("spell_preset", Codec.STRING, Codec.STRING).register();
 
         assertEquals("pickaid:spell_preset", handle.registryKey().location().toString());
         assertSame(Codec.STRING, handle.codec());
@@ -70,6 +70,40 @@ class PiDatapackRegistryBuilderTest {
                 .register();
 
         assertFalse(handle.syncToClient());
+    }
+
+    @Test
+    void duplicateDatapackRegistryKeyIsRejected() {
+        PiRegistrate registrate = createRegistrate();
+        registrate.datapackRegistry("spell_preset", Codec.STRING, Codec.STRING).register();
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> registrate.datapackRegistry("spell_preset", Codec.STRING, Codec.STRING).register());
+
+        assertEquals("Duplicate datapack registry: pickaid:spell_preset", exception.getMessage());
+    }
+
+    @Test
+    void registerRequiresDirectCodec() {
+        PiRegistrate registrate = createRegistrate();
+
+        NullPointerException exception = assertThrows(
+                NullPointerException.class,
+                () -> registrate.datapackRegistry("spell_preset", null, Codec.STRING));
+
+        assertEquals("directCodec", exception.getMessage());
+    }
+
+    @Test
+    void registerRequiresNetworkCodecEvenWithoutClientSync() {
+        PiRegistrate registrate = createRegistrate();
+
+        NullPointerException exception = assertThrows(
+                NullPointerException.class,
+                () -> registrate.datapackRegistry("spell_preset", Codec.STRING, null));
+
+        assertEquals("networkCodec", exception.getMessage());
     }
 
     private static PiRegistrate createRegistrate() {

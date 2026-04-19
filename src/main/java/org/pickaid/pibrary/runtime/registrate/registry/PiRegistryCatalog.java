@@ -30,7 +30,7 @@ public final class PiRegistryCatalog {
     }
 
     public static <T> PiRegistryHandle<T> require(ResourceKey<Registry<T>> key) {
-        return find(key).orElseThrow(() -> new IllegalStateException("Missing custom registry: " + key.location()));
+        return find(key).orElseThrow(() -> new IllegalStateException("Missing registry: " + key.location()));
     }
 
     static synchronized void clearForTests() {
