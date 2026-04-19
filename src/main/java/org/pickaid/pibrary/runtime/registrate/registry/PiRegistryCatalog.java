@@ -16,7 +16,10 @@ public final class PiRegistryCatalog {
     public static synchronized <T> PiRegistryHandle<T> register(PiRegistryHandle<T> handle) {
         Object previous = ENTRIES.putIfAbsent(handle.registryKey(), handle);
         if (previous != null) {
-            throw new IllegalStateException("Duplicate custom registry: " + handle.registryKey().location());
+            String prefix = handle instanceof org.pickaid.pibrary.api.registrate.registry.PiDatapackRegistryHandle<?>
+                    ? "datapack registry"
+                    : "custom registry";
+            throw new IllegalStateException("Duplicate " + prefix + ": " + handle.registryKey().location());
         }
         return handle;
     }
