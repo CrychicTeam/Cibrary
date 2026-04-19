@@ -10,6 +10,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -36,7 +39,13 @@ class PiCustomRegistryBuilderTest {
 
     @AfterEach
     void clearCatalog() {
-        PiRegistryCatalog.clearForTests();
+        try {
+            Method method = PiRegistryCatalog.class.getDeclaredMethod("clearForTests");
+            method.setAccessible(true);
+            method.invoke(null);
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError("Unable to clear PiRegistryCatalog for tests", exception);
+        }
     }
 
     @Test
@@ -51,6 +60,7 @@ class PiCustomRegistryBuilderTest {
         assertEquals("pickaid:spell_type", handle.registryKey().location().toString());
         assertEquals("pickaid:fire", handle.id("fire").toString());
         assertEquals("pickaid:basic", handle.defaultKey().location().toString());
+        assertSame(Codec.STRING, handle.codec());
         assertSame(handle, PiRegistryCatalog.require(handle.registryKey()));
     }
 
@@ -64,6 +74,18 @@ class PiCustomRegistryBuilderTest {
                 () -> registrate.customRegistry("spell_type", String.class).codec(Codec.STRING).register());
 
         assertEquals("Duplicate custom registry: pickaid:spell_type", exception.getMessage());
+    }
+
+    @Test
+    void requireRejectsMissingRegistryKey() {
+        ResourceKey<Registry<String>> missingKey =
+                ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("pickaid", "missing"));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> PiRegistryCatalog.require(missingKey));
+
+        assertEquals("Missing custom registry: pickaid:missing", exception.getMessage());
     }
 
     private static PiRegistrate createRegistrate() {
