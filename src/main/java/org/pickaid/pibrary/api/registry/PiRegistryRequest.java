@@ -7,6 +7,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 /**
+ * Legacy internal request model kept only for bridge migration.
+ * New public registry entry points live under {@code api.registrate.registry}.
+ *
  * Immutable registration request for a future registry helper runtime.
  *
  * @param registryKey target registry key
