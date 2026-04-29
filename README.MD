@@ -124,7 +124,7 @@ PiConfigValues values = PiConfigValues.builder(ExampleConfigs.GAMEPLAY)
 int maxEnergy = values.get(ExampleConfigs.MAX_ENERGY);
 ```
 
-方块、物品、方块实体、模型、loot、recipe 继续按 Registrate 的写法来。Pibrary 给这条链补的是常用短句：id 路径、通用 entry 回调、datagen hook、基础材质、挖掘 tag、简单 item tag 等。
+方块、物品、方块实体、模型、loot、recipe 继续按 Registrate 的写法来。`tag(...)`、`properties(...)`、`simpleItem()`、`defaultLoot()`、`defaultModel()` 这些 Registrate 已经有的能力，直接写通常更清楚。Pibrary 在这条链上主要补 id 路径、创造栏 section / NBT 变体、tint 声明，以及少数确实能减少重复的组合操作。
 
 如果你的项目只是正常注册方块和物品，直接用 `PiRegistrate`：
 
@@ -135,26 +135,22 @@ public final class ExampleEntries {
     public static final BlockEntry<Block> RELAY_CORE = REGISTRATE
             .block("relay_core", Block::new)
             .initialProperties(PiBlockProps::metal)
-            .transform(PiBlockTransforms.machine())
-            .transform(PiBlockTransforms.pickaxeOnly())
-            .transform(PiBlockTransforms.needsIronTool())
-            .transform(PiBlockTransforms.noOcclusion())
-            .transform(PiBlockTransforms.noMobSpawn())
-            .transform(PiEntryTransforms.onRegister(block -> {
+            .properties(properties -> properties
+                    .noOcclusion()
+                    .isValidSpawn((state, level, pos, type) -> false))
+            .blockAndItemTag(Tags.Blocks.STORAGE_BLOCKS_IRON, Tags.Items.STORAGE_BLOCKS_IRON)
+            .blockTags(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL)
+            .section("machines")
+            .onRegister(block -> {
                 // 这里可以接自己的全局缓存、运行时索引或调试统计。
-            }))
-            .transform(PiBlockTransforms.defaultBlockstateAndLoot())
-            .transform(PiBlockTransforms.tagBlockAndSimpleItem(
-                    Tags.Blocks.STORAGE_BLOCKS_IRON,
-                    Tags.Items.STORAGE_BLOCKS_IRON))
+            })
             .register();
 
     public static final ItemEntry<Item> COPPER_WAND = REGISTRATE
             .item("copper_wand", Item::new)
-            .transform(PiItemTransforms.stacksTo(1))
-            .transform(PiItemTransforms.fireResistant())
-            .transform(PiItemTransforms.tag(Tags.Items.INGOTS_COPPER))
-            .transform(PiItemTransforms.defaultModel())
+            .properties(properties -> properties.stacksTo(1).fireResistant())
+            .itemTags(Tags.Items.INGOTS_COPPER)
+            .section("materials")
             .register();
 
     public static final RegistryEntry<SoundEvent> RELAY_OPEN = REGISTRATE
@@ -162,9 +158,9 @@ public final class ExampleEntries {
                     "relay_open",
                     Registries.SOUND_EVENT,
                     () -> SoundEvent.createVariableRangeEvent(REGISTRATE.loc("relay_open")))
-            .transform(PiEntryTransforms.onRegister(sound -> {
-                // 这不是 block/item，也能使用同一套 entry-level transform。
-            }))
+            .onRegister(sound -> {
+                // 这不是 block/item，也能使用 Registrate 自带的注册回调。
+            })
             .register();
 
     private ExampleEntries() {
@@ -192,7 +188,7 @@ public final class ExampleEntries {
     public static final BlockEntry<Block> CHARGING_TABLE = REGISTRATE
             .block("charging_table", Block::new)
             .section("machines")
-            .transform(PiBlockTransforms.machine())
+            .initialProperties(PiBlockProps::metal)
             .simpleItem()
             .register();
 
@@ -242,8 +238,7 @@ static ItemBuilder<Item, PiRegistrate> spellScrollFromRegistry(
                     (stack, spell) -> stack.getOrCreateTag()
                             .putString("spell", spellId(spells, spell).toString()))
             .searchOnly()
-            .transform(PiItemTransforms.stacksTo(1))
-            .transform(PiItemTransforms.defaultModel());
+            .properties(properties -> properties.stacksTo(1));
 }
 
 private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellType spell) {
@@ -261,7 +256,7 @@ private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellT
 
 `section("materials")` 使用默认创造栏；默认创造栏可以在同一个注册类里稍后声明，Pibrary 会等到注册事件真正处理内容时再解析它。多个 tab 混用时不要依赖默认值，直接写 `section(tabKey, "materials")`。
 
-如果你的项目有自己的核心概念，例如 spell、trait、machine、module，不要把这些东西塞进 `PiBlockTransforms`。直接做一个自己的 Registrate 入口，把项目里的词写成方法：
+如果你的项目有自己的核心概念，例如 spell、trait、machine、module，不要把这些东西塞进 Pibrary 的通用 helper。直接做一个自己的 Registrate 入口，把项目里的词写成方法：
 
 ```java
 public final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
@@ -291,7 +286,7 @@ public final class ExampleSpells {
 
     public static final RegistryEntry<SpellType> FIREBALL = REGISTRATE
             .spell("fireball", FireballSpell::new)
-            .transform(PiEntryTransforms.onRegister(SpellRuntime::index))
+            .onRegister(SpellRuntime::index)
             .register();
 }
 ```
@@ -300,8 +295,8 @@ public final class ExampleSpells {
 
 这里有四层，不要混在一起：
 
-1. `PiEntryTransforms` 是通用层，任何 Registrate builder 都能用，例如 block、item、sound、particle、自定义 registry entry。它适合放注册回调、datagen hook、注册后索引这种“不是某个类型专属”的逻辑。
-2. `PiBlockTransforms` / `PiItemTransforms` 是类型层，只放确实属于方块或物品的短句，例如挖掘 tag、方块基础属性、物品 stack size。
+1. Registrate 原生链负责注册主流程：`properties(...)`、`tag(...)`、`item()`、`model(...)`、`loot(...)`、`onRegister(...)` 能直接表达清楚时就直接用。
+2. Pibrary 的 builder 方法负责少数 Registrate 不够顺手的地方，例如 `section(...)`、`variants(...)`、`blockTags(...)`、`itemTags(...)`、`blockAndItemTag(...)`。
 3. `REGISTRATE.tintFoliage(...)` / `tintBlock(...)` / `tintItem(...)` 是客户端 tint 层，常用颜色直接用短方法，复杂颜色再交给 builder。
 4. 复杂 blockstate、复杂 loot、特殊 renderer、复杂 block entity 继续直接写 Registrate 原生链，避免包装成“看起来统一但实际很别扭”的假架构。
 
@@ -311,7 +306,6 @@ public final class ExampleSpells {
 public static final BlockEntry<Block> GLOWING_LEAVES = REGISTRATE
         .block("glowing_leaves", Block::new)
         .initialProperties(PiBlockProps::wood)
-        .transform(PiBlockTransforms.defaultBlockstateAndLoot())
         .register();
 
 public static void registerClientTints() {

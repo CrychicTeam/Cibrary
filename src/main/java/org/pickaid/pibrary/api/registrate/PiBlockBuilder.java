@@ -2,11 +2,14 @@ package org.pickaid.pibrary.api.registrate;
 
 import com.tterrag.registrate.AbstractRegistrate;
 import com.tterrag.registrate.builders.BlockBuilder;
+import com.tterrag.registrate.builders.BlockEntityBuilder;
 import com.tterrag.registrate.builders.BuilderCallback;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
+import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -15,10 +18,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.pickaid.pibrary.api.creative.PiCreativeContentRegistry;
 import org.pickaid.pibrary.api.creative.PiCreativeVisibility;
@@ -84,6 +90,94 @@ public class PiBlockBuilder<T extends Block, P> extends BlockBuilder<T, P> {
     public PiBlockBuilder<T, P> section(ResourceKey<CreativeModeTab> tab, String section) {
         this.tab = PiCreativeTabTarget.explicit(tab);
         this.section = requireSection(section);
+        return this;
+    }
+
+    /**
+     * Creates the simple block item and applies an item tag to it.
+     *
+     * <p>Use this instead of a transform when a block needs a generated item
+     * with item-side tags. It keeps the call in the block registration chain
+     * without hiding Registrate's normal {@code tag(...)} method for block
+     * tags.</p>
+     */
+    public PiBlockBuilder<T, P> itemTag(TagKey<Item> tag) {
+        return itemTags(tag);
+    }
+
+    /**
+     * Creates the simple block item and applies item tags to it.
+     */
+    @SafeVarargs
+    public final PiBlockBuilder<T, P> itemTags(TagKey<Item>... tags) {
+        item().tag(copyItemTags(tags)).build();
+        return this;
+    }
+
+    /**
+     * Applies a block tag and creates a simple block item with the matching
+     * item tag.
+     */
+    public PiBlockBuilder<T, P> blockAndItemTag(TagKey<Block> blockTag, TagKey<Item> itemTag) {
+        tag(Objects.requireNonNull(blockTag, "blockTag"));
+        return itemTag(itemTag);
+    }
+
+    public PiBlockBuilder<T, P> blockTag(TagKey<Block> tag) {
+        return blockTags(tag);
+    }
+
+    @SafeVarargs
+    public final PiBlockBuilder<T, P> blockTags(TagKey<Block>... tags) {
+        Objects.requireNonNull(tags, "tags");
+        for (TagKey<Block> tag : tags) {
+            tag(Objects.requireNonNull(tag, "tag"));
+        }
+        return this;
+    }
+
+    public PiBlockBuilder<T, P> requiresTool() {
+        return properties(BlockBehaviour.Properties::requiresCorrectToolForDrops);
+    }
+
+    public PiBlockBuilder<T, P> noOcclusion() {
+        return properties(BlockBehaviour.Properties::noOcclusion);
+    }
+
+    public PiBlockBuilder<T, P> noMobSpawn() {
+        return properties(properties -> properties.isValidSpawn((state, level, pos, type) -> false));
+    }
+
+    public PiBlockBuilder<T, P> lightLevel(int value) {
+        if (value < 0 || value > 15) {
+            throw new IllegalArgumentException("light level must be inside [0, 15]");
+        }
+        return properties(properties -> properties.lightLevel(state -> value));
+    }
+
+    @Override
+    public PiBlockBuilder<T, P> properties(NonNullUnaryOperator<BlockBehaviour.Properties> func) {
+        super.properties(func);
+        return this;
+    }
+
+    @Override
+    public PiBlockBuilder<T, P> initialProperties(NonNullSupplier<? extends Block> properties) {
+        super.initialProperties(properties);
+        return this;
+    }
+
+    @Override
+    public PiBlockBuilder<T, P> simpleItem() {
+        super.simpleItem();
+        return this;
+    }
+
+    @Override
+    public <BE extends BlockEntity> PiBlockBuilder<T, P> simpleBlockEntity(
+            BlockEntityBuilder.BlockEntityFactory<BE> factory
+    ) {
+        super.simpleBlockEntity(factory);
         return this;
     }
 
@@ -189,6 +283,15 @@ public class PiBlockBuilder<T extends Block, P> extends BlockBuilder<T, P> {
             copy.add(Objects.requireNonNull(value, "variant value"));
         }
         return List.copyOf(copy);
+    }
+
+    private static TagKey<Item>[] copyItemTags(TagKey<Item>[] tags) {
+        Objects.requireNonNull(tags, "tags");
+        TagKey<Item>[] copy = Arrays.copyOf(tags, tags.length);
+        for (int i = 0; i < copy.length; i++) {
+            Objects.requireNonNull(copy[i], "tags[" + i + "]");
+        }
+        return copy;
     }
 
     private record Variant(String id, Consumer<ItemStack> configure) {

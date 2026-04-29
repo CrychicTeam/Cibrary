@@ -11,8 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.api.registrate.PiBlockProps;
-import org.pickaid.pibrary.api.registrate.PiBlockTransforms;
-import org.pickaid.pibrary.api.registrate.PiItemTransforms;
 import org.pickaid.pibrary.api.registrate.PiRegistrate;
 
 /**
@@ -24,7 +22,6 @@ public final class CounterCreativeEntries {
     public static final ItemEntry<Item> COUNTER_TOKEN = REGISTRATE
             .item("counter_token", Item::new)
             .section("materials")
-            .transform(PiItemTransforms.defaultModel())
             .register();
 
     public static final ItemEntry<Item> COUNTER_SCROLL = REGISTRATE
@@ -33,16 +30,13 @@ public final class CounterCreativeEntries {
             .variants(List.of("red", "blue"), color -> color, (stack, color) ->
                     stack.getOrCreateTag().putString("counter_color", color))
             .searchOnly()
-            .transform(PiItemTransforms.stacksTo(1))
-            .transform(PiItemTransforms.defaultModel())
+            .properties(properties -> properties.stacksTo(1))
             .register();
 
     public static final BlockEntry<Block> COUNTER_TABLE = REGISTRATE
             .block("counter_table", Block::new)
             .section("machines")
             .initialProperties(PiBlockProps::metal)
-            .transform(PiBlockTransforms.machine())
-            .transform(PiBlockTransforms.defaultBlockstateAndLoot())
             .simpleItem()
             .register();
 

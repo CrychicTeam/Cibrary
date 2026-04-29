@@ -9,10 +9,9 @@ import org.junit.jupiter.api.Test;
 
 class PiRegistratePackageStructureTest {
     @Test
-    void sharedTransformClassesStaySmallEnoughToRemainBoringHelpers() throws IOException {
-        assertLineCountAtMost("PiEntryTransforms.java", 120);
-        assertLineCountAtMost("PiBlockTransforms.java", 240);
-        assertLineCountAtMost("PiItemTransforms.java", 180);
+    void registrateBuilderClassesStaySmallEnoughToRemainBoringHelpers() throws IOException {
+        assertLineCountAtMost("PiBlockBuilder.java", 340);
+        assertLineCountAtMost("PiItemBuilder.java", 300);
         assertLineCountAtMost("PiBaseRegistrate.java", 240);
     }
 

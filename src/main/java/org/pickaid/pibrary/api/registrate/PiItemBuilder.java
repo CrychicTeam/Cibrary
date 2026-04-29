@@ -5,7 +5,10 @@ import com.tterrag.registrate.builders.BuilderCallback;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
+import com.tterrag.registrate.util.nullness.NonNullSupplier;
+import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -13,9 +16,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.ItemLike;
 import org.pickaid.pibrary.api.creative.PiCreativeContentRegistry;
 import org.pickaid.pibrary.api.creative.PiCreativeVisibility;
@@ -78,6 +83,63 @@ public class PiItemBuilder<T extends Item, P> extends ItemBuilder<T, P> {
     public PiItemBuilder<T, P> section(ResourceKey<CreativeModeTab> tab, String section) {
         this.tab = PiCreativeTabTarget.explicit(tab);
         this.section = requireSection(section);
+        return this;
+    }
+
+    public PiItemBuilder<T, P> itemTag(TagKey<Item> tag) {
+        return itemTags(tag);
+    }
+
+    @SafeVarargs
+    public final PiItemBuilder<T, P> itemTags(TagKey<Item>... tags) {
+        tag(copyItemTags(tags));
+        return this;
+    }
+
+    public PiItemBuilder<T, P> stacksTo(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("stack size must be positive");
+        }
+        return properties(properties -> properties.stacksTo(count));
+    }
+
+    public PiItemBuilder<T, P> durability(int durability) {
+        if (durability <= 0) {
+            throw new IllegalArgumentException("durability must be positive");
+        }
+        return properties(properties -> properties.durability(durability));
+    }
+
+    public PiItemBuilder<T, P> fireResistant() {
+        return properties(Item.Properties::fireResistant);
+    }
+
+    public PiItemBuilder<T, P> rarity(Rarity rarity) {
+        Objects.requireNonNull(rarity, "rarity");
+        return properties(properties -> properties.rarity(rarity));
+    }
+
+    @Override
+    public PiItemBuilder<T, P> properties(NonNullUnaryOperator<Item.Properties> func) {
+        super.properties(func);
+        return this;
+    }
+
+    @Override
+    public PiItemBuilder<T, P> initialProperties(NonNullSupplier<Item.Properties> properties) {
+        super.initialProperties(properties);
+        return this;
+    }
+
+    @Override
+    public PiItemBuilder<T, P> defaultModel() {
+        super.defaultModel();
+        return this;
+    }
+
+    @Override
+    public PiItemBuilder<T, P> defaultLang() {
+        super.defaultLang();
         return this;
     }
 
@@ -183,6 +245,15 @@ public class PiItemBuilder<T extends Item, P> extends ItemBuilder<T, P> {
             copy.add(Objects.requireNonNull(value, "variant value"));
         }
         return List.copyOf(copy);
+    }
+
+    private static TagKey<Item>[] copyItemTags(TagKey<Item>[] tags) {
+        Objects.requireNonNull(tags, "tags");
+        TagKey<Item>[] copy = Arrays.copyOf(tags, tags.length);
+        for (int i = 0; i < copy.length; i++) {
+            Objects.requireNonNull(copy[i], "tags[" + i + "]");
+        }
+        return copy;
     }
 
     private record Variant(String id, Consumer<ItemStack> configure) {

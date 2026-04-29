@@ -112,7 +112,7 @@ PiConfigValues values = PiConfigValues.builder(ExampleConfigs.GAMEPLAY)
 int maxEnergy = values.get(ExampleConfigs.MAX_ENERGY);
 ```
 
-For blocks, items, block entities, models, loot, and recipes, keep the normal Registrate chain. Pibrary adds short names for repeated pieces: id paths, entry callbacks, datagen hooks, base block properties, mining tags, and simple item tags.
+For blocks, items, block entities, models, loot, and recipes, keep the normal Registrate chain. Registrate already has clear direct methods such as `tag(...)`, `properties(...)`, `simpleItem()`, `defaultLoot()`, and `defaultModel()`. Use those directly when they read well. Pibrary mainly adds id helpers, creative-tab sections, NBT variants, tint declarations, and direct builder methods for common block/item tag cases.
 
 If the project only needs ordinary block and item registration, use `PiRegistrate`:
 
@@ -123,26 +123,22 @@ public final class ExampleEntries {
     public static final BlockEntry<Block> RELAY_CORE = REGISTRATE
             .block("relay_core", Block::new)
             .initialProperties(PiBlockProps::metal)
-            .transform(PiBlockTransforms.machine())
-            .transform(PiBlockTransforms.pickaxeOnly())
-            .transform(PiBlockTransforms.needsIronTool())
-            .transform(PiBlockTransforms.noOcclusion())
-            .transform(PiBlockTransforms.noMobSpawn())
-            .transform(PiEntryTransforms.onRegister(block -> {
+            .properties(properties -> properties
+                    .noOcclusion()
+                    .isValidSpawn((state, level, pos, type) -> false))
+            .blockAndItemTag(Tags.Blocks.STORAGE_BLOCKS_IRON, Tags.Items.STORAGE_BLOCKS_IRON)
+            .blockTags(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL)
+            .section("machines")
+            .onRegister(block -> {
                 // Add runtime indexes, debug tracking, or project-level caches here.
-            }))
-            .transform(PiBlockTransforms.defaultBlockstateAndLoot())
-            .transform(PiBlockTransforms.tagBlockAndSimpleItem(
-                    Tags.Blocks.STORAGE_BLOCKS_IRON,
-                    Tags.Items.STORAGE_BLOCKS_IRON))
+            })
             .register();
 
     public static final ItemEntry<Item> COPPER_WAND = REGISTRATE
             .item("copper_wand", Item::new)
-            .transform(PiItemTransforms.stacksTo(1))
-            .transform(PiItemTransforms.fireResistant())
-            .transform(PiItemTransforms.tag(Tags.Items.INGOTS_COPPER))
-            .transform(PiItemTransforms.defaultModel())
+            .properties(properties -> properties.stacksTo(1).fireResistant())
+            .itemTags(Tags.Items.INGOTS_COPPER)
+            .section("materials")
             .register();
 
     public static final RegistryEntry<SoundEvent> RELAY_OPEN = REGISTRATE
@@ -150,9 +146,9 @@ public final class ExampleEntries {
                     "relay_open",
                     Registries.SOUND_EVENT,
                     () -> SoundEvent.createVariableRangeEvent(REGISTRATE.loc("relay_open")))
-            .transform(PiEntryTransforms.onRegister(sound -> {
-                // This is not a block or item, but it can still use entry-level transforms.
-            }))
+            .onRegister(sound -> {
+                // This is not a block or item, but it can still use Registrate's registration callback.
+            })
             .register();
 
     private ExampleEntries() {
@@ -180,7 +176,7 @@ public final class ExampleEntries {
     public static final BlockEntry<Block> CHARGING_TABLE = REGISTRATE
             .block("charging_table", Block::new)
             .section("machines")
-            .transform(PiBlockTransforms.machine())
+            .initialProperties(PiBlockProps::metal)
             .simpleItem()
             .register();
 
@@ -230,8 +226,7 @@ static ItemBuilder<Item, PiRegistrate> spellScrollFromRegistry(
                     (stack, spell) -> stack.getOrCreateTag()
                             .putString("spell", spellId(spells, spell).toString()))
             .searchOnly()
-            .transform(PiItemTransforms.stacksTo(1))
-            .transform(PiItemTransforms.defaultModel());
+            .properties(properties -> properties.stacksTo(1));
 }
 
 private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellType spell) {
@@ -249,7 +244,7 @@ private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellT
 
 `section("materials")` uses the default creative tab. The tab may be declared later in the same registration class; Pibrary resolves it when creative contents are registered. If a class uses several tabs, prefer `section(tabKey, "materials")`.
 
-If the project has its own first-class concepts, such as spells, traits, machines, or modules, do not put them into `PiBlockTransforms`. Give the project its own Registrate entry point:
+If the project has its own first-class concepts, such as spells, traits, machines, or modules, do not put them into Pibrary's shared helpers. Give the project its own Registrate entry point:
 
 ```java
 public final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
@@ -279,7 +274,7 @@ public final class ExampleSpells {
 
     public static final RegistryEntry<SpellType> FIREBALL = REGISTRATE
             .spell("fireball", FireballSpell::new)
-            .transform(PiEntryTransforms.onRegister(SpellRuntime::index))
+            .onRegister(SpellRuntime::index)
             .register();
 }
 ```
@@ -288,8 +283,8 @@ The rule is simple: Pibrary provides thin shared tools, while each mod keeps its
 
 There are four layers here:
 
-1. `PiEntryTransforms` works on any Registrate builder: block, item, sound, particle, or a custom registry entry. Use it for callbacks, datagen hooks, and post-registration indexing.
-2. `PiBlockTransforms` and `PiItemTransforms` stay type-specific. They should only contain operations that are truly block- or item-shaped.
+1. The native Registrate chain owns the main registration flow. Use `properties(...)`, `tag(...)`, `item()`, `model(...)`, `loot(...)`, and `onRegister(...)` directly when they say what you mean.
+2. Pibrary builder methods cover the few places Registrate is not direct enough, such as `section(...)`, `variants(...)`, `blockTags(...)`, `itemTags(...)`, and `blockAndItemTag(...)`.
 3. `REGISTRATE.tintFoliage(...)`, `tintBlock(...)`, and `tintItem(...)` are the client tint layer. Common colors use short methods; complex colors use a small builder.
 4. Custom blockstates, custom loot, renderers, and complex block entities should stay as native Registrate code. Keep the hard parts explicit instead of hiding them behind a wrapper that becomes awkward in real projects.
 
@@ -299,7 +294,6 @@ If a model JSON uses `tintindex`, use the helpers in `api/render/tint`. Put the 
 public static final BlockEntry<Block> GLOWING_LEAVES = REGISTRATE
         .block("glowing_leaves", Block::new)
         .initialProperties(PiBlockProps::wood)
-        .transform(PiBlockTransforms.defaultBlockstateAndLoot())
         .register();
 
 public static void registerClientTints() {

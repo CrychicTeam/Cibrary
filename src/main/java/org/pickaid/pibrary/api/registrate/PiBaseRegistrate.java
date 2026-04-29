@@ -28,7 +28,7 @@ import org.pickaid.pibrary.runtime.creative.PiForgeCreativeTabs;
  * <p>The important part is the self type: a mod can extend
  * {@code PiBaseRegistrate<MyRegistrate>} and keep Registrate's fluent return
  * types while adding its own domain methods such as {@code spell(...)},
- * {@code trait(...)}, or {@code machine(...)}. Pibrary only provides common id
+ * {@code trait(...)}, or {@code altar(...)}. Pibrary only provides common id
  * helpers here; project-specific builders should live in the project that owns
  * the gameplay concept.</p>
  *

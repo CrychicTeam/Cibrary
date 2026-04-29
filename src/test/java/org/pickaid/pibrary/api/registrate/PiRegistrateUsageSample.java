@@ -13,6 +13,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -22,7 +23,7 @@ import org.pickaid.pibrary.api.render.tint.PiBlockTints;
 import org.pickaid.pibrary.api.render.tint.PiItemTints;
 import org.pickaid.pibrary.api.render.tint.PiTintRegistry;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unchecked", "unused"})
 final class PiRegistrateUsageSample {
     private PiRegistrateUsageSample() {
     }
@@ -30,25 +31,22 @@ final class PiRegistrateUsageSample {
     static BlockBuilder<Block, PiRegistrate> relayCore(PiRegistrate registrate) {
         return registrate.block("relay_core", Block::new)
                 .initialProperties(PiBlockProps::metal)
-                .transform(PiBlockTransforms.machine())
-                .transform(PiBlockTransforms.pickaxeOnly())
-                .transform(PiBlockTransforms.needsIronTool())
-                .transform(PiBlockTransforms.noOcclusion())
-                .transform(PiBlockTransforms.noMobSpawn())
-                .transform(PiEntryTransforms.onRegister(block -> {
-                }))
-                .transform(PiBlockTransforms.defaultBlockstateAndLoot())
-                .transform(PiBlockTransforms.tagBlockAndSimpleItem(
-                        Tags.Blocks.STORAGE_BLOCKS_IRON,
-                        Tags.Items.STORAGE_BLOCKS_IRON));
+                .properties(properties -> properties
+                        .noOcclusion()
+                        .isValidSpawn((state, level, pos, type) -> false))
+                .blockAndItemTag(Tags.Blocks.STORAGE_BLOCKS_IRON, Tags.Items.STORAGE_BLOCKS_IRON)
+                .blockTags(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL)
+                .section("machines")
+                .onRegister(block -> {
+                });
     }
 
     static ItemBuilder<Item, PiRegistrate> copperWand(PiRegistrate registrate) {
         return registrate.item("copper_wand", Item::new)
-                .transform(PiItemTransforms.stacksTo(1))
-                .transform(PiItemTransforms.fireResistant())
-                .transform(PiItemTransforms.tag(Tags.Items.INGOTS_COPPER))
-                .transform(PiItemTransforms.defaultModel());
+                .stacksTo(1)
+                .fireResistant()
+                .itemTags(Tags.Items.INGOTS_COPPER)
+                .section("materials");
     }
 
     static NoConfigBuilder<SoundEvent, SoundEvent, PiRegistrate> relayOpenSound(PiRegistrate registrate) {
@@ -56,14 +54,14 @@ final class PiRegistrateUsageSample {
                 "relay_open",
                 Registries.SOUND_EVENT,
                 () -> SoundEvent.createVariableRangeEvent(registrate.loc("relay_open"))
-        ).transform(PiEntryTransforms.onRegister(sound -> {
-        }));
+        ).onRegister(sound -> {
+        });
     }
 
     static NoConfigBuilder<SpellType, SpellType, ExampleRegistrate> fireballSpell(ExampleRegistrate registrate) {
         return registrate.spell("fireball", SpellType::new)
-                .transform(PiEntryTransforms.onRegister(spell -> {
-                }));
+                .onRegister(spell -> {
+                });
     }
 
     static RegistryEntry<TraitType> frozenTrait(ExampleRegistrate registrate) {
@@ -85,8 +83,7 @@ final class PiRegistrateUsageSample {
                         (stack, spell) -> stack.getOrCreateTag()
                                 .putString("spell", spellId(spells, spell).toString()))
                 .searchOnly()
-                .transform(PiItemTransforms.stacksTo(1))
-                .transform(PiItemTransforms.defaultModel());
+                .stacksTo(1);
     }
 
     static PiTintRegistry configureTints(PiRegistrate registrate) {
