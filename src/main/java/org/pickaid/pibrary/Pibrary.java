@@ -3,6 +3,7 @@ package org.pickaid.pibrary;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
+import org.pickaid.pibrary.runtime.facet.PiChunkFacetDescriptors;
 import org.pickaid.pibrary.runtime.core.PibraryRuntimeBootstrap;
 import org.pickaid.pibrary.runtime.facet.PiLevelFacetDescriptors;
 import org.pickaid.pibrary.runtime.facet.PiLivingFacetDescriptors;
@@ -19,6 +20,7 @@ public final class Pibrary {
         PibraryRuntimeBootstrap.bootstrap();
         PiLivingFacetDescriptors.bootstrap();
         PiLevelFacetDescriptors.bootstrap();
+        PiChunkFacetDescriptors.bootstrap();
         PiLivingSyncMessages.bootstrap();
     }
 

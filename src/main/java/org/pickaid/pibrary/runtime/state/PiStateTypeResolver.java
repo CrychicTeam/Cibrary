@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
+import org.pickaid.pibrary.api.facet.PiStateChunkFacet;
 import org.pickaid.pibrary.api.facet.PiStateLevelFacet;
 import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
 
@@ -21,6 +22,12 @@ public final class PiStateTypeResolver {
             return resolveTypeArgument(type, PiStateLevelFacet.class, 0);
         }
     };
+    private static final ClassValue<Class<?>> CHUNK_FACET_STATE_TYPES = new ClassValue<>() {
+        @Override
+        protected Class<?> computeValue(Class<?> type) {
+            return resolveTypeArgument(type, PiStateChunkFacet.class, 0);
+        }
+    };
 
     private PiStateTypeResolver() {
     }
@@ -33,6 +40,11 @@ public final class PiStateTypeResolver {
     @SuppressWarnings("unchecked")
     public static <S> Class<S> levelFacetStateType(Class<? extends PiStateLevelFacet<S>> facetClass) {
         return (Class<S>) LEVEL_FACET_STATE_TYPES.get(facetClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <S> Class<S> chunkFacetStateType(Class<? extends PiStateChunkFacet<S>> facetClass) {
+        return (Class<S>) CHUNK_FACET_STATE_TYPES.get(facetClass);
     }
 
     private static Class<?> resolveTypeArgument(Class<?> leafType, Class<?> targetBase, int index) {

@@ -76,7 +76,32 @@ CounterLevelFacet facet = ExampleLevelFacets.COUNTER_LEVEL.get(level);
 facet.increment();
 ```
 
-你的模组初始化时调用一次 `ExampleLivingFacets.register()` / `ExampleLevelFacets.register()`，让这些静态 handle 被加载。之后业务代码只拿 typed handle，不手写 capability key，也不手动找 generated descriptor。
+如果状态属于已经加载的 chunk，写 Chunk Facet。它走 chunk capability 持久化，不会主动加载或生成 chunk；用 `findLoaded(...)` 查询时，chunk 没加载就返回空。
+
+```java
+@PiChunkFacet(namespace = "example", path = "ore_memory")
+public final class OreMemoryFacet extends PiStateChunkFacet<OreMemoryState> {
+    public OreMemoryFacet(PiChunkFacetContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleChunkFacets {
+    public static final PiChunkFacetType<OreMemoryFacet> ORE_MEMORY =
+            PiChunkFacets.bind(OreMemoryFacet.class).register();
+
+    private ExampleChunkFacets() {
+    }
+
+    public static void register() {
+    }
+}
+
+Optional<OreMemoryFacet> memory =
+        PiChunkFacets.findLoaded(serverLevel, chunkPos, OreMemoryFacet.class);
+```
+
+你的模组初始化时调用一次 `ExampleLivingFacets.register()` / `ExampleLevelFacets.register()` / `ExampleChunkFacets.register()`，让这些静态 handle 被加载。之后业务代码只拿 typed handle，不手写 capability key，也不手动找 generated descriptor。
 
 配置先写成 `PiConfigSpec`。这不是文件格式，也不是强行替代 Forge config；它只是把 id、作用域、默认值、注释和校验放在一个稳定位置。之后无论你用 Forge config、datapack JSON、客户端本地文件，还是 Pibrary 以后自己的 loader，都能吃同一份定义。
 
@@ -386,6 +411,31 @@ public final class CounterBlockEntity extends BlockEntity {
 }
 ```
 
+如果这个方块实体有菜单，`PiMenuData` 可以直接接原版 `addDataSlots(...)`。服务端读 getter，客户端收到数据后跑 setter；如果方块实体实现了 `PiPresentationSource`，screen projection 会按 `refreshOnMenuData(...)` 自动失效。
+
+```java
+public final class CounterBlockEntity extends PiStateBlockEntity<CounterState>
+        implements PiPresentationSource {
+    public PiMenuData menuData() {
+        return menuData(
+                PiMenuDataSlot.mutable(
+                        () -> viewState().count,
+                        value -> updateState(state -> state.count = value)),
+                PiMenuDataSlot.mutable(
+                        () -> viewState().energy,
+                        value -> updateState(state -> state.energy = value))
+        );
+    }
+
+    @Override
+    public void contributePresentation(PiPresentationContext context) {
+        context.screens().snapshot(CounterScreenModel.class,
+                partialTick -> CounterScreenModel.from(viewState()));
+        context.screens().refreshOnMenuData(CounterScreenModel.class);
+    }
+}
+```
+
 同一份 source 也可以交给 recipe-viewer compat。`api/jei` 这里仍然不导入 JEI 类；真正的插件代码以后只需要把这些中立 spec 转成对应版本的 viewer API。
 
 ```java
@@ -455,18 +505,22 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 6. `api/targeting`
    目标选择查询与 resolver 契约。
 7. `api/facet`
-   living / level facet 注解、typed handle、descriptor bootstrap 和状态基类。
-8. `api/entity`
+   living / level / chunk facet 注解、typed handle、descriptor bootstrap 和状态基类。
+8. `api/blockentity`
+   基于 PiSerializeKit state 的方块实体持久化、客户端 update tag 和菜单数据入口。
+9. `api/entity`
    实体生命周期与受击处理边界。
-9. `api/projectile`
+10. `api/projectile`
    面向性能优化的 projectile trace / impact 契约。
-10. `api/jei`
+11. `api/menu`
+   基于原版 `ContainerData` 的菜单 int 同步桥。
+12. `api/jei`
    JEI 中立的 recipe-viewer 契约、模块收集面与 GUI / alias / transfer 规格。
-11. `api/recipe`
+13. `api/recipe`
     机器逻辑和 recipe-viewer compat 共用的 recipe view、source、match 和 reload cache 契约。
-12. `api/math`
+14. `api/math`
     基于原版 `Vec3` / `AABB` 的核心数学、曲线、权重、视口投影和几何 helper。
-13. `api/render/tint`
+15. `api/render/tint`
     方块/物品模型 tint 的颜色 provider、Registrate tint 方法和颜色计算 helper。
 
 ## Maven
@@ -478,7 +532,7 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 mihono = "https://maven.mihono.cn/repository/pickaid1201/"
 
 [dependencies.deobf_implementation]
-pibrary = "com.mihono.pickaid:pibrary:0.0.6-dev"
+pibrary = "com.mihono.pickaid:pibrary:0.0.7-dev"
 ```
 
 如果项目还在直接写 Gradle，可以这样导入：
@@ -489,6 +543,6 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.6-dev")
+    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.7-dev")
 }
 ```

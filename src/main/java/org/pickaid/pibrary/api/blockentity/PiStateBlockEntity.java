@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.pickaid.pibrary.api.presentation.PiPresentationSource;
 import org.pickaid.pibrary.api.presentation.PiPresentations;
+import org.pickaid.pibrary.api.menu.PiMenuData;
+import org.pickaid.pibrary.api.menu.PiMenuDataSlot;
 import org.pickaid.pibrary.runtime.state.PiFacetState;
 import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 import org.pickaid.piserializekit.api.schema.PiDirtySet;
@@ -71,6 +73,22 @@ public abstract class PiStateBlockEntity<S> extends BlockEntity {
      */
     protected final void clearDirty() {
         facetState.clearDirty();
+    }
+
+    /**
+     * Creates vanilla menu data bound to this block entity.
+     *
+     * <p>If this block entity contributes presentation data, client-side menu
+     * updates invalidate screen projections marked with
+     * {@code refreshOnMenuData(...)}.</p>
+     *
+     * @param slots menu data slots
+     * @return container data bridge
+     */
+    protected final PiMenuData menuData(PiMenuDataSlot... slots) {
+        return this instanceof PiPresentationSource source
+                ? PiMenuData.refreshing(source, slots)
+                : PiMenuData.create(slots);
     }
 
     @Override

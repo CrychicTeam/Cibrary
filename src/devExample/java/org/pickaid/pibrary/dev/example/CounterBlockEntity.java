@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.pickaid.pibrary.api.blockentity.PiStateBlockEntity;
+import org.pickaid.pibrary.api.menu.PiMenuData;
+import org.pickaid.pibrary.api.menu.PiMenuDataSlot;
 import org.pickaid.pibrary.api.presentation.PiPresentationContext;
 import org.pickaid.pibrary.api.presentation.PiPresentationSource;
 import org.pickaid.pibrary.api.presentation.PiPresentationScope;
@@ -51,6 +53,22 @@ public final class CounterBlockEntity extends PiStateBlockEntity<CounterState> i
      */
     public PiRecipeLookupCache<CounterRecipeViews.CounterRecipe> recipeCache() {
         return recipeCache;
+    }
+
+    /**
+     * Creates the small int bridge a vanilla menu can pass to {@code addDataSlots}.
+     *
+     * @return count/energy menu data
+     */
+    public PiMenuData menuData() {
+        return menuData(
+                PiMenuDataSlot.mutable(
+                        () -> viewState().count,
+                        value -> updateState(state -> state.count = value)),
+                PiMenuDataSlot.mutable(
+                        () -> viewState().energy,
+                        value -> updateState(state -> state.energy = value))
+        );
     }
 
     @Override

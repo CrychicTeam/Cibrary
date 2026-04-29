@@ -64,7 +64,32 @@ CounterLevelFacet facet = ExampleLevelFacets.COUNTER_LEVEL.get(level);
 facet.increment();
 ```
 
-Call `ExampleLevelFacets.register()` during your own mod bootstrap. After that, gameplay code uses the typed handle and does not need to touch capability keys or generated descriptors directly.
+If the state belongs to a loaded chunk, write a Chunk Facet. It uses chunk capability persistence and does not load or generate chunks by itself. `findLoaded(...)` returns empty when the chunk is not already loaded.
+
+```java
+@PiChunkFacet(namespace = "example", path = "ore_memory")
+public final class OreMemoryFacet extends PiStateChunkFacet<OreMemoryState> {
+    public OreMemoryFacet(PiChunkFacetContext context) {
+        super(context);
+    }
+}
+
+public final class ExampleChunkFacets {
+    public static final PiChunkFacetType<OreMemoryFacet> ORE_MEMORY =
+            PiChunkFacets.bind(OreMemoryFacet.class).register();
+
+    private ExampleChunkFacets() {
+    }
+
+    public static void register() {
+    }
+}
+
+Optional<OreMemoryFacet> memory =
+        PiChunkFacets.findLoaded(serverLevel, chunkPos, OreMemoryFacet.class);
+```
+
+Call `ExampleLevelFacets.register()` and `ExampleChunkFacets.register()` during your own mod bootstrap. After that, gameplay code uses typed handles and does not need to touch capability keys or generated descriptors directly.
 
 Define config as a `PiConfigSpec` first. This is not a file format and it does not replace Forge config by itself. It keeps ids, scope, defaults, comments, and validation in one stable place, so Forge config, datapack JSON, local client files, or a later Pibrary loader can all consume the same definition.
 
@@ -374,6 +399,31 @@ public final class CounterBlockEntity extends BlockEntity {
 }
 ```
 
+If that block entity has a menu, `PiMenuData` can go straight into vanilla `addDataSlots(...)`. The server reads getters and the client receives values through setters. If the block entity is also a `PiPresentationSource`, screen projections marked with `refreshOnMenuData(...)` are invalidated automatically.
+
+```java
+public final class CounterBlockEntity extends PiStateBlockEntity<CounterState>
+        implements PiPresentationSource {
+    public PiMenuData menuData() {
+        return menuData(
+                PiMenuDataSlot.mutable(
+                        () -> viewState().count,
+                        value -> updateState(state -> state.count = value)),
+                PiMenuDataSlot.mutable(
+                        () -> viewState().energy,
+                        value -> updateState(state -> state.energy = value))
+        );
+    }
+
+    @Override
+    public void contributePresentation(PiPresentationContext context) {
+        context.screens().snapshot(CounterScreenModel.class,
+                partialTick -> CounterScreenModel.from(viewState()));
+        context.screens().refreshOnMenuData(CounterScreenModel.class);
+    }
+}
+```
+
 The same source can feed recipe-viewer compat. `api/jei` still imports no JEI classes; the real plugin layer only has to translate these neutral specs into the target viewer API.
 
 ```java
@@ -464,20 +514,24 @@ In the current committed tree, the most usable public packages are:
 5. `api/state`
    shared state keys and sync policy.
 6. `api/facet`
-   living / level facet annotations, typed handles, descriptor bootstrap, and state-backed base classes.
-7. `api/targeting`
+   living / level / chunk facet annotations, typed handles, descriptor bootstrap, and state-backed base classes.
+7. `api/blockentity`
+   PiSerializeKit-state-backed block-entity persistence, client update tags, and menu data entry points.
+8. `api/targeting`
    target query contracts and resolvers.
-8. `api/entity`
+9. `api/entity`
    current entity lifecycle, spatial index, and living-hurt boundaries.
-9. `api/projectile`
+10. `api/projectile`
    the current projectile tracing contracts.
-10. `api/jei`
+11. `api/menu`
+   vanilla `ContainerData` bridges for menu int synchronization.
+12. `api/jei`
    JEI-neutral recipe-viewer contracts, module bootstrap surfaces, and GUI / alias / transfer specs.
-11. `api/recipe`
+13. `api/recipe`
     recipe views, sources, matches, and reload-cache hooks shared by machines and recipe-viewer compat.
-12. `api/math`
+14. `api/math`
     core numeric, curve, weight, projection, and geometry helpers built around vanilla `Vec3` and `AABB`.
-13. `api/render/tint`
+15. `api/render/tint`
     block/item model tint providers, Registrate tint methods, and color math helpers.
 
 The living-facet example above is backed by committed runtime code in `runtime/capability`, `runtime/facet`, `runtime/state`, and `runtime/sync`.
@@ -506,7 +560,7 @@ If the downstream project uses the Pi template, add the Maven repository and dep
 mihono = "https://maven.mihono.cn/repository/pickaid1201/"
 
 [dependencies.deobf_implementation]
-pibrary = "com.mihono.pickaid:pibrary:0.0.6-dev"
+pibrary = "com.mihono.pickaid:pibrary:0.0.7-dev"
 ```
 
 If the downstream project still writes Gradle directly, use:
@@ -517,7 +571,7 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.6-dev")
+    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.7-dev")
 }
 ```
 
