@@ -1,0 +1,154 @@
+package org.pickaid.pibrary.api.registrate;
+
+import com.tterrag.registrate.builders.BlockBuilder;
+import com.tterrag.registrate.builders.ItemBuilder;
+import com.tterrag.registrate.builders.NoConfigBuilder;
+import com.tterrag.registrate.util.entry.RegistryEntry;
+import com.tterrag.registrate.util.nullness.NonNullSupplier;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.function.Supplier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.IForgeRegistry;
+import org.pickaid.pibrary.api.render.tint.PiBlockTints;
+import org.pickaid.pibrary.api.render.tint.PiItemTints;
+import org.pickaid.pibrary.api.render.tint.PiTintRegistry;
+
+@SuppressWarnings("unused")
+final class PiRegistrateUsageSample {
+    private PiRegistrateUsageSample() {
+    }
+
+    static BlockBuilder<Block, PiRegistrate> relayCore(PiRegistrate registrate) {
+        return registrate.block("relay_core", Block::new)
+                .initialProperties(PiBlockProps::metal)
+                .transform(PiBlockTransforms.machine())
+                .transform(PiBlockTransforms.pickaxeOnly())
+                .transform(PiBlockTransforms.needsIronTool())
+                .transform(PiBlockTransforms.noOcclusion())
+                .transform(PiBlockTransforms.noMobSpawn())
+                .transform(PiEntryTransforms.onRegister(block -> {
+                }))
+                .transform(PiBlockTransforms.defaultBlockstateAndLoot())
+                .transform(PiBlockTransforms.tagBlockAndSimpleItem(
+                        Tags.Blocks.STORAGE_BLOCKS_IRON,
+                        Tags.Items.STORAGE_BLOCKS_IRON));
+    }
+
+    static ItemBuilder<Item, PiRegistrate> copperWand(PiRegistrate registrate) {
+        return registrate.item("copper_wand", Item::new)
+                .transform(PiItemTransforms.stacksTo(1))
+                .transform(PiItemTransforms.fireResistant())
+                .transform(PiItemTransforms.tag(Tags.Items.INGOTS_COPPER))
+                .transform(PiItemTransforms.defaultModel());
+    }
+
+    static NoConfigBuilder<SoundEvent, SoundEvent, PiRegistrate> relayOpenSound(PiRegistrate registrate) {
+        return registrate.generic(
+                "relay_open",
+                Registries.SOUND_EVENT,
+                () -> SoundEvent.createVariableRangeEvent(registrate.loc("relay_open"))
+        ).transform(PiEntryTransforms.onRegister(sound -> {
+        }));
+    }
+
+    static NoConfigBuilder<SpellType, SpellType, ExampleRegistrate> fireballSpell(ExampleRegistrate registrate) {
+        return registrate.spell("fireball", SpellType::new)
+                .transform(PiEntryTransforms.onRegister(spell -> {
+                }));
+    }
+
+    static RegistryEntry<TraitType> frozenTrait(ExampleRegistrate registrate) {
+        return registrate.trait("frozen", TraitType::new);
+    }
+
+    static ItemBuilder<Item, PiRegistrate> spellScrollFromRegistry(
+            PiRegistrate registrate,
+            IForgeRegistry<SpellType> spells
+    ) {
+        return registrate.item("spell_scroll", Item::new)
+                .section("scrolls")
+                .variants(
+                        () -> spells.getValues().stream()
+                                .filter(SpellType::enabled)
+                                .sorted(Comparator.comparing(spell -> spellId(spells, spell).toString()))
+                                .toList(),
+                        spell -> spellId(spells, spell).getPath(),
+                        (stack, spell) -> stack.getOrCreateTag()
+                                .putString("spell", spellId(spells, spell).toString()))
+                .searchOnly()
+                .transform(PiItemTransforms.stacksTo(1))
+                .transform(PiItemTransforms.defaultModel());
+    }
+
+    static PiTintRegistry configureTints(PiRegistrate registrate) {
+        registrate.tintBlock(() -> relayCore(registrate).getEntry(), 0x44AAFF)
+                .tintFoliage(() -> relayCore(registrate).getEntry())
+                .tintBlockItem(() -> relayCore(registrate).getEntry())
+                .tintItem(() -> Items.STICK, 0, 0x44AAFF)
+                .tintDurability(() -> Items.STICK, 1, 0xAA2222, 0x22AAFF)
+                .tintBlock(() -> relayCore(registrate).getEntry(), tint -> tint
+                        .layer(0).constant(0x112233)
+                        .layer(1).provider(PiBlockTints.foliage()))
+                .tintItem(() -> Items.STICK, tint -> tint
+                        .layer(0).provider(PiItemTints.layer(0, 0x44AAFF))
+                        .layer(1).durability(0xAA2222, 0x22AAFF));
+        return registrate.tints();
+    }
+
+    /**
+     * Downstream mods should put their own gameplay words here instead of
+     * asking Pibrary to grow generic transforms for every possible block or
+     * content family.
+     */
+    private static final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
+        private static final ResourceKey<Registry<SpellType>> SPELLS =
+                ResourceKey.createRegistryKey(PiRegistrateUsageSample.id("spells"));
+        private static final ResourceKey<Registry<TraitType>> TRAITS =
+                ResourceKey.createRegistryKey(PiRegistrateUsageSample.id("traits"));
+
+        private ExampleRegistrate(String modid) {
+            super(modid);
+        }
+
+        static ExampleRegistrate createForSample(String modid) {
+            return new ExampleRegistrate(modid);
+        }
+
+        NoConfigBuilder<SpellType, SpellType, ExampleRegistrate> spell(
+                String name,
+                NonNullSupplier<SpellType> factory
+        ) {
+            return generic(name, SPELLS, factory);
+        }
+
+        RegistryEntry<TraitType> trait(String name, Supplier<TraitType> factory) {
+            return simple(name, TRAITS, factory::get);
+        }
+    }
+
+    private static net.minecraft.resources.ResourceLocation id(String path) {
+        return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("example", path);
+    }
+
+    private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellType spell) {
+        return Objects.requireNonNull(spells.getKey(spell), "registered spell id");
+    }
+
+    private static final class SpellType {
+        boolean enabled() {
+            return true;
+        }
+    }
+
+    private static final class TraitType {
+    }
+}
