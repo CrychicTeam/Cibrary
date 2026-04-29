@@ -6,7 +6,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.api.projectile.PiProjectileLifecycleContext;
-import org.pickaid.pibrary.api.projectile.PiProjectileLifecycleServices;
+import org.pickaid.pibrary.api.projectile.PiProjectileLifecycles;
 
 /**
  * Forge event bridge for projectile join-level lifecycle callbacks.
@@ -17,7 +17,7 @@ public final class PiProjectileLifecycleEvents {
     }
 
     /**
-     * Bridges projectile {@link EntityJoinLevelEvent} events into the installed lifecycle service.
+     * Bridges projectile {@link EntityJoinLevelEvent} events into the installed lifecycle registry.
      *
      * @param event Forge entity join event
      */
@@ -26,7 +26,7 @@ public final class PiProjectileLifecycleEvents {
         if (!(event.getEntity() instanceof Projectile projectile)) {
             return;
         }
-        PiProjectileLifecycleServices.find().ifPresent(service ->
-                service.onJoinLevel(projectile, new PiProjectileLifecycleContext(event.loadedFromDisk())));
+        PiProjectileLifecycles.find().ifPresent(registry ->
+                registry.onJoinLevel(projectile, new PiProjectileLifecycleContext(event.loadedFromDisk())));
     }
 }

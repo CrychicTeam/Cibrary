@@ -3,7 +3,7 @@ package org.pickaid.pibrary;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
-import org.pickaid.pibrary.runtime.core.PibraryRuntimeServices;
+import org.pickaid.pibrary.runtime.core.PibraryRuntimeBootstrap;
 import org.pickaid.pibrary.runtime.facet.PiLevelFacetDescriptors;
 import org.pickaid.pibrary.runtime.facet.PiLivingFacetDescriptors;
 import org.pickaid.pibrary.runtime.sync.PiLivingSyncMessages;
@@ -16,7 +16,7 @@ public final class Pibrary {
 
     public Pibrary() {
         LOGGER.info("Initializing {}", MOD_ID);
-        PibraryRuntimeServices.bootstrap();
+        PibraryRuntimeBootstrap.bootstrap();
         PiLivingFacetDescriptors.bootstrap();
         PiLevelFacetDescriptors.bootstrap();
         PiLivingSyncMessages.bootstrap();

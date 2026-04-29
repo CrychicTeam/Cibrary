@@ -10,57 +10,57 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 import org.pickaid.pibrary.api.entity.PiEntityLifecycleHandler;
-import org.pickaid.pibrary.api.entity.PiEntityLifecycleService;
-import org.pickaid.pibrary.api.entity.PiEntityLifecycleServices;
-import org.pickaid.pibrary.runtime.core.PibraryRuntimeServices;
+import org.pickaid.pibrary.api.entity.PiEntityLifecycleRegistry;
+import org.pickaid.pibrary.api.entity.PiEntityLifecycles;
+import org.pickaid.pibrary.runtime.core.PibraryRuntimeBootstrap;
 
 class PiEntityLifecycleRuntimeTest {
     @Test
-    void bootstrapInstallsDefaultEntityLifecycleServiceWhenMissing() {
-        PiEntityLifecycleService previous = PiEntityLifecycleServices.find().orElse(null);
+    void bootstrapInstallsDefaultEntityLifecycleRegistryWhenMissing() {
+        PiEntityLifecycleRegistry previous = PiEntityLifecycles.find().orElse(null);
         try {
-            PiEntityLifecycleServices.install(null);
+            PiEntityLifecycles.install(null);
 
-            PibraryRuntimeServices.bootstrap();
+            PibraryRuntimeBootstrap.bootstrap();
 
-            assertTrue(PiEntityLifecycleServices.require() instanceof PiDefaultEntityLifecycleService);
+            assertTrue(PiEntityLifecycles.require() instanceof PiDefaultEntityLifecycleRegistry);
         } finally {
-            PiEntityLifecycleServices.install(previous);
+            PiEntityLifecycles.install(previous);
         }
     }
 
     @Test
-    void lifecycleServiceResolvesHandlersByEntityType() {
-        PiDefaultEntityLifecycleService service = new PiDefaultEntityLifecycleService();
+    void lifecycleRegistryResolvesHandlersByEntityType() {
+        PiDefaultEntityLifecycleRegistry registry = new PiDefaultEntityLifecycleRegistry();
         JoinSectionHandler allEntities = new JoinSectionHandler();
         JoinSectionHandler exactEntities = new JoinSectionHandler();
         JoinSectionHandler onlyOtherEntities = new JoinSectionHandler();
 
-        service.register(Entity.class, allEntities);
-        service.register(TestEntity.class, exactEntities);
-        service.register(OtherEntity.class, onlyOtherEntities);
+        registry.register(Entity.class, allEntities);
+        registry.register(TestEntity.class, exactEntities);
+        registry.register(OtherEntity.class, onlyOtherEntities);
 
-        assertEquals(2, service.handlersFor(TestEntity.class).size());
-        assertTrue(service.handlersFor(TestEntity.class).contains(allEntities));
-        assertTrue(service.handlersFor(TestEntity.class).contains(exactEntities));
-        assertEquals(1, service.handlersFor(OtherEntity.class).stream().filter(allEntities::equals).count());
-        assertEquals(1, service.handlersFor(OtherEntity.class).stream().filter(onlyOtherEntities::equals).count());
+        assertEquals(2, registry.handlersFor(TestEntity.class).size());
+        assertTrue(registry.handlersFor(TestEntity.class).contains(allEntities));
+        assertTrue(registry.handlersFor(TestEntity.class).contains(exactEntities));
+        assertEquals(1, registry.handlersFor(OtherEntity.class).stream().filter(allEntities::equals).count());
+        assertEquals(1, registry.handlersFor(OtherEntity.class).stream().filter(onlyOtherEntities::equals).count());
     }
 
     @Test
-    void lifecycleServiceInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
-        PiDefaultEntityLifecycleService service = new PiDefaultEntityLifecycleService();
+    void lifecycleRegistryInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
+        PiDefaultEntityLifecycleRegistry registry = new PiDefaultEntityLifecycleRegistry();
         JoinSectionHandler allEntities = new JoinSectionHandler();
         JoinSectionHandler exactEntities = new JoinSectionHandler();
 
-        service.register(Entity.class, allEntities);
-        assertEquals(1, service.handlersFor(TestEntity.class).size());
+        registry.register(Entity.class, allEntities);
+        assertEquals(1, registry.handlersFor(TestEntity.class).size());
 
-        service.register(TestEntity.class, exactEntities);
+        registry.register(TestEntity.class, exactEntities);
 
-        assertEquals(2, service.handlersFor(TestEntity.class).size());
-        assertTrue(service.handlersFor(TestEntity.class).contains(allEntities));
-        assertTrue(service.handlersFor(TestEntity.class).contains(exactEntities));
+        assertEquals(2, registry.handlersFor(TestEntity.class).size());
+        assertTrue(registry.handlersFor(TestEntity.class).contains(allEntities));
+        assertTrue(registry.handlersFor(TestEntity.class).contains(exactEntities));
     }
 
     private static final class JoinSectionHandler implements PiEntityLifecycleHandler<Entity> {

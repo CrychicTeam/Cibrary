@@ -15,7 +15,7 @@
 
 `Pibrary` 现在负责以下长期核心能力：
 
-1. 核心服务定位与基础 service registry；
+1. 基础依赖定位与低层共享注册表；
 2. 配置、诊断、状态、目标选择、注册、数学等通用契约；
 3. 实体生命周期、实体选择与高性能 projectile trace 的公共边界；
 4. 面向可选 recipe-viewer compat 的中立模块 / bootstrap / spec 契约；
@@ -452,7 +452,7 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 当前已经开始明确这些基础面：
 
 1. `api/core`
-   服务 key 与 service registry，用于真正的全局工具服务。
+   底层 key 与共享注册表，用于少数需要全局替换实现的基础能力。
 2. `api/config`
    配置条目、分组 spec、作用域、注释与默认值校验。
 3. `api/diagnostics`

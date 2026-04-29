@@ -13,37 +13,37 @@ import org.pickaid.pibrary.api.entity.PiVehicleLifecycleHandler;
 
 class PiVehicleLifecycleRuntimeTest {
     @Test
-    void vehicleLifecycleServiceResolvesHandlersByEntityType() {
-        PiDefaultVehicleLifecycleService service = new PiDefaultVehicleLifecycleService();
+    void vehicleLifecycleRegistryResolvesHandlersByEntityType() {
+        PiDefaultVehicleLifecycleRegistry registry = new PiDefaultVehicleLifecycleRegistry();
         VehicleHandler allEntities = new VehicleHandler();
         VehicleHandler exactEntities = new VehicleHandler();
         VehicleHandler onlyOtherEntities = new VehicleHandler();
 
-        service.register(Entity.class, allEntities);
-        service.register(TestEntity.class, exactEntities);
-        service.register(OtherEntity.class, onlyOtherEntities);
+        registry.register(Entity.class, allEntities);
+        registry.register(TestEntity.class, exactEntities);
+        registry.register(OtherEntity.class, onlyOtherEntities);
 
-        assertEquals(2, service.handlersFor(TestEntity.class).size());
-        assertTrue(service.handlersFor(TestEntity.class).contains(allEntities));
-        assertTrue(service.handlersFor(TestEntity.class).contains(exactEntities));
-        assertEquals(1, service.handlersFor(OtherEntity.class).stream().filter(allEntities::equals).count());
-        assertEquals(1, service.handlersFor(OtherEntity.class).stream().filter(onlyOtherEntities::equals).count());
+        assertEquals(2, registry.handlersFor(TestEntity.class).size());
+        assertTrue(registry.handlersFor(TestEntity.class).contains(allEntities));
+        assertTrue(registry.handlersFor(TestEntity.class).contains(exactEntities));
+        assertEquals(1, registry.handlersFor(OtherEntity.class).stream().filter(allEntities::equals).count());
+        assertEquals(1, registry.handlersFor(OtherEntity.class).stream().filter(onlyOtherEntities::equals).count());
     }
 
     @Test
-    void vehicleLifecycleServiceInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
-        PiDefaultVehicleLifecycleService service = new PiDefaultVehicleLifecycleService();
+    void vehicleLifecycleRegistryInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
+        PiDefaultVehicleLifecycleRegistry registry = new PiDefaultVehicleLifecycleRegistry();
         VehicleHandler allEntities = new VehicleHandler();
         VehicleHandler exactEntities = new VehicleHandler();
 
-        service.register(Entity.class, allEntities);
-        assertEquals(1, service.handlersFor(TestEntity.class).size());
+        registry.register(Entity.class, allEntities);
+        assertEquals(1, registry.handlersFor(TestEntity.class).size());
 
-        service.register(TestEntity.class, exactEntities);
+        registry.register(TestEntity.class, exactEntities);
 
-        assertEquals(2, service.handlersFor(TestEntity.class).size());
-        assertTrue(service.handlersFor(TestEntity.class).contains(allEntities));
-        assertTrue(service.handlersFor(TestEntity.class).contains(exactEntities));
+        assertEquals(2, registry.handlersFor(TestEntity.class).size());
+        assertTrue(registry.handlersFor(TestEntity.class).contains(allEntities));
+        assertTrue(registry.handlersFor(TestEntity.class).contains(exactEntities));
     }
 
     private static final class VehicleHandler implements PiVehicleLifecycleHandler<Entity> {

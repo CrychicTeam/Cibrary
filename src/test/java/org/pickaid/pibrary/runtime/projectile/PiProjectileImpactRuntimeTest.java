@@ -20,37 +20,37 @@ import org.pickaid.pibrary.api.projectile.PiProjectileImpactResult;
 
 class PiProjectileImpactRuntimeTest {
     @Test
-    void projectileImpactServiceResolvesHandlersByProjectileType() {
-        PiDefaultProjectileImpactService service = new PiDefaultProjectileImpactService();
+    void projectileImpactRegistryResolvesHandlersByProjectileType() {
+        PiDefaultProjectileImpactRegistry registry = new PiDefaultProjectileImpactRegistry();
         ImpactHandler allProjectiles = new ImpactHandler();
         ImpactHandler exactProjectiles = new ImpactHandler();
         ImpactHandler onlyOtherProjectiles = new ImpactHandler();
 
-        service.register(Projectile.class, allProjectiles);
-        service.register(TestProjectile.class, exactProjectiles);
-        service.register(OtherProjectile.class, onlyOtherProjectiles);
+        registry.register(Projectile.class, allProjectiles);
+        registry.register(TestProjectile.class, exactProjectiles);
+        registry.register(OtherProjectile.class, onlyOtherProjectiles);
 
-        assertEquals(2, service.handlersFor(TestProjectile.class).size());
-        assertTrue(service.handlersFor(TestProjectile.class).contains(allProjectiles));
-        assertTrue(service.handlersFor(TestProjectile.class).contains(exactProjectiles));
-        assertEquals(1, service.handlersFor(OtherProjectile.class).stream().filter(allProjectiles::equals).count());
-        assertEquals(1, service.handlersFor(OtherProjectile.class).stream().filter(onlyOtherProjectiles::equals).count());
+        assertEquals(2, registry.handlersFor(TestProjectile.class).size());
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(allProjectiles));
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(exactProjectiles));
+        assertEquals(1, registry.handlersFor(OtherProjectile.class).stream().filter(allProjectiles::equals).count());
+        assertEquals(1, registry.handlersFor(OtherProjectile.class).stream().filter(onlyOtherProjectiles::equals).count());
     }
 
     @Test
-    void projectileImpactServiceInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
-        PiDefaultProjectileImpactService service = new PiDefaultProjectileImpactService();
+    void projectileImpactRegistryInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
+        PiDefaultProjectileImpactRegistry registry = new PiDefaultProjectileImpactRegistry();
         ImpactHandler allProjectiles = new ImpactHandler();
         ImpactHandler exactProjectiles = new ImpactHandler();
 
-        service.register(Projectile.class, allProjectiles);
-        assertEquals(1, service.handlersFor(TestProjectile.class).size());
+        registry.register(Projectile.class, allProjectiles);
+        assertEquals(1, registry.handlersFor(TestProjectile.class).size());
 
-        service.register(TestProjectile.class, exactProjectiles);
+        registry.register(TestProjectile.class, exactProjectiles);
 
-        assertEquals(2, service.handlersFor(TestProjectile.class).size());
-        assertTrue(service.handlersFor(TestProjectile.class).contains(allProjectiles));
-        assertTrue(service.handlersFor(TestProjectile.class).contains(exactProjectiles));
+        assertEquals(2, registry.handlersFor(TestProjectile.class).size());
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(allProjectiles));
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(exactProjectiles));
     }
 
     @Test

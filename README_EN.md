@@ -420,7 +420,7 @@ These helpers are meant for targeting, projectile math, HUD markers, world previ
 ## Design Direction
 
 `Pibrary` is being shaped around these long-term responsibilities:
-1. core service location and lightweight service registry contracts;
+1. core dependency location and lightweight shared registry contracts;
 2. shared API boundaries for config, diagnostics, state, targeting, registry support, and math helpers;
 3. living-facet registration, attachment, and sync as a stable root pattern for attached state;
 4. JEI-neutral module, bootstrap, source, and spec contracts for optional recipe-viewer compat;
@@ -461,7 +461,7 @@ Its purpose is:
 
 In the current committed tree, the most usable public packages are:
 1. `api/core`
-   service keys and service registry contracts.
+   low-level keys and shared registry contracts for the few systems that need global replacement.
 2. `api/config`
    config entries, grouped specs, scopes, comments, and default-value validation.
 3. `api/diagnostics`

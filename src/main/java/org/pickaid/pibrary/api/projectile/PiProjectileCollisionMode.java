@@ -1,7 +1,7 @@
 package org.pickaid.pibrary.api.projectile;
 
 /**
- * Controls how the projectile tracing service resolves block and entity hits.
+ * Controls how the projectile tracer resolves block and entity hits.
  */
 public enum PiProjectileCollisionMode {
     STOP_ON_ANY_HIT,

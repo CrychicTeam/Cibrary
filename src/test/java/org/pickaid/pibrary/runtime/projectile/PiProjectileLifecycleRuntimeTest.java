@@ -15,37 +15,37 @@ import org.pickaid.pibrary.api.projectile.PiProjectileLifecycleHandler;
 
 class PiProjectileLifecycleRuntimeTest {
     @Test
-    void projectileLifecycleServiceResolvesHandlersByProjectileType() {
-        PiDefaultProjectileLifecycleService service = new PiDefaultProjectileLifecycleService();
+    void projectileLifecycleRegistryResolvesHandlersByProjectileType() {
+        PiDefaultProjectileLifecycleRegistry registry = new PiDefaultProjectileLifecycleRegistry();
         LifecycleHandler allProjectiles = new LifecycleHandler();
         LifecycleHandler exactProjectiles = new LifecycleHandler();
         LifecycleHandler onlyOtherProjectiles = new LifecycleHandler();
 
-        service.register(Projectile.class, allProjectiles);
-        service.register(TestProjectile.class, exactProjectiles);
-        service.register(OtherProjectile.class, onlyOtherProjectiles);
+        registry.register(Projectile.class, allProjectiles);
+        registry.register(TestProjectile.class, exactProjectiles);
+        registry.register(OtherProjectile.class, onlyOtherProjectiles);
 
-        assertEquals(2, service.handlersFor(TestProjectile.class).size());
-        assertTrue(service.handlersFor(TestProjectile.class).contains(allProjectiles));
-        assertTrue(service.handlersFor(TestProjectile.class).contains(exactProjectiles));
-        assertEquals(1, service.handlersFor(OtherProjectile.class).stream().filter(allProjectiles::equals).count());
-        assertEquals(1, service.handlersFor(OtherProjectile.class).stream().filter(onlyOtherProjectiles::equals).count());
+        assertEquals(2, registry.handlersFor(TestProjectile.class).size());
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(allProjectiles));
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(exactProjectiles));
+        assertEquals(1, registry.handlersFor(OtherProjectile.class).stream().filter(allProjectiles::equals).count());
+        assertEquals(1, registry.handlersFor(OtherProjectile.class).stream().filter(onlyOtherProjectiles::equals).count());
     }
 
     @Test
-    void projectileLifecycleServiceInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
-        PiDefaultProjectileLifecycleService service = new PiDefaultProjectileLifecycleService();
+    void projectileLifecycleRegistryInvalidatesResolvedTypeCacheWhenNewHandlerIsRegistered() {
+        PiDefaultProjectileLifecycleRegistry registry = new PiDefaultProjectileLifecycleRegistry();
         LifecycleHandler allProjectiles = new LifecycleHandler();
         LifecycleHandler exactProjectiles = new LifecycleHandler();
 
-        service.register(Projectile.class, allProjectiles);
-        assertEquals(1, service.handlersFor(TestProjectile.class).size());
+        registry.register(Projectile.class, allProjectiles);
+        assertEquals(1, registry.handlersFor(TestProjectile.class).size());
 
-        service.register(TestProjectile.class, exactProjectiles);
+        registry.register(TestProjectile.class, exactProjectiles);
 
-        assertEquals(2, service.handlersFor(TestProjectile.class).size());
-        assertTrue(service.handlersFor(TestProjectile.class).contains(allProjectiles));
-        assertTrue(service.handlersFor(TestProjectile.class).contains(exactProjectiles));
+        assertEquals(2, registry.handlersFor(TestProjectile.class).size());
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(allProjectiles));
+        assertTrue(registry.handlersFor(TestProjectile.class).contains(exactProjectiles));
     }
 
     @Test

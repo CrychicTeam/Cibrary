@@ -14,7 +14,7 @@ class PiProjectileTraceGeometryTest {
         Vec3 from = new Vec3(0.0D, 0.0D, 5.0D);
         Vec3 to = new Vec3(0.0D, 0.0D, 7.0D);
 
-        assertTrue(PiDefaultProjectileService.traceMovingBounds(
+        assertTrue(PiDefaultProjectileTracer.traceMovingBounds(
                 targetBounds,
                 targetDelta,
                 from,
@@ -29,7 +29,7 @@ class PiProjectileTraceGeometryTest {
         Vec3 from = new Vec3(0.0D, 0.0D, 5.0D);
         Vec3 to = new Vec3(0.0D, 0.0D, 7.0D);
 
-        assertTrue(PiDefaultProjectileService.traceMovingBounds(
+        assertTrue(PiDefaultProjectileTracer.traceMovingBounds(
                 targetBounds,
                 Vec3.ZERO,
                 from,

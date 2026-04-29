@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.pickaid.pibrary.Pibrary;
 import org.pickaid.pibrary.api.projectile.PiProjectileImpactContext;
 import org.pickaid.pibrary.api.projectile.PiProjectileImpactResult;
-import org.pickaid.pibrary.api.projectile.PiProjectileImpactServices;
+import org.pickaid.pibrary.api.projectile.PiProjectileImpacts;
 
 /**
  * Forge event bridge for projectile impact callbacks.
@@ -18,16 +18,16 @@ public final class PiProjectileImpactEvents {
     }
 
     /**
-     * Bridges {@link ProjectileImpactEvent} into the installed projectile impact service.
+     * Bridges {@link ProjectileImpactEvent} into the installed projectile impact registry.
      *
      * @param event Forge impact event
      */
     @SubscribeEvent
     @SuppressWarnings("removal")
     public static void onProjectileImpact(ProjectileImpactEvent event) {
-        PiProjectileImpactServices.find().ifPresent(service -> {
+        PiProjectileImpacts.find().ifPresent(registry -> {
             PiProjectileImpactContext context = new PiProjectileImpactContext(event.getRayTraceResult());
-            service.onImpact(event.getProjectile(), context);
+            registry.onImpact(event.getProjectile(), context);
             if (context.isCanceled()) {
                 // Cancel is still the Forge 1.20.1 way to let the projectile continue flying.
                 event.setCanceled(true);

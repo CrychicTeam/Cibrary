@@ -5,7 +5,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.entity.PiEntityLifecycleServices;
+import org.pickaid.pibrary.api.entity.PiEntityLifecycles;
 
 /**
  * Forge event bridge for entity lifecycle callbacks.
@@ -16,24 +16,24 @@ public final class PiEntityLifecycleEvents {
     }
 
     /**
-     * Bridges {@link EntityJoinLevelEvent} into the installed entity lifecycle service.
+     * Bridges {@link EntityJoinLevelEvent} into the installed entity lifecycle registry.
      *
      * @param event Forge entity join event
      */
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-        PiEntityLifecycleServices.find().ifPresent(service ->
-                service.onJoinLevel(event.getEntity(), event.getLevel(), event.loadedFromDisk()));
+        PiEntityLifecycles.find().ifPresent(lifecycle ->
+                lifecycle.onJoinLevel(event.getEntity(), event.getLevel(), event.loadedFromDisk()));
     }
 
     /**
-     * Bridges entity section transitions into the installed lifecycle service.
+     * Bridges entity section transitions into the installed lifecycle registry.
      *
      * @param event Forge entity section event
      */
     @SubscribeEvent
     public static void onEntityEnterSection(EntityEvent.EnteringSection event) {
-        PiEntityLifecycleServices.find().ifPresent(service ->
-                service.onEnterSection(event.getEntity(), event.getOldPos(), event.getNewPos()));
+        PiEntityLifecycles.find().ifPresent(lifecycle ->
+                lifecycle.onEnterSection(event.getEntity(), event.getOldPos(), event.getNewPos()));
     }
 }
