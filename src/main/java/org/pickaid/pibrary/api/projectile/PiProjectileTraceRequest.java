@@ -7,6 +7,19 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.pickaid.pibrary.api.targeting.PiTargetQuery;
 
+/**
+ * Immutable projectile trace request.
+ *
+ * @param level level where the trace runs
+ * @param source source entity of the trace
+ * @param from trace start position
+ * @param to trace end position
+ * @param sweepBounds local projectile bounds used for swept tests
+ * @param targetQuery targeting policy used when filtering entities
+ * @param collisionMode block and entity collision behavior
+ * @param maxEntityHits maximum number of entity hits to keep
+ * @param grazeRadius extra radius used to collect near misses separately from real hits
+ */
 public record PiProjectileTraceRequest(
         Level level,
         Entity source,
@@ -15,9 +28,29 @@ public record PiProjectileTraceRequest(
         AABB sweepBounds,
         PiTargetQuery targetQuery,
         PiProjectileCollisionMode collisionMode,
-        int maxEntityHits
+        int maxEntityHits,
+        double grazeRadius
 ) {
+    public PiProjectileTraceRequest(
+            Level level,
+            Entity source,
+            Vec3 from,
+            Vec3 to,
+            AABB sweepBounds,
+            PiTargetQuery targetQuery,
+            PiProjectileCollisionMode collisionMode,
+            int maxEntityHits
+    ) {
+        this(level, source, from, to, sweepBounds, targetQuery, collisionMode, maxEntityHits, 0.0D);
+    }
+
     public PiProjectileTraceRequest {
+        if (maxEntityHits < 1) {
+            throw new IllegalArgumentException("maxEntityHits must be >= 1");
+        }
+        if (grazeRadius < 0.0D) {
+            throw new IllegalArgumentException("grazeRadius must be >= 0");
+        }
         Objects.requireNonNull(level, "level");
         Objects.requireNonNull(source, "source");
         Objects.requireNonNull(from, "from");
@@ -25,8 +58,5 @@ public record PiProjectileTraceRequest(
         Objects.requireNonNull(sweepBounds, "sweepBounds");
         Objects.requireNonNull(targetQuery, "targetQuery");
         Objects.requireNonNull(collisionMode, "collisionMode");
-        if (maxEntityHits < 1) {
-            throw new IllegalArgumentException("maxEntityHits must be >= 1");
-        }
     }
 }
