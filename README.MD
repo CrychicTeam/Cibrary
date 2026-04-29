@@ -481,7 +481,7 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 mihono = "https://maven.mihono.cn/repository/pickaid1201/"
 
 [dependencies.deobf_implementation]
-pibrary = "com.mihono.pickaid:pibrary:0.0.4"
+pibrary = "com.mihono.pickaid:pibrary:0.0.6-dev"
 ```
 
 如果项目还在直接写 Gradle，可以这样导入：
@@ -492,6 +492,6 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.4")
+    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.6-dev")
 }
 ```
