@@ -425,21 +425,18 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 
 ## 现阶段代码状态
 
-这个仓库目前分成两层：
+这个仓库现在按职责拆开：
 
 1. `src/main/java/org/pickaid/pibrary/api/**`
-   这里开始建立新的核心 API 面。
-2. `src/main/java/org/pickaid/pibrary/content/**` 与其他旧包
-   这里仍保留旧单体时代代码，后续会逐步拆分迁移。
+   给下游直接使用的稳定入口。
+2. `src/main/java/org/pickaid/pibrary/runtime/**`
+   Forge 1.20.1 下的落地实现，例如 capability、sync、creative tab、recipe cache 和 projectile trace。
+3. `src/main/java/org/pickaid/pibrary/mixin/**`
+   只放确实需要碰原版内部结构的访问点。
+4. `src/devExample/java/**`
+   编译参与测试，但不会进入生产 jar 的示例代码。
 
-历史单体快照保留在：
-`restore/legacy-monolith-20260331`
-
-它的作用是：
-
-1. 保留旧实现以便迁移和回看；
-2. 避免把旧逻辑重新塞回新架构说明里；
-3. 让新 API 可以逐步接管旧内容，而不是一次性硬删。
+历史单体快照保留在 `restore/legacy-monolith-20260331`，只用于回看旧实现和迁移灵感，不作为当前 API 文档。
 
 ## 可用 API
 

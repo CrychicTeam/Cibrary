@@ -437,19 +437,18 @@ In practice, that means:
 
 ## Current Code State
 
-This repo is intentionally split into two layers:
+This repository is split by responsibility:
+
 1. `src/main/java/org/pickaid/pibrary/api/**`
-   This is where the new core-facing API surface starts.
-2. `src/main/java/org/pickaid/pibrary/content/**` and other legacy packages
-   These still contain old monolithic-era code that will be migrated out over time.
+   stable entry points for downstream mods.
+2. `src/main/java/org/pickaid/pibrary/runtime/**`
+   Forge 1.20.1 implementations such as capability, sync, creative-tab, recipe-cache, and projectile-trace wiring.
+3. `src/main/java/org/pickaid/pibrary/mixin/**`
+   access seams for vanilla internals that cannot be reached cleanly through public APIs.
+4. `src/devExample/java/**`
+   examples compiled by tests but excluded from the production jar.
 
-The preserved legacy snapshot lives in:
-`restore/legacy-monolith-20260331`
-
-Its purpose is:
-1. keep the previous implementation available for reference and migration;
-2. avoid pushing old monolithic assumptions back into the new architecture;
-3. let the new contracts replace old behavior incrementally instead of deleting everything blindly.
+The preserved legacy snapshot remains at `restore/legacy-monolith-20260331` for migration reference only. It is not the current API documentation.
 
 ## Usable Now
 
