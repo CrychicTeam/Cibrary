@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.facet.PiLevelFacetContext;
 import org.pickaid.pibrary.dev.example.CounterLevelFacet;
 
@@ -16,7 +16,7 @@ class PiLevelFacetSavedDataTest {
     void savesAndLoadsLevelFacetThroughPersistedProjection() {
         var descriptor = PiLevelFacetDescriptors.requireGenerated(CounterLevelFacet.class);
         PiLevelFacetSavedData<CounterLevelFacet> source =
-                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryServices.create()));
+                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryScopes.create()));
         source.facet().increment();
         source.facet().increment();
         source.facet().increment();
@@ -33,7 +33,7 @@ class PiLevelFacetSavedDataTest {
         assertFalse(persisted.contains("session_glow"));
 
         PiLevelFacetSavedData<CounterLevelFacet> restored =
-                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryServices.create()), persisted);
+                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryScopes.create()), persisted);
 
         assertEquals(4, restored.facet().count());
         assertEquals(7, restored.facet().energy());
@@ -50,7 +50,7 @@ class PiLevelFacetSavedDataTest {
     void savedDataTracksPersistedChangesOnly() {
         var descriptor = PiLevelFacetDescriptors.requireGenerated(CounterLevelFacet.class);
         PiLevelFacetSavedData<CounterLevelFacet> data =
-                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryServices.create()));
+                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryScopes.create()));
 
         assertFalse(data.isDirty());
 
@@ -68,7 +68,7 @@ class PiLevelFacetSavedDataTest {
     void saveReplacesStaleKeysInsteadOfLeavingResidualPayload() {
         var descriptor = PiLevelFacetDescriptors.requireGenerated(CounterLevelFacet.class);
         PiLevelFacetSavedData<CounterLevelFacet> data =
-                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryServices.create()));
+                new PiLevelFacetSavedData<>(descriptor, new PiLevelFacetContext(null, PibraryScopes.create()));
         data.facet().increment();
 
         CompoundTag existing = new CompoundTag();

@@ -2,10 +2,10 @@ package org.pickaid.pibrary.api.facet;
 
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
+import org.pickaid.pibrary.api.core.PibraryScope;
 
 /**
- * Container abstraction used to resolve living facets and shared scoped services.
+ * Container abstraction used to resolve living facets and expose a shared scope.
  */
 public interface PiLivingFacetContainer {
     /**
@@ -17,11 +17,11 @@ public interface PiLivingFacetContainer {
     LivingEntity living();
 
     /**
-     * Returns the container-level shared service registry.
+     * Returns the container-level shared scope.
      *
-     * @return shared service registry
+     * @return shared scope
      */
-    PibraryServiceContext services();
+    PibraryScope scope();
 
     /**
      * Resolves an attached living facet from this container.

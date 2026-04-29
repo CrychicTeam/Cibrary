@@ -7,15 +7,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 
 /**
  * Global accessor for the installed entity spatial index.
  */
 public final class PiEntitySpatialIndexes {
-    public static final PibraryServiceKey<PiEntitySpatialIndex> KEY =
-            new PibraryServiceKey<>(Pibrary.id("entity_spatial_index"), PiEntitySpatialIndex.class);
+    public static final PibraryScopeKey<PiEntitySpatialIndex> KEY =
+            new PibraryScopeKey<>(Pibrary.id("entity_spatial_index"), PiEntitySpatialIndex.class);
 
     private PiEntitySpatialIndexes() {
     }
@@ -26,7 +26,7 @@ public final class PiEntitySpatialIndexes {
      * @param index index instance or {@code null} to remove
      */
     public static void install(PiEntitySpatialIndex index) {
-        PibraryServices.install(KEY, index);
+        PibraryScopes.install(KEY, index);
     }
 
     /**
@@ -35,7 +35,7 @@ public final class PiEntitySpatialIndexes {
      * @return installed index, if present
      */
     public static Optional<PiEntitySpatialIndex> find() {
-        return PibraryServices.findService(KEY);
+        return PibraryScopes.findGlobal(KEY);
     }
 
     /**
@@ -44,7 +44,7 @@ public final class PiEntitySpatialIndexes {
      * @return installed spatial index
      */
     public static PiEntitySpatialIndex require() {
-        return PibraryServices.requireService(KEY);
+        return PibraryScopes.requireGlobal(KEY);
     }
 
     /**

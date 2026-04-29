@@ -5,8 +5,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContainer;
 import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
 
@@ -15,27 +15,27 @@ import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
  */
 public final class PiAttachedLivingFacetContainer implements PiLivingFacetContainer {
     private final @Nullable LivingEntity living;
-    private final PibraryServiceContext services;
+    private final PibraryScope scope;
     private final Map<Class<?>, PiStateLivingEntityFacet<?>> attachedFacets = new ConcurrentHashMap<>();
 
     /**
-     * Creates a container with a fresh child service scope.
+     * Creates a container with a fresh child scope.
      *
      * @param living owning entity, when available
      */
     public PiAttachedLivingFacetContainer(@Nullable LivingEntity living) {
-        this(living, PibraryServices.root().child());
+        this(living, PibraryScopes.root().child());
     }
 
     /**
-     * Creates a container with an explicit shared service scope.
+     * Creates a container with an explicit shared scope.
      *
      * @param living owning entity, when available
-     * @param services shared service scope
+     * @param scope shared scope
      */
-    public PiAttachedLivingFacetContainer(@Nullable LivingEntity living, PibraryServiceContext services) {
+    public PiAttachedLivingFacetContainer(@Nullable LivingEntity living, PibraryScope scope) {
         this.living = living;
-        this.services = Objects.requireNonNull(services, "services");
+        this.scope = Objects.requireNonNull(scope, "scope");
     }
 
     @Override
@@ -44,8 +44,8 @@ public final class PiAttachedLivingFacetContainer implements PiLivingFacetContai
     }
 
     @Override
-    public PibraryServiceContext services() {
-        return services;
+    public PibraryScope scope() {
+        return scope;
     }
 
     @Override

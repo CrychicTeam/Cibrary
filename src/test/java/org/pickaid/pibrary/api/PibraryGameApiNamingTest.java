@@ -22,7 +22,14 @@ class PibraryGameApiNamingTest {
         assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.api.projectile.PiProjectileImpacts"));
         assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.api.projectile.PiProjectileImpactRegistry"));
         assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.runtime.core.PibraryRuntimeBootstrap"));
+        assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.api.core.PibraryScope"));
+        assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.api.core.PibraryScopeKey"));
+        assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.api.core.PibraryScopeRegistry"));
+        assertDoesNotThrow(() -> Class.forName("org.pickaid.pibrary.api.core.PibraryScopes"));
 
+        try (Stream<Path> files = Files.walk(Path.of("src/main/java/org/pickaid/pibrary/api/core"))) {
+            assertFalse(files.anyMatch(PibraryGameApiNamingTest::hasServiceInFileName));
+        }
         try (Stream<Path> files = Files.walk(Path.of("src/main/java/org/pickaid/pibrary/api/entity"))) {
             assertFalse(files.anyMatch(PibraryGameApiNamingTest::hasServiceInFileName));
         }

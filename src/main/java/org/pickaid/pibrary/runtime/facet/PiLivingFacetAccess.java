@@ -2,8 +2,8 @@ package org.pickaid.pibrary.runtime.facet;
 
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContainer;
 import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
 
@@ -12,26 +12,26 @@ import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
  */
 public final class PiLivingFacetAccess implements PiLivingFacetContainer {
     private final @Nullable LivingEntity living;
-    private final PibraryServiceContext services;
+    private final PibraryScope scope;
 
     /**
-     * Creates a query container with a fresh child service scope.
+     * Creates a query container with a fresh child scope.
      *
      * @param living owning entity, when available
      */
     public PiLivingFacetAccess(@Nullable LivingEntity living) {
-        this(living, PibraryServices.root().child());
+        this(living, PibraryScopes.root().child());
     }
 
     /**
-     * Creates a query container with an explicit shared service scope.
+     * Creates a query container with an explicit shared scope.
      *
      * @param living owning entity, when available
-     * @param services shared service scope
+     * @param scope shared scope
      */
-    public PiLivingFacetAccess(@Nullable LivingEntity living, PibraryServiceContext services) {
+    public PiLivingFacetAccess(@Nullable LivingEntity living, PibraryScope scope) {
         this.living = living;
-        this.services = services;
+        this.scope = scope;
     }
 
     @Override
@@ -40,8 +40,8 @@ public final class PiLivingFacetAccess implements PiLivingFacetContainer {
     }
 
     @Override
-    public PibraryServiceContext services() {
-        return services;
+    public PibraryScope scope() {
+        return scope;
     }
 
     @Override

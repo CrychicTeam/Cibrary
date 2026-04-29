@@ -6,8 +6,8 @@ import net.minecraft.world.entity.LivingEntity;
 import org.junit.jupiter.api.Test;
 import org.pickaid.pinet.api.sync.model.PiSyncEnvelopeKind;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.presentation.PiPresentationContext;
 import org.pickaid.pibrary.api.presentation.PiPresentationSource;
 import org.pickaid.pibrary.api.presentation.PiPresentationScope;
@@ -20,7 +20,7 @@ import org.pickaid.pibrary.dev.example.CounterHudModel;
 import org.pickaid.pibrary.dev.example.CounterState;
 
 class PiLivingPresentationRuntimeTest {
-    private static final PibraryServiceContext DETACHED_SERVICES = PibraryServices.create();
+    private static final PibraryScope DETACHED_SCOPE = PibraryScopes.create();
 
     private static final PiLivingFacetContainer DETACHED_CONTAINER = new PiLivingFacetContainer() {
         @Override
@@ -29,8 +29,8 @@ class PiLivingPresentationRuntimeTest {
         }
 
         @Override
-        public PibraryServiceContext services() {
-            return DETACHED_SERVICES;
+        public PibraryScope scope() {
+            return DETACHED_SCOPE;
         }
 
         @Override

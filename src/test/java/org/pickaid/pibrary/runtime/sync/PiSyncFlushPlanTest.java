@@ -9,8 +9,8 @@ import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContext;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContainer;
 import org.pickaid.pibrary.dev.example.CounterPlayerFacet;
@@ -23,7 +23,7 @@ import org.pickaid.piserializekit.api.schema.PiFieldKey;
 import org.pickaid.piserializekit.api.schema.PiSyncScope;
 
 class PiSyncFlushPlanTest {
-    private static final PibraryServiceContext DETACHED_SERVICES = PibraryServices.create();
+    private static final PibraryScope DETACHED_SCOPE = PibraryScopes.create();
 
     private static final PiLivingFacetContainer DETACHED_CONTAINER = new PiLivingFacetContainer() {
         @Override
@@ -32,8 +32,8 @@ class PiSyncFlushPlanTest {
         }
 
         @Override
-        public PibraryServiceContext services() {
-            return DETACHED_SERVICES;
+        public PibraryScope scope() {
+            return DETACHED_SCOPE;
         }
 
         @Override

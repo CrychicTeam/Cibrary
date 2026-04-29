@@ -14,8 +14,8 @@ import net.minecraftforge.common.capabilities.CapabilityToken;
 import org.junit.jupiter.api.Test;
 import org.pickaid.pinet.api.sync.model.PiSyncEnvelopeKind;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.facet.PiAttachedLivingFacet;
 import org.pickaid.pibrary.api.facet.PiCloneAwareLivingFacet;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContext;
@@ -27,7 +27,7 @@ import org.pickaid.pibrary.dev.example.CounterState;
 import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 
 class PiLivingFacetLifecycleTest {
-    private static final PibraryServiceContext DETACHED_SERVICES = PibraryServices.create();
+    private static final PibraryScope DETACHED_SCOPE = PibraryScopes.create();
 
     private static final PiLivingFacetContainer DETACHED_CONTAINER = new PiLivingFacetContainer() {
         @Override
@@ -36,8 +36,8 @@ class PiLivingFacetLifecycleTest {
         }
 
         @Override
-        public PibraryServiceContext services() {
-            return DETACHED_SERVICES;
+        public PibraryScope scope() {
+            return DETACHED_SCOPE;
         }
 
         @Override

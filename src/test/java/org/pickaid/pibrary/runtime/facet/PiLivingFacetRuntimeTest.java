@@ -11,9 +11,9 @@ import org.pickaid.pinet.api.sync.model.PiSyncEnvelope;
 import org.pickaid.pinet.api.sync.model.PiSyncEnvelopeKind;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
 import org.pickaid.pinet.api.sync.model.PiSyncTarget;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContext;
 import org.pickaid.pibrary.api.facet.PiLivingFacetContainer;
 import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
@@ -22,9 +22,9 @@ import org.pickaid.pibrary.dev.example.CounterState;
 import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 
 class PiLivingFacetRuntimeTest {
-    private static final PibraryServiceKey<String> GREETING =
-            new PibraryServiceKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
-    private static final PibraryServiceContext DETACHED_SERVICES = PibraryServices.create();
+    private static final PibraryScopeKey<String> GREETING =
+            new PibraryScopeKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
+    private static final PibraryScope DETACHED_SCOPE = PibraryScopes.create();
 
     private static final PiLivingFacetContainer DETACHED_CONTAINER = new PiLivingFacetContainer() {
         @Override
@@ -33,8 +33,8 @@ class PiLivingFacetRuntimeTest {
         }
 
         @Override
-        public PibraryServiceContext services() {
-            return DETACHED_SERVICES;
+        public PibraryScope scope() {
+            return DETACHED_SCOPE;
         }
 
         @Override
@@ -137,7 +137,7 @@ class PiLivingFacetRuntimeTest {
         left.putLocal("left");
         assertEquals("left", left.greeting());
         assertEquals("shared", right.greeting());
-        assertEquals("shared", container.services().require(GREETING));
+        assertEquals("shared", container.scope().require(GREETING));
     }
 
     @Test
@@ -174,7 +174,7 @@ class PiLivingFacetRuntimeTest {
     }
 
     private static final class TestLivingContainer implements PiLivingFacetContainer {
-        private final PibraryServiceContext services = PibraryServices.create();
+        private final PibraryScope scope = PibraryScopes.create();
 
         @Override
         public net.minecraft.world.entity.LivingEntity living() {
@@ -182,8 +182,8 @@ class PiLivingFacetRuntimeTest {
         }
 
         @Override
-        public PibraryServiceContext services() {
-            return services;
+        public PibraryScope scope() {
+            return scope;
         }
 
         @Override
@@ -198,15 +198,15 @@ class PiLivingFacetRuntimeTest {
         }
 
         private void putShared(String value) {
-            sharedServices().register(GREETING, value);
+            sharedScope().register(GREETING, value);
         }
 
         private void putLocal(String value) {
-            services().register(GREETING, value);
+            scope().register(GREETING, value);
         }
 
         private String greeting() {
-            return requireService(GREETING);
+            return requireScoped(GREETING);
         }
     }
 }

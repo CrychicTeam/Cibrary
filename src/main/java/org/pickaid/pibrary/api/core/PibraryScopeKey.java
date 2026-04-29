@@ -4,14 +4,14 @@ import java.util.Objects;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Typed identifier for a service registered in the {@link PibraryServiceRegistry}.
+ * Typed identifier for a scoped value registered in the {@link PibraryScopeRegistry}.
  *
- * @param id unique logical id of the service
+ * @param id unique logical id of the scoped value
  * @param type runtime type used for validation and lookup
- * @param <T> service contract type
+ * @param <T> value contract type
  */
-public record PibraryServiceKey<T>(ResourceLocation id, Class<T> type) {
-    public PibraryServiceKey {
+public record PibraryScopeKey<T>(ResourceLocation id, Class<T> type) {
+    public PibraryScopeKey {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(type, "type");
     }

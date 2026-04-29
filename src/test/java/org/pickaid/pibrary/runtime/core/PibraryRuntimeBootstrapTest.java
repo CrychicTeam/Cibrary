@@ -174,7 +174,7 @@ class PibraryRuntimeBootstrapTest {
             ) {
                 return descriptor.create(new org.pickaid.pibrary.api.facet.PiLevelFacetContext(
                         level,
-                        org.pickaid.pibrary.api.core.PibraryServices.create()
+                        org.pickaid.pibrary.api.core.PibraryScopes.create()
                 ));
             }
         };

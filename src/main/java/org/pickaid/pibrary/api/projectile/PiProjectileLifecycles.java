@@ -4,15 +4,15 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 
 /**
  * Global accessor for the installed {@link PiProjectileLifecycleRegistry}.
  */
 public final class PiProjectileLifecycles {
-    public static final PibraryServiceKey<PiProjectileLifecycleRegistry> KEY =
-            new PibraryServiceKey<>(Pibrary.id("projectile_lifecycle"), PiProjectileLifecycleRegistry.class);
+    public static final PibraryScopeKey<PiProjectileLifecycleRegistry> KEY =
+            new PibraryScopeKey<>(Pibrary.id("projectile_lifecycle"), PiProjectileLifecycleRegistry.class);
 
     private PiProjectileLifecycles() {
     }
@@ -23,7 +23,7 @@ public final class PiProjectileLifecycles {
      * @param registry registry instance or {@code null} to remove
      */
     public static void install(PiProjectileLifecycleRegistry registry) {
-        PibraryServices.install(KEY, registry);
+        PibraryScopes.install(KEY, registry);
     }
 
     /**
@@ -32,7 +32,7 @@ public final class PiProjectileLifecycles {
      * @return installed registry, if present
      */
     public static Optional<PiProjectileLifecycleRegistry> find() {
-        return PibraryServices.findService(KEY);
+        return PibraryScopes.findGlobal(KEY);
     }
 
     /**
@@ -41,7 +41,7 @@ public final class PiProjectileLifecycles {
      * @return installed registry
      */
     public static PiProjectileLifecycleRegistry require() {
-        return PibraryServices.requireService(KEY);
+        return PibraryScopes.requireGlobal(KEY);
     }
 
     /**

@@ -2,15 +2,15 @@ package org.pickaid.pibrary.api.projectile;
 
 import java.util.Optional;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 
 /**
  * Global accessor for the installed {@link PiProjectileTracer}.
  */
 public final class PiProjectileTraces {
-    public static final PibraryServiceKey<PiProjectileTracer> KEY =
-            new PibraryServiceKey<>(Pibrary.id("projectile_tracer"), PiProjectileTracer.class);
+    public static final PibraryScopeKey<PiProjectileTracer> KEY =
+            new PibraryScopeKey<>(Pibrary.id("projectile_tracer"), PiProjectileTracer.class);
 
     private PiProjectileTraces() {
     }
@@ -21,7 +21,7 @@ public final class PiProjectileTraces {
      * @param tracer tracer instance or {@code null} to remove
      */
     public static void install(PiProjectileTracer tracer) {
-        PibraryServices.install(KEY, tracer);
+        PibraryScopes.install(KEY, tracer);
     }
 
     /**
@@ -30,7 +30,7 @@ public final class PiProjectileTraces {
      * @return installed tracer, if present
      */
     public static Optional<PiProjectileTracer> find() {
-        return PibraryServices.findService(KEY);
+        return PibraryScopes.findGlobal(KEY);
     }
 
     /**
@@ -39,7 +39,7 @@ public final class PiProjectileTraces {
      * @return installed tracer
      */
     public static PiProjectileTracer require() {
-        return PibraryServices.requireService(KEY);
+        return PibraryScopes.requireGlobal(KEY);
     }
 
     /**

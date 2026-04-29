@@ -4,7 +4,7 @@ import java.util.Objects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
+import org.pickaid.pibrary.api.core.PibraryScope;
 
 /**
  * Immutable construction context passed to living facets.
@@ -12,29 +12,29 @@ import org.pickaid.pibrary.api.core.PibraryServiceContext;
 public final class PiLivingFacetContext {
     private final @Nullable LivingEntity living;
     private final PiLivingFacetContainer container;
-    private final PibraryServiceContext services;
+    private final PibraryScope scope;
 
     /**
-     * Creates a context with a fresh child service scope derived from the container.
+     * Creates a context with a fresh child scope derived from the container.
      *
      * @param living owning entity, when available
      * @param container owning facet container
      */
     public PiLivingFacetContext(@Nullable LivingEntity living, PiLivingFacetContainer container) {
-        this(living, container, container.services().child());
+        this(living, container, container.scope().child());
     }
 
     /**
-     * Creates a context with an explicit scoped service registry.
+     * Creates a context with an explicit local scope.
      *
      * @param living owning entity, when available
      * @param container owning facet container
-     * @param services scoped service registry for the facet instance
+     * @param scope local scope for the facet instance
      */
-    public PiLivingFacetContext(@Nullable LivingEntity living, PiLivingFacetContainer container, PibraryServiceContext services) {
+    public PiLivingFacetContext(@Nullable LivingEntity living, PiLivingFacetContainer container, PibraryScope scope) {
         this.living = living;
         this.container = Objects.requireNonNull(container, "container");
-        this.services = Objects.requireNonNull(services, "services");
+        this.scope = Objects.requireNonNull(scope, "scope");
     }
 
     /**
@@ -65,20 +65,20 @@ public final class PiLivingFacetContext {
     }
 
     /**
-     * Returns the scoped service registry local to this facet instance.
+     * Returns the scope local to this facet instance.
      *
-     * @return local service registry
+     * @return local scope
      */
-    public PibraryServiceContext services() {
-        return services;
+    public PibraryScope scope() {
+        return scope;
     }
 
     /**
-     * Returns the shared container-level service registry.
+     * Returns the shared container-level scope.
      *
-     * @return shared container registry
+     * @return shared container scope
      */
-    public PibraryServiceContext sharedServices() {
-        return container.services();
+    public PibraryScope sharedScope() {
+        return container.scope();
     }
 }

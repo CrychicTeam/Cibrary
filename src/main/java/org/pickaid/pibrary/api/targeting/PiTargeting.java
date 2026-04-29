@@ -5,15 +5,15 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 
 /**
  * Global accessor for the installed {@link PiTargetingResolver}.
  */
 public final class PiTargeting {
-    public static final PibraryServiceKey<PiTargetingResolver> KEY =
-            new PibraryServiceKey<>(Pibrary.id("targeting_resolver"), PiTargetingResolver.class);
+    public static final PibraryScopeKey<PiTargetingResolver> KEY =
+            new PibraryScopeKey<>(Pibrary.id("targeting_resolver"), PiTargetingResolver.class);
 
     private PiTargeting() {
     }
@@ -24,7 +24,7 @@ public final class PiTargeting {
      * @param resolver resolver instance or {@code null} to remove
      */
     public static void install(PiTargetingResolver resolver) {
-        PibraryServices.install(KEY, resolver);
+        PibraryScopes.install(KEY, resolver);
     }
 
     /**
@@ -33,7 +33,7 @@ public final class PiTargeting {
      * @return installed resolver, if present
      */
     public static Optional<PiTargetingResolver> find() {
-        return PibraryServices.findService(KEY);
+        return PibraryScopes.findGlobal(KEY);
     }
 
     /**
@@ -42,7 +42,7 @@ public final class PiTargeting {
      * @return installed resolver
      */
     public static PiTargetingResolver require() {
-        return PibraryServices.requireService(KEY);
+        return PibraryScopes.requireGlobal(KEY);
     }
 
     /**

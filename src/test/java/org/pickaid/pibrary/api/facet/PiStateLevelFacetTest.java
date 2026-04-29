@@ -11,15 +11,15 @@ import org.pickaid.pinet.api.sync.model.PiSyncEnvelope;
 import org.pickaid.pinet.api.sync.model.PiSyncEnvelopeKind;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
 import org.pickaid.pinet.api.sync.model.PiSyncTarget;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 import org.pickaid.pibrary.dev.example.CounterState;
 import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 
 class PiStateLevelFacetTest {
-    private static final PibraryServiceKey<String> GREETING =
-            new PibraryServiceKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
+    private static final PibraryScopeKey<String> GREETING =
+            new PibraryScopeKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
 
     @Test
     void persistentDataUsesPersistedProjection() {
@@ -113,7 +113,7 @@ class PiStateLevelFacetTest {
 
     @Test
     void facetContextsUseLocalChildScopesWithSharedLevelFallback() {
-        PibraryServiceContext shared = PibraryServices.create();
+        PibraryScope shared = PibraryScopes.create();
         TestLevelFacet left = new TestLevelFacet(new PiLevelFacetContext(null, shared));
         TestLevelFacet right = new TestLevelFacet(new PiLevelFacetContext(null, shared));
 
@@ -145,15 +145,15 @@ class PiStateLevelFacetTest {
         }
 
         private void putShared(String value) {
-            sharedServices().register(GREETING, value);
+            sharedScope().register(GREETING, value);
         }
 
         private void putLocal(String value) {
-            services().register(GREETING, value);
+            scope().register(GREETING, value);
         }
 
         private String greeting() {
-            return requireService(GREETING);
+            return requireScoped(GREETING);
         }
 
         private int count() {
@@ -170,6 +170,6 @@ class PiStateLevelFacetTest {
     }
 
     private static TestLevelFacet newFacet() {
-        return new TestLevelFacet(new PiLevelFacetContext(null, PibraryServices.create()));
+        return new TestLevelFacet(new PiLevelFacetContext(null, PibraryScopes.create()));
     }
 }

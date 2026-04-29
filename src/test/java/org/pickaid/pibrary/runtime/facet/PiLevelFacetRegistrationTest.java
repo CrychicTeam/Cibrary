@@ -123,7 +123,7 @@ class PiLevelFacetRegistrationTest {
                 org.pickaid.pibrary.api.facet.PiLevelFacetDescriptor<T, ?> descriptor
         ) {
             resolveCalls++;
-            return descriptor.create(new PiLevelFacetContext(level, org.pickaid.pibrary.api.core.PibraryServices.create()));
+            return descriptor.create(new PiLevelFacetContext(level, org.pickaid.pibrary.api.core.PibraryScopes.create()));
         }
     }
 }

@@ -8,8 +8,8 @@ import org.pickaid.pinet.api.sync.model.PiSyncEnvelope;
 import org.pickaid.pinet.api.sync.model.PiSyncEnvelopeKind;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
 import org.pickaid.pinet.api.sync.model.PiSyncTarget;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
 import org.pickaid.pibrary.runtime.state.PiFacetState;
 import org.pickaid.pibrary.runtime.state.PiStateTypeResolver;
 import org.pickaid.pibrary.runtime.sync.PiSyncRouteVisibility;
@@ -47,43 +47,43 @@ public abstract class PiStateLevelFacet<S> {
     }
 
     /**
-     * Returns the scoped service registry owned by this facet instance.
+     * Returns the scope owned by this facet instance.
      *
-     * @return scoped service registry
+     * @return local scope
      */
-    protected final PibraryServiceContext services() {
-        return context.services();
+    protected final PibraryScope scope() {
+        return context.scope();
     }
 
     /**
-     * Returns the shared level service registry.
+     * Returns the shared level scope.
      *
-     * @return shared level service registry
+     * @return shared level scope
      */
-    protected final PibraryServiceContext sharedServices() {
-        return context.sharedServices();
+    protected final PibraryScope sharedScope() {
+        return context.sharedScope();
     }
 
     /**
-     * Finds another service in the local scoped registry.
+     * Finds another value in the local scoped registry.
      *
-     * @param key service key
-     * @param <T> service type
-     * @return resolved service, if present
+     * @param key scope key
+     * @param <T> scope type
+     * @return resolved value, if present
      */
-    protected final <T> Optional<T> findService(PibraryServiceKey<T> key) {
-        return services().find(key);
+    protected final <T> Optional<T> findScoped(PibraryScopeKey<T> key) {
+        return scope().find(key);
     }
 
     /**
-     * Requires another service from the local scoped registry.
+     * Requires another value from the local scoped registry.
      *
-     * @param key service key
-     * @param <T> service type
-     * @return resolved service
+     * @param key scope key
+     * @param <T> scope type
+     * @return resolved value
      */
-    protected final <T> T requireService(PibraryServiceKey<T> key) {
-        return services().require(key);
+    protected final <T> T requireScoped(PibraryScopeKey<T> key) {
+        return scope().require(key);
     }
 
     /**

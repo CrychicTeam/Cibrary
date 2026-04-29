@@ -2,15 +2,15 @@ package org.pickaid.pibrary.api.facet;
 
 import java.util.Optional;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 
 /**
  * Global accessor for the installed level-facet storage backend.
  */
 public final class PiLevelFacetStorages {
-    public static final PibraryServiceKey<PiLevelFacetStorage> KEY =
-            new PibraryServiceKey<>(Pibrary.id("level_facet_storage"), PiLevelFacetStorage.class);
+    public static final PibraryScopeKey<PiLevelFacetStorage> KEY =
+            new PibraryScopeKey<>(Pibrary.id("level_facet_storage"), PiLevelFacetStorage.class);
 
     private PiLevelFacetStorages() {
     }
@@ -21,7 +21,7 @@ public final class PiLevelFacetStorages {
      * @param storage storage backend or {@code null} to remove
      */
     public static void install(PiLevelFacetStorage storage) {
-        PibraryServices.install(KEY, storage);
+        PibraryScopes.install(KEY, storage);
     }
 
     /**
@@ -30,7 +30,7 @@ public final class PiLevelFacetStorages {
      * @return installed backend, if present
      */
     public static Optional<PiLevelFacetStorage> find() {
-        return PibraryServices.findService(KEY);
+        return PibraryScopes.findGlobal(KEY);
     }
 
     /**
@@ -39,6 +39,6 @@ public final class PiLevelFacetStorages {
      * @return installed backend
      */
     public static PiLevelFacetStorage require() {
-        return PibraryServices.requireService(KEY);
+        return PibraryScopes.requireGlobal(KEY);
     }
 }

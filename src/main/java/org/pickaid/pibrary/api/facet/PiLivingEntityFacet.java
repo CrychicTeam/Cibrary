@@ -2,8 +2,8 @@ package org.pickaid.pibrary.api.facet;
 
 import java.util.Objects;
 import java.util.Optional;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
+import org.pickaid.pibrary.api.core.PibraryScope;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
 
 /**
  * Base class for living-entity-scoped facets.
@@ -25,43 +25,43 @@ public abstract class PiLivingEntityFacet {
     }
 
     /**
-     * Returns the scoped service registry owned by this facet instance.
+     * Returns the scope owned by this facet instance.
      *
-     * @return scoped service registry
+     * @return local scope
      */
-    protected final PibraryServiceContext services() {
-        return context.services();
+    protected final PibraryScope scope() {
+        return context.scope();
     }
 
     /**
-     * Returns the shared container-level service registry.
+     * Returns the shared container-level scope.
      *
-     * @return shared container service registry
+     * @return shared container scope
      */
-    protected final PibraryServiceContext sharedServices() {
-        return context.sharedServices();
+    protected final PibraryScope sharedScope() {
+        return context.sharedScope();
     }
 
     /**
-     * Finds another service in the local scoped registry.
+     * Finds another value in the local scoped registry.
      *
-     * @param key service key
-     * @param <T> service type
-     * @return resolved service, if present
+     * @param key scope key
+     * @param <T> scope type
+     * @return resolved value, if present
      */
-    protected final <T> Optional<T> findService(PibraryServiceKey<T> key) {
-        return services().find(key);
+    protected final <T> Optional<T> findScoped(PibraryScopeKey<T> key) {
+        return scope().find(key);
     }
 
     /**
-     * Requires another service from the local scoped registry.
+     * Requires another value from the local scoped registry.
      *
-     * @param key service key
-     * @param <T> service type
-     * @return resolved service
+     * @param key scope key
+     * @param <T> scope type
+     * @return resolved value
      */
-    protected final <T> T requireService(PibraryServiceKey<T> key) {
-        return services().require(key);
+    protected final <T> T requireScoped(PibraryScopeKey<T> key) {
+        return scope().require(key);
     }
 
     /**

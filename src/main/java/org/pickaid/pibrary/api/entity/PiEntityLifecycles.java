@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.api.core.PibraryServiceKey;
-import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.core.PibraryScopeKey;
+import org.pickaid.pibrary.api.core.PibraryScopes;
 
 /**
  * Global entity lifecycle registry.
@@ -14,22 +14,22 @@ import org.pickaid.pibrary.api.core.PibraryServices;
  * hooks. It hides the low-level registry plumbing behind a game-facing name.</p>
  */
 public final class PiEntityLifecycles {
-    public static final PibraryServiceKey<PiEntityLifecycleRegistry> KEY =
-            new PibraryServiceKey<>(Pibrary.id("entity_lifecycle"), PiEntityLifecycleRegistry.class);
+    public static final PibraryScopeKey<PiEntityLifecycleRegistry> KEY =
+            new PibraryScopeKey<>(Pibrary.id("entity_lifecycle"), PiEntityLifecycleRegistry.class);
 
     private PiEntityLifecycles() {
     }
 
     public static void install(PiEntityLifecycleRegistry lifecycle) {
-        PibraryServices.install(KEY, lifecycle);
+        PibraryScopes.install(KEY, lifecycle);
     }
 
     public static Optional<PiEntityLifecycleRegistry> find() {
-        return PibraryServices.findService(KEY);
+        return PibraryScopes.findGlobal(KEY);
     }
 
     public static PiEntityLifecycleRegistry require() {
-        return PibraryServices.requireService(KEY);
+        return PibraryScopes.requireGlobal(KEY);
     }
 
     public static <E extends Entity> void register(Class<E> entityType, PiEntityLifecycleHandler<? super E> handler) {

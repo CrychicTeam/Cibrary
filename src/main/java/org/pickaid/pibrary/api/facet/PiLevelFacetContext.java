@@ -4,37 +4,37 @@ import java.util.Objects;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
-import org.pickaid.pibrary.api.core.PibraryServiceContext;
+import org.pickaid.pibrary.api.core.PibraryScope;
 
 /**
  * Immutable construction context passed to level facets.
  */
 public final class PiLevelFacetContext {
     private final @Nullable ServerLevel level;
-    private final PibraryServiceContext sharedServices;
-    private final PibraryServiceContext services;
+    private final PibraryScope sharedScope;
+    private final PibraryScope scope;
 
     /**
-     * Creates a context with a fresh child service scope derived from the shared level scope.
+     * Creates a context with a fresh child scope derived from the shared level scope.
      *
      * @param level owning level, when available
-     * @param sharedServices shared level service registry
+     * @param sharedScope shared level scope
      */
-    public PiLevelFacetContext(@Nullable ServerLevel level, PibraryServiceContext sharedServices) {
-        this(level, sharedServices, sharedServices.child());
+    public PiLevelFacetContext(@Nullable ServerLevel level, PibraryScope sharedScope) {
+        this(level, sharedScope, sharedScope.child());
     }
 
     /**
-     * Creates a context with an explicit scoped service registry.
+     * Creates a context with an explicit local scope.
      *
      * @param level owning level, when available
-     * @param sharedServices shared level service registry
-     * @param services scoped registry for the facet instance
+     * @param sharedScope shared level scope
+     * @param scope local scope for the facet instance
      */
-    public PiLevelFacetContext(@Nullable ServerLevel level, PibraryServiceContext sharedServices, PibraryServiceContext services) {
+    public PiLevelFacetContext(@Nullable ServerLevel level, PibraryScope sharedScope, PibraryScope scope) {
         this.level = level;
-        this.sharedServices = Objects.requireNonNull(sharedServices, "sharedServices");
-        this.services = Objects.requireNonNull(services, "services");
+        this.sharedScope = Objects.requireNonNull(sharedScope, "sharedScope");
+        this.scope = Objects.requireNonNull(scope, "scope");
     }
 
     /**
@@ -56,20 +56,20 @@ public final class PiLevelFacetContext {
     }
 
     /**
-     * Returns the scoped service registry owned by this facet instance.
+     * Returns the scope owned by this facet instance.
      *
-     * @return local service registry
+     * @return local scope
      */
-    public PibraryServiceContext services() {
-        return services;
+    public PibraryScope scope() {
+        return scope;
     }
 
     /**
-     * Returns the shared level service registry.
+     * Returns the shared level scope.
      *
-     * @return shared level registry
+     * @return shared level scope
      */
-    public PibraryServiceContext sharedServices() {
-        return sharedServices;
+    public PibraryScope sharedScope() {
+        return sharedScope;
     }
 }
