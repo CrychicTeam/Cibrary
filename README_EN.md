@@ -519,7 +519,7 @@ If the downstream project uses the Pi template, add the Maven repository and dep
 mihono = "https://maven.mihono.cn/repository/pickaid1201/"
 
 [dependencies.deobf_implementation]
-pibrary = "com.mihono.pickaid:pibrary:0.0.7-dev"
+pibrary = "com.mihono.pickaid:pibrary:0.0.8-dev"
 ```
 
 If the downstream project still writes Gradle directly, use:
@@ -530,6 +530,6 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.7-dev")
+    implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.8-dev")
 }
 ```
