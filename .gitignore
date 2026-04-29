@@ -25,3 +25,7 @@ restore
 
 # Files from Forge MDK
 forge*changelog.txt
+
+docs/superpowers
+
+project.local.toml

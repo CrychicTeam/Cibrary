@@ -9,6 +9,7 @@ buildscript {
         }
     }
     dependencies {
+        classpath "org.tomlj:tomlj:1.1.1"
         classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.4.+"
         classpath 'org.spongepowered:mixingradle:0.7.+'
     }
@@ -22,6 +23,7 @@ plugins {
 }
 
 apply plugin: 'idea'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: "com.matthewprenger.cursegradle"
 apply plugin: 'org.spongepowered.mixin'
@@ -41,15 +43,12 @@ tasks.matching { it.name == "reobfJar" }.configureEach {
     enabled = false
 }
 
-ext.configFile = file("build.txt")
-configFile.withReader {
-    def prop = new Properties()
-    prop.load(it)
-    project.ext.config = new ConfigSlurper().parse(prop)
-    project.ext.hasConfig = { key ->
-        return config.isSet(key);
-    }
-}
+apply from: 'gradle/template-config.gradle'
+
+def templateRepositories = project.ext.templateRepositories
+def templateFeatureDependencies = project.ext.templateFeatureDependencies
+def templateDependencies = project.ext.templateDependencies
+def templateDevPackDependencies = project.ext.templateDevPackDependencies
 
 version = config.mod_version
 group = config.maven_group
@@ -86,7 +85,7 @@ minecraft {
 
             args.add "-Dmixin.env.disableRefMap=true"
 
-            if (hasConfig("mc_user") && !config.mc_user.isEmpty()) {
+            if (rootProject.ext.hasConfig.call("mc_user") && !config.mc_user.isEmpty()) {
                 def userId = config.mc_user.split(',', 2)
                 args.add "--username"
                 args.add userId[0]
@@ -170,64 +169,49 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-repositories {
-    mavenLocal()
-    maven {
-        name = "Jared's maven"
-        url = "https://maven.blamejared.com/"
-        content {
-            includeGroupByRegex "mezz\\.jei.*"
-        }
-    }
-    maven {
-        name = 'tterrag'
-        url = 'https://maven.tterrag.com/'
+sourceSets {
+    devExample {
+        java.setSrcDirs(["src/devExample/java"])
+        resources.setSrcDirs(["src/devExample/resources"])
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
     }
 
-    maven {
-        name = 'GeckoLib'
-        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    test {
+        compileClasspath += sourceSets.devExample.output
+        runtimeClasspath += sourceSets.devExample.output
     }
-    maven {
-        url = "https://maven.theillusivec4.top/"
-        content {
-            includeGroup "top.theillusivec4.curios"
+}
+
+configurations {
+    devExampleImplementation.extendsFrom implementation
+    devExampleCompileOnly.extendsFrom compileOnly
+    devExampleRuntimeOnly.extendsFrom runtimeOnly
+    devExampleAnnotationProcessor.extendsFrom annotationProcessor
+}
+
+tasks.named("compileTestJava").configure {
+    dependsOn tasks.named("compileDevExampleJava")
+}
+
+repositories {
+    def addConfiguredRepository = { Map<String, ?> repoSpec ->
+        maven {
+            name = repoSpec.name
+            url = repoSpec.url
+            if (!repoSpec.groups.isEmpty() || !repoSpec.groupRegexes.isEmpty()) {
+                content {
+                    repoSpec.groups.each { includeGroup(it) }
+                    repoSpec.groupRegexes.each { includeGroupByRegex(it) }
+                }
+            }
         }
     }
-    maven {
-        name "KosmX's maven"
-        url 'https://maven.kosmx.dev/'
-    }
-    maven {
-        name = "Curseforge"
-        url = "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-    maven {
-        // Shedaniel's maven (Architectury API)
-        url = "https://maven.architectury.dev"
-        content {
-            includeGroup "dev.architectury"
-        }
-    }
-    maven {
-        name = "Lat's Maven"
-        url = "https://maven.latvian.dev/releases"
-        content {
-            includeGroup "dev.latvian.mods"
-            includeGroup "dev.latvian.apps"
-        }
-    }
-    maven {
-        url 'https://jitpack.io'
-        content {
-            includeGroup "com.github.rtyley"
-        }
-    }
-    maven { url = "https://maven.createmod.net" }
-    maven { url "https://maven.mihono.cn/repository/pickaid1201/" }
+
+    mavenLocal()
+    (templateRepositories.builtin + templateRepositories.custom + templateRepositories.devPacks)
+            .unique { repoSpec -> repoSpec.url.toString() }
+            .each(addConfiguredRepository)
     flatDir { dirs "libraries/${config.mc_version}/all" }
     flatDir { dirs "libraries/${config.mc_version}/classpathOnly" }
     flatDir { dirs "libraries/${config.mc_version}/runtimeOnly" }
@@ -236,154 +220,54 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
-    compileOnly(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${config.mixin_extras_version}"))
-    annotationProcessor("com.mihono.pickaid:piserializekit:0.0.1") {
-        transitive = false
-    }
-    implementation("com.mihono.pickaid:piserializekit:0.0.1") {
-        transitive = false
-    }
-    implementation("com.mihono.pickaid:pinet:0.0.1") {
-        transitive = false
-    }
     testImplementation platform("org.junit:junit-bom:5.10.2")
     testImplementation "org.junit.jupiter:junit-jupiter"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
-    compileOnly fg.deobf("com.tterrag.registrate:Registrate:${config.registrate_version}")
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.20,MC1.21)")
-
-    if (hasConfig("jei_version") && !config.jei_version.isEmpty()) {
-        compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}-common-api:${config.jei_version}")
-        compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}-forge-api:${config.jei_version}")
-        runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}-forge:${config.jei_version}")
-    }
-
-    if (hasConfig("geckolib_version") && !config.geckolib_version.isEmpty()) {
-        implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${config.mc_version}:${config.geckolib_version}")
-        implementation("com.eliotlash.mclib:mclib:20")
-        jarJar(group: 'software.bernie.geckolib', name: "geckolib-forge-${config.mc_version}", version: "[${config.geckolib_version},)")
-    }
-
-    if (hasConfig("curios_version") && !config.curios_version.isEmpty()) {
-        compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${config.curios_version}")
-        runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${config.curios_version}")
-    }
-
-    if (hasConfig("playeranimator_version") && !config.playeranimator_version.isEmpty()) {
-        implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${config.playeranimator_version}")
-        runtimeOnly fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${config.bendylib_version}")
-    }
-
-    if (hasConfig("enable_annotation") && Boolean.parseBoolean(config.enable_annotation)) {
-        compileOnly(annotationProcessor("org.spongepowered:mixin:0.8.7:processor"))
-    }
-
-    // Mixin extra
-    if (hasConfig("mixin_extras_version") && !config.mixin_extras_version.isEmpty()) {
-        implementation fg.deobf("com.github.llamalad7.mixinextras:mixinextras-forge:${config.mixin_extras_version}")
-        jarJar(group: 'com.github.llamalad7.mixinextras', name: 'mixinextras-forge', version: "[${config.mixin_extras_version},)")
-    }
-
-    if (hasConfig("l2_library_version") && !config.l2_library_version.isEmpty()) {
-        implementation fg.deobf("dev.xkmc.l2library:l2library:${config.l2_library_version}")
-        jarJar(group: 'dev.xkmc', name: 'l2library', version: "[${config.l2_library_version},)")
-    }
-
-
-    // Libraries jarjar.
-
-    if (hasConfig("l2damagetracker_version") && !config.l2damagetracker_version.isEmpty()) {
-        implementation fg.deobf("dev.xkmc.l2damagetracker:l2damagetracker:${config.l2damagetracker_version}")
-        jarJar(group: 'dev.xkmc', name: 'l2damagetracker', version: "[${config.l2damagetracker_version},)")
-    }
-
-    if (hasConfig("l2serial_version") && !config.l2serial_version.isEmpty()) {
-        implementation fg.deobf("dev.xkmc.l2serial:l2serial:${config.l2serial_version}")
-        jarJar(group: 'dev.xkmc', name: 'l2serial', version: "[${config.l2serial_version},)")
-    }
-
-    if (hasConfig("reference_projects") && !config.reference_projects.isEmpty()) {
-        compileOnly fg.deobf("curse.maven:forgeendertech-244844:6030567")
-        compileOnly fg.deobf("curse.maven:advanced-hook-launchers-244849:5829843")
-    }
-
-    compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${config.kubejs_version}")
-    compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${config.rhino_version}")
-    implementation fg.deobf("dev.architectury:architectury-forge:${config.architectury_version}")
-
-    if (hasConfig("ponder_version") && !config.ponder_version.isEmpty()) {
-        implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${config.mc_version}:${config.ponder_version}"))
-    }
-    if (hasConfig("flywheel_version") && !config.flywheel_version.isEmpty()) {
-        compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${config.mc_version}:${config.flywheel_version}"))
-        runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${config.mc_version}:${config.flywheel_version}"))
-    }
-
-    def libraries = new File(file("libraries"), "${config.mc_version}")
-    if (!libraries.isDirectory()) libraries.mkdirs()
-
-    def libDir = new File(libraries, "all");
-    if (libDir.isDirectory()) {
-        libDir.eachFile { file ->
-            def splitPos = file.name.lastIndexOf("-")
-            def modartifact = file.name.substring(0, splitPos)
-            def modversion = file.name.substring(splitPos + 1, file.name.length() - 4)
-            dependencies {
-                implementation fg.deobf(project.dependencies.create("_all:$modartifact:$modversion") {
-                    transitive = false
-                })
-            }
+    def createConfiguredDependency = { String notation, boolean transitive ->
+        project.dependencies.create(notation) {
+            it.transitive = transitive
         }
-    } else libDir.mkdir();
+    }
 
-    libDir = new File(libraries, "classpathOnly");
-    if (libDir.isDirectory()) {
-        libDir.eachFile { file ->
-            def splitPos = file.name.lastIndexOf("-")
-            def modartifact = file.name.substring(0, splitPos)
-            def modversion = file.name.substring(splitPos + 1, file.name.length() - 4)
-            dependencies {
-                compileOnly fg.deobf(project.dependencies.create("_classpath:$modartifact:$modversion") {
-                    transitive = false
-                })
-            }
+    (templateFeatureDependencies + templateDependencies + templateDevPackDependencies).each { dependencySpec ->
+        if (dependencySpec.configuration == "jarJar") {
+            jarJar(project.dependencies.create("${dependencySpec.group}:${dependencySpec.artifact}:${dependencySpec.range}") {
+                it.transitive = dependencySpec.transitive
+            })
+            return
         }
-    } else libDir.mkdir();
 
-    libDir = new File(libraries, "runtimeOnly");
-    if (libDir.isDirectory()) {
-        libDir.eachFile { file ->
-            def splitPos = file.name.lastIndexOf("-")
-            def modartifact = file.name.substring(0, splitPos)
-            def modversion = file.name.substring(splitPos + 1, file.name.length() - 4)
-            dependencies {
-                runtimeOnly fg.deobf(project.dependencies.create("_runtime:$modartifact:$modversion") {
-                    transitive = false
-                })
-            }
-        }
-    } else libDir.mkdir();
+        def baseDependency = createConfiguredDependency(dependencySpec.notation, dependencySpec.transitive)
+        def resolvedDependency = dependencySpec.deobf ? fg.deobf(baseDependency) : baseDependency
+        add(dependencySpec.configuration, resolvedDependency)
+    }
 
-    libDir = new File(file("libraries"), "embedded");
-    if (libDir.isDirectory()) {
-        libDir.eachFile { file ->
-            def splitPos = file.name.lastIndexOf("-")
-            def modartifact = file.name.substring(0, splitPos)
-            def modversion = file.name.substring(splitPos + 1, file.name.length() - 4)
-            def modreference = "lib:$modartifact:$modversion"
-
-            dependencies {
-                implementation project.dependencies.create(modreference) {
-                    transitive = false
-                }
-            }
-        }
-    } else libDir.mkdir();
 }
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+}
+
+tasks.register("verifyProductionJarExcludesDevExamples") {
+    group = "verification"
+    description = "Fails if dev example classes are packaged into the production jar."
+    dependsOn tasks.jar
+
+    doLast {
+        def jarFile = tasks.jar.archiveFile.get().asFile
+        def leakedEntries = zipTree(jarFile).matching {
+            include "org/pickaid/pibrary/dev/example/**"
+        }.files
+
+        if (!leakedEntries.isEmpty()) {
+            throw new GradleException("Production jar contains dev example classes: ${leakedEntries}")
+        }
+    }
+}
+
+tasks.check.configure {
+    dependsOn tasks.named("verifyProductionJarExcludesDevExamples")
 }
 
 def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta']
@@ -680,16 +564,17 @@ tasks.withType(JavaCompile).configureEach {
 import java.nio.file.Files
 
 def incrementBuild = {
-    if (hasConfig("formal_version") && Boolean.parseBoolean(config.formal_version)) {
+    if (rootProject.ext.hasConfig.call("formal_version") && Boolean.parseBoolean(config.formal_version)) {
         def buildTxt = configFile.toPath()
         List<String> lines = Files.readAllLines buildTxt
         lines.replaceAll { String ln ->
-            if (ln.startsWith("mod_version")) {
-                def version = ln.split("=")[1]
+            if (ln ==~ /\s*version\s*=\s*".*"\s*/) {
+                def matcher = (ln =~ /"([^"]+)"/)
+                def version = matcher[0][1]
                 def dot = version.lastIndexOf('.') + 1
                 def newVersion = version.substring(0, dot)
                 def lastOne = Integer.parseInt(version.substring(dot)) + 1
-                return "mod_version=" + newVersion + lastOne
+                return 'version = "' + newVersion + lastOne + '"'
             }
             return ln
         }
