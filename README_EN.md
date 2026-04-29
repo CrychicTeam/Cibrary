@@ -12,7 +12,7 @@ The current goal is practical:
 
 ## Use It Today
 
-If you want persistent state attached to a player or mob, write a Facet. A Facet is attached to the entity, can persist state, can sync state, and can opt into hooks such as tick, clone, and presentation refresh.
+If you want persistent state attached to a player or mob, write a Facet. A Facet is attached to the entity, can persist state, can sync state, and can opt into hooks such as tick, clone, and display refresh.
 
 ```java
 @PiLivingFacet(namespace = "example", path = "counter_player")
@@ -461,30 +461,6 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 
 These helpers are meant for targeting, projectile math, HUD markers, world previews, simple animation curves, and weighted choices. Larger visual systems can build on them as low-level pieces.
 
-## Design Direction
-
-`Pibrary` is being shaped around these long-term responsibilities:
-1. core dependency location and lightweight shared registry contracts;
-2. shared API boundaries for config, diagnostics, state, targeting, registry support, and math helpers;
-3. living-facet registration, attachment, and sync as a stable root pattern for attached state;
-4. JEI-neutral module, bootstrap, source, and spec contracts for optional recipe-viewer compat;
-5. shared boundaries such as entity lifecycle, projectile, and presentation contracts when they are ready to live in the root repo instead of one gameplay repo;
-6. the minimum stable root dependency for the Pi series;
-7. shared language for foundation libraries and higher-level engine mods.
-
-This README describes the core API that is usable now. Heavier runtime, compat, and gameplay systems can build around these contracts without being folded back into the root mod.
-
-## Presentation Direction
-
-As the repo family splits further, one rule should stay stable:
-
-`the authoritative side owns truth, clients consume projections`
-
-In practice, that means:
-1. server-side state owners keep the authoritative state;
-2. client render and UI layers should consume derived views instead of poking raw source state directly;
-3. anything that must stay in the root repo should stay small, explicit, and easy to share across repos.
-
 ## Current Code State
 
 This repository is split by responsibility:
@@ -534,23 +510,6 @@ In the current committed tree, the most usable public packages are:
 15. `api/render/tint`
     block/item model tint providers, Registrate tint methods, and color math helpers.
 
-The living-facet example above is backed by committed runtime code in `runtime/capability`, `runtime/facet`, `runtime/state`, and `runtime/sync`.
-
-These are deliberately lightweight right now:
-1. first make the boundaries correct;
-2. make them reusable across multiple repos;
-3. let real engine and compat work decide where concrete implementations belong.
-
-## Still Light
-
-This stage keeps these areas as thin contracts until real consumers force more detail:
-1. automatic config assembly;
-2. a generic sync runtime;
-3. a complete registry runtime helper;
-4. advanced targeting geometry systems;
-5. a one-shot migration of all legacy gameplay code;
-6. gameplay-specific counter or reaction logic.
-
 ## Maven
 
 If the downstream project uses the Pi template, add the Maven repository and dependency in `project.toml`:
@@ -574,9 +533,3 @@ dependencies {
     implementation fg.deobf("com.mihono.pickaid:pibrary:0.0.7-dev")
 }
 ```
-
-## Next Direction
-
-1. keep extracting reusable pieces from the legacy monolith into stable contracts;
-2. make the core APIs easy to consume from downstream mods;
-3. keep the split based on responsibility instead of letting `pibrary` grow back into the old all-in-one structure.

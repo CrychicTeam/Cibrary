@@ -26,7 +26,7 @@
 
 ## 现在怎么用
 
-如果你要给玩家或生物挂一份持久化状态，写一个 Facet。Facet 会被挂到实体上，可以保存、同步，也可以提供 tick、clone、presentation 等钩子。
+如果你要给玩家或生物挂一份持久化状态，写一个 Facet。Facet 会被挂到实体上，可以保存、同步，也可以提供 tick、clone、显示刷新等钩子。
 
 ```java
 @PiLivingFacet(namespace = "example", path = "counter_player")
