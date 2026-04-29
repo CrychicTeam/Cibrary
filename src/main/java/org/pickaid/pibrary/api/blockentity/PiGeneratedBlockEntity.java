@@ -7,6 +7,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.pickaid.piserializekit.api.schema.PiDirtySet;
 import org.pickaid.piserializekit.api.schema.PiFieldKey;
 
+/**
+ * Minimal generated block entity base with explicit dirty-key tracking.
+ */
 public abstract class PiGeneratedBlockEntity extends BlockEntity {
     private final PiDirtySet dirtySet = new PiDirtySet();
 
@@ -14,12 +17,22 @@ public abstract class PiGeneratedBlockEntity extends BlockEntity {
         super(type, pos, state);
     }
 
+    /**
+     * Marks one or more generated field keys as dirty.
+     *
+     * @param keys dirty field keys
+     */
     protected final void dirty(PiFieldKey... keys) {
         for (PiFieldKey key : keys) {
             dirtySet.mark(key);
         }
     }
 
+    /**
+     * Returns the generated dirty-set tracker.
+     *
+     * @return dirty-set tracker
+     */
     protected final PiDirtySet dirtySet() {
         return dirtySet;
     }
