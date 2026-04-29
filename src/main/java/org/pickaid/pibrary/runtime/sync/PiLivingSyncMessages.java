@@ -14,13 +14,14 @@ import org.pickaid.pinet.api.service.PiNetServices;
 import org.pickaid.pinet.api.sync.model.PiSyncEnvelopeKind;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.runtime.service.PiActiveLivingServiceRegistry;
+import org.pickaid.pibrary.runtime.facet.PiActiveLivingFacetRegistry;
 
 /**
- * Networking bridge for generated living-service sync packets.
+ * Networking bridge for generated living-facet sync packets.
  */
 public final class PiLivingSyncMessages {
-    private static final PiChannelId CHANNEL = new PiChannelId(Pibrary.id("living_services"));
+    private static final String FACETS_KEY = "facets";
+    private static final PiChannelId CHANNEL = new PiChannelId(Pibrary.id("living_facets"));
     private static final PiMessageCodec<PiLivingSyncPacket> CODEC = new PiMessageCodec<>() {
         @Override
         public void encode(PiMessageBuffer buffer, PiLivingSyncPacket value) {
@@ -70,7 +71,7 @@ public final class PiLivingSyncMessages {
             return;
         }
         CompoundTag payload = buildPayload(living, PiSyncEnvelopeKind.FULL, route, false);
-        if (!hasServices(payload)) {
+        if (!hasFacets(payload)) {
             return;
         }
         netService.sendToPlayer(player, CHANNEL, new PiLivingSyncPacket(living.getId(), PiSyncEnvelopeKind.FULL, route, payload));
@@ -87,7 +88,7 @@ public final class PiLivingSyncMessages {
             return;
         }
         CompoundTag payload = buildPayload(living, PiSyncEnvelopeKind.FULL, PiSyncRoute.TRACKING, false);
-        if (!hasServices(payload)) {
+        if (!hasFacets(payload)) {
             return;
         }
         netService.sendToTracking(living, CHANNEL, new PiLivingSyncPacket(living.getId(), PiSyncEnvelopeKind.FULL, PiSyncRoute.TRACKING, payload));
@@ -120,14 +121,14 @@ public final class PiLivingSyncMessages {
         boolean trackingSent = false;
         if (living instanceof ServerPlayer player && hasDirty(living, PiSyncRoute.OWNER)) {
             CompoundTag ownerPayload = buildPayload(living, PiSyncEnvelopeKind.DELTA, PiSyncRoute.OWNER, true);
-            if (hasServices(ownerPayload)) {
+            if (hasFacets(ownerPayload)) {
                 netService.sendToPlayer(player, CHANNEL, new PiLivingSyncPacket(living.getId(), PiSyncEnvelopeKind.DELTA, PiSyncRoute.OWNER, ownerPayload));
                 ownerSent = true;
             }
         }
         if (hasDirty(living, PiSyncRoute.TRACKING)) {
             CompoundTag trackingPayload = buildPayload(living, PiSyncEnvelopeKind.DELTA, PiSyncRoute.TRACKING, true);
-            if (hasServices(trackingPayload)) {
+            if (hasFacets(trackingPayload)) {
                 netService.sendToTracking(living, CHANNEL, new PiLivingSyncPacket(living.getId(), PiSyncEnvelopeKind.DELTA, PiSyncRoute.TRACKING, trackingPayload));
                 trackingSent = true;
             }
@@ -141,20 +142,20 @@ public final class PiLivingSyncMessages {
     }
 
     /**
-     * Applies a decoded packet payload to the matching generated services on a living entity.
+     * Applies a decoded packet payload to the matching generated facets on a living entity.
      *
      * @param living target living entity
      * @param packet decoded sync packet
      */
     public static void apply(LivingEntity living, PiLivingSyncPacket packet) {
-        CompoundTag servicesTag = packet.payload().getCompound("services");
-        for (String key : servicesTag.getAllKeys()) {
+        CompoundTag facetsTag = packet.payload().getCompound(FACETS_KEY);
+        for (String key : facetsTag.getAllKeys()) {
             var id = net.minecraft.resources.ResourceLocation.tryParse(key);
             if (id == null) {
                 continue;
             }
-            PiActiveLivingServiceRegistry.find(id)
-                    .ifPresent(descriptor -> descriptor.applySyncPayload(living, packet.kind(), packet.route(), servicesTag.getCompound(key)));
+            PiActiveLivingFacetRegistry.find(id)
+                    .ifPresent(descriptor -> descriptor.applySyncPayload(living, packet.kind(), packet.route(), facetsTag.getCompound(key)));
         }
     }
 
@@ -172,28 +173,28 @@ public final class PiLivingSyncMessages {
         return netService;
     }
 
-    private static boolean hasServices(CompoundTag payload) {
-        return !payload.getCompound("services").getAllKeys().isEmpty();
+    private static boolean hasFacets(CompoundTag payload) {
+        return !payload.getCompound(FACETS_KEY).getAllKeys().isEmpty();
     }
 
     private static CompoundTag buildPayload(LivingEntity living, PiSyncEnvelopeKind kind, PiSyncRoute route, boolean deltaOnly) {
         CompoundTag payload = new CompoundTag();
-        CompoundTag services = new CompoundTag();
-        for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
+        CompoundTag facets = new CompoundTag();
+        for (var descriptor : PiActiveLivingFacetRegistry.activeDescriptors()) {
             if (deltaOnly && !descriptor.hasDirty(living, route)) {
                 continue;
             }
-            CompoundTag serviceTag = descriptor.buildSyncPayload(living, kind, route);
-            if (hasVisibleData(serviceTag)) {
-                services.put(descriptor.id().toString(), serviceTag);
+            CompoundTag facetTag = descriptor.buildSyncPayload(living, kind, route);
+            if (hasVisibleData(facetTag)) {
+                facets.put(descriptor.id().toString(), facetTag);
             }
         }
-        payload.put("services", services);
+        payload.put(FACETS_KEY, facets);
         return payload;
     }
 
     private static boolean hasDirty(LivingEntity living, PiSyncRoute route) {
-        for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
+        for (var descriptor : PiActiveLivingFacetRegistry.activeDescriptors()) {
             if (descriptor.hasDirty(living, route)) {
                 return true;
             }
@@ -202,7 +203,7 @@ public final class PiLivingSyncMessages {
     }
 
     private static void clearDirty(LivingEntity living, PiSyncRoute route) {
-        for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
+        for (var descriptor : PiActiveLivingFacetRegistry.activeDescriptors()) {
             descriptor.clearDirty(living, route);
         }
     }

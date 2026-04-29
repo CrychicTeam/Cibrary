@@ -9,9 +9,11 @@ import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
-import org.pickaid.pibrary.api.service.PiLivingServiceContext;
-import org.pickaid.pibrary.api.service.PiLivingServiceHost;
-import org.pickaid.pibrary.dev.example.CounterPlayerService;
+import org.pickaid.pibrary.api.core.PibraryServiceContext;
+import org.pickaid.pibrary.api.core.PibraryServices;
+import org.pickaid.pibrary.api.facet.PiLivingFacetContext;
+import org.pickaid.pibrary.api.facet.PiLivingFacetContainer;
+import org.pickaid.pibrary.dev.example.CounterPlayerFacet;
 import org.pickaid.pibrary.dev.example.CounterState_PiFields;
 import org.pickaid.pibrary.dev.example.CounterState_PiSchema;
 import org.pickaid.pibrary.dev.example.CounterState;
@@ -21,20 +23,27 @@ import org.pickaid.piserializekit.api.schema.PiFieldKey;
 import org.pickaid.piserializekit.api.schema.PiSyncScope;
 
 class PiSyncFlushPlanTest {
-    private static final PiLivingServiceHost DETACHED_HOST = new PiLivingServiceHost() {
+    private static final PibraryServiceContext DETACHED_SERVICES = PibraryServices.create();
+
+    private static final PiLivingFacetContainer DETACHED_CONTAINER = new PiLivingFacetContainer() {
         @Override
         public net.minecraft.world.entity.LivingEntity living() {
             return null;
         }
 
         @Override
-        public <T extends org.pickaid.pibrary.api.service.PiStateLivingEntityService<?>> T get(Class<T> serviceType) {
-            throw new UnsupportedOperationException("Detached host does not resolve services");
+        public PibraryServiceContext services() {
+            return DETACHED_SERVICES;
+        }
+
+        @Override
+        public <T extends org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet<?>> T get(Class<T> facetClass) {
+            throw new UnsupportedOperationException("Detached container does not resolve facets");
         }
     };
 
-    private static CounterPlayerService newService() {
-        return new CounterPlayerService(new PiLivingServiceContext(null, DETACHED_HOST));
+    private static CounterPlayerFacet newFacet() {
+        return new CounterPlayerFacet(new PiLivingFacetContext(null, DETACHED_CONTAINER));
     }
 
     @Test
@@ -51,12 +60,12 @@ class PiSyncFlushPlanTest {
     }
 
     @Test
-    void servicesCanMarkDirtyFieldsWithoutManualPacketCode() {
-        CounterPlayerService service = newService();
-        service.gainEnergy(1);
+    void facetsCanMarkDirtyFieldsWithoutManualPacketCode() {
+        CounterPlayerFacet facet = newFacet();
+        facet.gainEnergy(1);
 
-        assertEquals(1, service.energy());
-        assertEquals(1, service.dirtyCount());
+        assertEquals(1, facet.energy());
+        assertEquals(1, facet.dirtyCount());
     }
 
     @Test

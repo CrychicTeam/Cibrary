@@ -5,13 +5,20 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
-import org.pickaid.pibrary.api.service.PiStateLivingEntityService;
+import org.pickaid.pibrary.api.facet.PiStateLevelFacet;
+import org.pickaid.pibrary.api.facet.PiStateLivingEntityFacet;
 
 public final class PiStateTypeResolver {
-    private static final ClassValue<Class<?>> LIVING_SERVICE_STATE_TYPES = new ClassValue<>() {
+    private static final ClassValue<Class<?>> LIVING_FACET_STATE_TYPES = new ClassValue<>() {
         @Override
         protected Class<?> computeValue(Class<?> type) {
-            return resolveTypeArgument(type, PiStateLivingEntityService.class, 0);
+            return resolveTypeArgument(type, PiStateLivingEntityFacet.class, 0);
+        }
+    };
+    private static final ClassValue<Class<?>> LEVEL_FACET_STATE_TYPES = new ClassValue<>() {
+        @Override
+        protected Class<?> computeValue(Class<?> type) {
+            return resolveTypeArgument(type, PiStateLevelFacet.class, 0);
         }
     };
 
@@ -19,8 +26,13 @@ public final class PiStateTypeResolver {
     }
 
     @SuppressWarnings("unchecked")
-    public static <S> Class<S> livingServiceStateType(Class<? extends PiStateLivingEntityService<S>> serviceType) {
-        return (Class<S>) LIVING_SERVICE_STATE_TYPES.get(serviceType);
+    public static <S> Class<S> livingFacetStateType(Class<? extends PiStateLivingEntityFacet<S>> facetClass) {
+        return (Class<S>) LIVING_FACET_STATE_TYPES.get(facetClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <S> Class<S> levelFacetStateType(Class<? extends PiStateLevelFacet<S>> facetClass) {
+        return (Class<S>) LEVEL_FACET_STATE_TYPES.get(facetClass);
     }
 
     private static Class<?> resolveTypeArgument(Class<?> leafType, Class<?> targetBase, int index) {

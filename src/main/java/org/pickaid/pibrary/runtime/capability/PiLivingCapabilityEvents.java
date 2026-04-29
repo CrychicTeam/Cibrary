@@ -10,13 +10,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.pickaid.pinet.api.sync.model.PiSyncRoute;
 import org.pickaid.pibrary.Pibrary;
-import org.pickaid.pibrary.runtime.service.PiActiveLivingServiceRegistry;
-import org.pickaid.pibrary.runtime.service.PiAttachedLivingHost;
-import org.pickaid.pibrary.runtime.service.PiLivingServiceLifecycles;
+import org.pickaid.pibrary.runtime.facet.PiActiveLivingFacetRegistry;
+import org.pickaid.pibrary.runtime.facet.PiAttachedLivingFacetContainer;
+import org.pickaid.pibrary.runtime.facet.PiLivingFacetLifecycles;
 import org.pickaid.pibrary.runtime.sync.PiLivingSyncMessages;
 
 /**
- * Forge event bridge for generated living-service capability attachment, clone
+ * Forge event bridge for generated living-facet capability attachment, clone
  * handling, ticking, and sync fan-out.
  */
 @Mod.EventBusSubscriber(modid = Pibrary.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -25,7 +25,7 @@ public final class PiLivingCapabilityEvents {
     }
 
     /**
-     * Attaches generated living-service capability providers to every living entity.
+     * Attaches generated living-facet capability providers to every living entity.
      *
      * @param event Forge capability attachment event
      */
@@ -34,18 +34,18 @@ public final class PiLivingCapabilityEvents {
         if (!(event.getObject() instanceof LivingEntity living)) {
             return;
         }
-        PiAttachedLivingHost host = new PiAttachedLivingHost(living);
-        for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
-            var provider = descriptor.createProvider(living, host);
+        PiAttachedLivingFacetContainer container = new PiAttachedLivingFacetContainer(living);
+        for (var descriptor : PiActiveLivingFacetRegistry.activeDescriptors()) {
+            var provider = descriptor.createProvider(living, container);
             event.addCapability(descriptor.id(), provider);
-            if (provider instanceof org.pickaid.pibrary.runtime.service.PiLivingServiceInstanceProvider<?, ?> instanceProvider) {
+            if (provider instanceof org.pickaid.pibrary.runtime.facet.PiLivingFacetInstanceProvider<?, ?> instanceProvider) {
                 event.addListener(instanceProvider::invalidate);
             }
         }
     }
 
     /**
-     * Copies generated service state across player clone events and resends full sync.
+     * Copies generated facet state across player clone events and resends full sync.
      *
      * @param event Forge player clone event
      */
@@ -53,7 +53,7 @@ public final class PiLivingCapabilityEvents {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         event.getOriginal().reviveCaps();
         try {
-            for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
+            for (var descriptor : PiActiveLivingFacetRegistry.activeDescriptors()) {
                 descriptor.copy(event.getOriginal(), event.getEntity(), event.isWasDeath());
             }
         } finally {
@@ -120,8 +120,8 @@ public final class PiLivingCapabilityEvents {
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity living = event.getEntity();
-        for (var descriptor : PiActiveLivingServiceRegistry.activeDescriptors()) {
-            descriptor.find(living).ifPresent(service -> PiLivingServiceLifecycles.tick(service, living.level().isClientSide()));
+        for (var descriptor : PiActiveLivingFacetRegistry.activeDescriptors()) {
+            descriptor.find(living).ifPresent(service -> PiLivingFacetLifecycles.tick(service, living.level().isClientSide()));
         }
         if (living.level().isClientSide()) {
             return;
