@@ -3,6 +3,16 @@ package org.pickaid.pibrary.api.jei;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Clickable GUI area that opens one or more recipe types.
+ *
+ * @param screenClassName fully qualified screen class name
+ * @param x left coordinate
+ * @param y top coordinate
+ * @param width clickable width
+ * @param height clickable height
+ * @param recipeTypes recipe types opened by the area
+ */
 public record PiJeiClickArea(
         String screenClassName,
         int x,
