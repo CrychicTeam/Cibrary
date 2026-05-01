@@ -18,8 +18,12 @@ class PiJeiRecipeSourceSpecTest {
                 new PiJeiCategorySpec<>(type, Component.literal("Counter Charging"), 116, 54, 0);
         PiJeiRecipeSourceSpec<CounterRecipeViews.CounterRecipe> source =
                 new PiJeiRecipeSourceSpec<>(type, CounterRecipeViews.SOURCE);
+        PiJeiBootstrap bootstrap = new PiJeiBootstrap();
+        bootstrap.registerCategory(category);
+        bootstrap.registerRecipeSource(source);
 
         assertEquals(type, category.recipeType());
         assertEquals(1, source.source().views(null).size());
+        assertEquals(1, bootstrap.recipeSources().size());
     }
 }

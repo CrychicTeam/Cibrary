@@ -15,6 +15,14 @@ public interface PiJeiBridge {
     <R> void registerCategory(PiJeiCategorySpec<R> category);
 
     /**
+     * Registers one recipe source for a viewer category.
+     *
+     * @param source recipe source spec
+     * @param <R> recipe type
+     */
+    <R> void registerRecipeSource(PiJeiRecipeSourceSpec<R> source);
+
+    /**
      * Registers one catalyst spec.
      *
      * @param catalyst catalyst spec

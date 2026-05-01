@@ -11,6 +11,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
  */
 public final class PiJeiBootstrap implements PiJeiBridge {
     private final List<PiJeiCategorySpec<?>> categories = new ArrayList<>();
+    private final List<PiJeiRecipeSourceSpec<?>> recipeSources = new ArrayList<>();
     private final List<PiJeiCatalystSpec> catalysts = new ArrayList<>();
     private final List<PiJeiClickArea> clickAreas = new ArrayList<>();
     private final List<PiJeiExtraArea> extraAreas = new ArrayList<>();
@@ -20,6 +21,11 @@ public final class PiJeiBootstrap implements PiJeiBridge {
     @Override
     public <R> void registerCategory(PiJeiCategorySpec<R> category) {
         categories.add(Objects.requireNonNull(category, "category"));
+    }
+
+    @Override
+    public <R> void registerRecipeSource(PiJeiRecipeSourceSpec<R> source) {
+        recipeSources.add(Objects.requireNonNull(source, "source"));
     }
 
     @Override
@@ -54,6 +60,15 @@ public final class PiJeiBootstrap implements PiJeiBridge {
      */
     public List<PiJeiCategorySpec<?>> categories() {
         return List.copyOf(categories);
+    }
+
+    /**
+     * Returns collected recipe source specs.
+     *
+     * @return immutable recipe source list
+     */
+    public List<PiJeiRecipeSourceSpec<?>> recipeSources() {
+        return List.copyOf(recipeSources);
     }
 
     /**
