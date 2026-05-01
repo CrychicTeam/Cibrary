@@ -51,9 +51,6 @@ public abstract class PiBaseRegistrate<S extends PiBaseRegistrate<S>>
         super(modid);
     }
 
-    /**
-     * Registers this instance to an explicit mod event bus.
-     */
     protected final S registerTo(IEventBus modBus) {
         IEventBus bus = Objects.requireNonNull(modBus, "modBus");
         registerEventListeners(bus);
@@ -65,9 +62,6 @@ public abstract class PiBaseRegistrate<S extends PiBaseRegistrate<S>>
         return self();
     }
 
-    /**
-     * Registers this instance to Registrate's default mod event bus.
-     */
     protected final S registerToDefaultBus() {
         return registerTo(getModEventBus());
     }
