@@ -1,10 +1,13 @@
 package org.pickaid.pibrary.api.registrate;
 
+import com.mojang.serialization.Codec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.Tags;
 import org.junit.jupiter.api.Test;
+import org.pickaid.pibrary.api.config.PiDataConfigType;
 
 class PiRegistrateBuilderHelpersTest {
     @Test
@@ -15,6 +18,11 @@ class PiRegistrateBuilderHelpersTest {
     @Test
     void itemHelpersKeepThePibraryBuilderChain() {
         assertItemBuilderApi((PiItemBuilder<Item, ?>) null);
+    }
+
+    @Test
+    void registrateCanKeepDataConfigEntries() {
+        assertDataConfigEntryApi((PiBaseRegistrate<?>) null);
     }
 
     private static void assertBlockBuilderApi(PiBlockBuilder<Block, ?> builder) {
@@ -50,5 +58,17 @@ class PiRegistrateBuilderHelpersTest {
                 .rarity(net.minecraft.world.item.Rarity.RARE)
                 .section("items")
                 .variant("charged", stack -> stack.getOrCreateTag().putBoolean("charged", true));
+    }
+
+    private static void assertDataConfigEntryApi(PiBaseRegistrate<?> registrate) {
+        if (registrate == null) {
+            return;
+        }
+        PiDataConfigType<String> spells = PiDataConfigType.create("spell", Codec.STRING);
+        registrate.dataConfig(spells.entry(id("fireball"), "enabled"));
+    }
+
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath("example", path);
     }
 }

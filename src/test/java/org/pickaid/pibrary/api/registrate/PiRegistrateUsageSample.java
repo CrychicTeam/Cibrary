@@ -3,10 +3,12 @@ package org.pickaid.pibrary.api.registrate;
 import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.builders.NoConfigBuilder;
-import com.tterrag.registrate.util.entry.RegistryEntry;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -22,9 +24,14 @@ import net.minecraftforge.registries.IForgeRegistry;
 import org.pickaid.pibrary.api.render.tint.PiBlockTints;
 import org.pickaid.pibrary.api.render.tint.PiItemTints;
 import org.pickaid.pibrary.api.render.tint.PiTintRegistry;
+import org.pickaid.pibrary.api.config.PiDataConfigCollector;
+import org.pickaid.pibrary.api.config.PiDataConfigType;
 
 @SuppressWarnings({"unchecked", "unused"})
 final class PiRegistrateUsageSample {
+    private static final PiDataConfigType<SpellRules> SPELL_RULES =
+            PiDataConfigType.merged("spell", SpellRules.CODEC, SpellRules::mergeAll);
+
     private PiRegistrateUsageSample() {
     }
 
@@ -59,13 +66,9 @@ final class PiRegistrateUsageSample {
     }
 
     static NoConfigBuilder<SpellType, SpellType, ExampleRegistrate> fireballSpell(ExampleRegistrate registrate) {
-        return registrate.spell("fireball", SpellType::new)
+        return registrate.spell("fireball", SpellType::new, id -> new SpellRules(8, 120, 4))
                 .onRegister(spell -> {
                 });
-    }
-
-    static RegistryEntry<TraitType> frozenTrait(ExampleRegistrate registrate) {
-        return registrate.trait("frozen", TraitType::new);
     }
 
     static ItemBuilder<Item, PiRegistrate> spellScrollFromRegistry(
@@ -109,8 +112,6 @@ final class PiRegistrateUsageSample {
     private static final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
         private static final ResourceKey<Registry<SpellType>> SPELLS =
                 ResourceKey.createRegistryKey(PiRegistrateUsageSample.id("spells"));
-        private static final ResourceKey<Registry<TraitType>> TRAITS =
-                ResourceKey.createRegistryKey(PiRegistrateUsageSample.id("traits"));
 
         private ExampleRegistrate(String modid) {
             super(modid);
@@ -127,8 +128,18 @@ final class PiRegistrateUsageSample {
             return generic(name, SPELLS, factory);
         }
 
-        RegistryEntry<TraitType> trait(String name, Supplier<TraitType> factory) {
-            return simple(name, TRAITS, factory::get);
+        NoConfigBuilder<SpellType, SpellType, ExampleRegistrate> spell(
+                String name,
+                Supplier<SpellType> factory,
+                Function<ResourceLocation, SpellRules> config
+        ) {
+            ResourceLocation id = loc(name);
+            dataConfig(SPELL_RULES.entry(id, config.apply(id)));
+            return generic(name, SPELLS, factory::get);
+        }
+
+        void collectGeneratedConfigs(PiDataConfigCollector collector) {
+            collectDataConfigs(collector);
         }
     }
 
@@ -146,6 +157,23 @@ final class PiRegistrateUsageSample {
         }
     }
 
-    private static final class TraitType {
+    private record SpellRules(int mana, int cooldown, int range) {
+        private static final Codec<SpellRules> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.INT.fieldOf("mana").forGetter(SpellRules::mana),
+                Codec.INT.fieldOf("cooldown").forGetter(SpellRules::cooldown),
+                Codec.INT.fieldOf("range").forGetter(SpellRules::range)
+        ).apply(instance, SpellRules::new));
+
+        private static SpellRules mergeAll(java.util.Collection<SpellRules> values) {
+            int mana = 0;
+            int cooldown = 0;
+            int range = 0;
+            for (SpellRules value : values) {
+                mana += value.mana;
+                cooldown += value.cooldown;
+                range = Math.max(range, value.range);
+            }
+            return new SpellRules(mana, cooldown, range);
+        }
     }
 }

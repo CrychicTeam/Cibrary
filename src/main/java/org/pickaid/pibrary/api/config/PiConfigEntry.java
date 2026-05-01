@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.resources.ResourceLocation;
+import org.pickaid.piserializekit.api.service.PiSerializer;
 
 /**
  * Typed config entry definition shared by loaders, generated docs, and runtime
@@ -41,6 +42,11 @@ public record PiConfigEntry<T>(
 
     public static <T> Builder<T> builder(ResourceLocation id, Codec<T> codec, PiConfigScope scope, T defaultValue) {
         return new Builder<>(id, codec, scope, defaultValue);
+    }
+
+    public static <T> Builder<T> builder(ResourceLocation id, PiSerializer<T> serializer, PiConfigScope scope, T defaultValue) {
+        Objects.requireNonNull(serializer, "serializer");
+        return builder(id, serializer.valueCodec(), scope, defaultValue);
     }
 
     public List<String> validate(T value) {

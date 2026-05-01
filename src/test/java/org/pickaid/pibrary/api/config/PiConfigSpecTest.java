@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
+import org.pickaid.piserializekit.api.service.PiSerializers;
 
 class PiConfigSpecTest {
     @Test
@@ -123,7 +124,24 @@ class PiConfigSpecTest {
         assertEquals("config entry does not belong to spec: example:other/max_energy", exception.getMessage());
     }
 
+    @Test
+    void entriesCanUsePiSerializeKitSerializersAsCodecSource() {
+        PiConfigEntry<Mode> mode = PiConfigEntry
+                .builder(id("gameplay/mode"), PiSerializers.enumType(Mode.class), PiConfigScope.COMMON_BOOTSTRAP, Mode.NORMAL)
+                .build();
+        PiConfigSpec spec = PiConfigSpec.builder(id("gameplay"), PiConfigScope.COMMON_BOOTSTRAP)
+                .entry(mode)
+                .build();
+
+        assertEquals(Mode.NORMAL, PiConfigValues.defaults(spec).get(mode));
+    }
+
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath("example", path);
+    }
+
+    private enum Mode {
+        NORMAL,
+        HARD
     }
 }

@@ -15,5 +15,9 @@
  * registrate subclass instead of this package. For project-specific registries, extend
  * {@link org.pickaid.pibrary.api.registrate.PiBaseRegistrate} and put the
  * project-specific builders in the owning mod.</p>
+ *
+ * <p>The Registrate integration direction in this package learns from lcy's L2
+ * project family, especially the way L2 keeps content registration and generated
+ * config declarations close together.</p>
  */
 package org.pickaid.pibrary.api.registrate;

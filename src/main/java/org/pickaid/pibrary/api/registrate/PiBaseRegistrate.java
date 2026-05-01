@@ -5,6 +5,8 @@ import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.builders.NoConfigBuilder;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import net.minecraft.core.Registry;
@@ -16,6 +18,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
+import org.pickaid.pibrary.api.config.PiDataConfigCollector;
+import org.pickaid.pibrary.api.config.PiDataConfigEntry;
 import org.pickaid.pibrary.api.creative.PiCreativeContentRegistry;
 import org.pickaid.pibrary.api.creative.PiCreativeTabBuilder;
 import org.pickaid.pibrary.api.render.tint.PiTintRegistry;
@@ -39,6 +43,7 @@ public abstract class PiBaseRegistrate<S extends PiBaseRegistrate<S>>
         implements PiTintedRegistrate<S> {
     private final PiTintRegistry tintRegistry = new PiTintRegistry();
     private final PiCreativeContentRegistry creativeContents = new PiCreativeContentRegistry();
+    private final List<Consumer<PiDataConfigCollector>> dataConfigWriters = new ArrayList<>();
     private ResourceKey<CreativeModeTab> defaultCreativeTabKey;
     private boolean creativeContentsAttached;
 
@@ -47,10 +52,7 @@ public abstract class PiBaseRegistrate<S extends PiBaseRegistrate<S>>
     }
 
     /**
-     * Registers this Registrate instance to an explicit mod event bus.
-     *
-     * @param modBus Forge mod event bus
-     * @return this Registrate instance
+     * Registers this instance to an explicit mod event bus.
      */
     protected final S registerTo(IEventBus modBus) {
         IEventBus bus = Objects.requireNonNull(modBus, "modBus");
@@ -64,9 +66,7 @@ public abstract class PiBaseRegistrate<S extends PiBaseRegistrate<S>>
     }
 
     /**
-     * Registers this Registrate instance to Registrate's default mod event bus.
-     *
-     * @return this Registrate instance
+     * Registers this instance to Registrate's default mod event bus.
      */
     protected final S registerToDefaultBus() {
         return registerTo(getModEventBus());
@@ -96,6 +96,21 @@ public abstract class PiBaseRegistrate<S extends PiBaseRegistrate<S>>
 
     public final PiCreativeContentRegistry creativeContents() {
         return creativeContents;
+    }
+
+    public final S dataConfig(Consumer<PiDataConfigCollector> writer) {
+        dataConfigWriters.add(Objects.requireNonNull(writer, "writer"));
+        return self();
+    }
+
+    public final S dataConfig(PiDataConfigEntry<?> entry) {
+        Objects.requireNonNull(entry, "entry");
+        return dataConfig(collector -> collector.add(entry));
+    }
+
+    public final void collectDataConfigs(PiDataConfigCollector collector) {
+        Objects.requireNonNull(collector, "collector");
+        dataConfigWriters.forEach(writer -> writer.accept(collector));
     }
 
     public final S creativeSections(String... sections) {
