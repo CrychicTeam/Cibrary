@@ -100,6 +100,12 @@ mihono = "https://maven.mihono.cn/repository/pickaid1201/"
 piserializekit = { notation = "com.mihono.pickaid:piserializekit:0.0.5", transitive = false }
 pinet = { notation = "com.mihono.pickaid:pinet:0.0.4", transitive = false }
 
+# CommonMark backs PiTexts.markup(...). It stays behind Pibrary's own
+# PiTextMarkupScope extension API, so downstream mods do not need to import
+# commonmark classes.
+[dependencies.implementation]
+commonmark = "org.commonmark:commonmark:0.28.0"
+
 # Registrate is a public development surface for Pibrary's registry helpers, but
 # at runtime it is embedded into the produced jar instead of requiring users to
 # install it separately.
@@ -117,6 +123,7 @@ registrate_test = "com.tterrag.registrate:Registrate:MC1.20-1.3.11"
 piserializekit = { notation = "com.mihono.pickaid:piserializekit:0.0.5", range = "[0.0.5,0.1.0)", transitive = false }
 pinet = { notation = "com.mihono.pickaid:pinet:0.0.4", range = "[0.0.4,0.1.0)", transitive = false }
 registrate = { notation = "com.tterrag.registrate:Registrate:MC1.20-1.3.11", range = "[MC1.20,MC1.21)" }
+commonmark = { notation = "org.commonmark:commonmark:0.28.0", range = "[0.28.0,0.29.0)", transitive = false }
 
 # Mixin AP is needed for refmap generation. It is not a gameplay dependency.
 [dependencies.compile_only]
