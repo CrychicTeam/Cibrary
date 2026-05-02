@@ -19,7 +19,10 @@ import net.minecraft.network.chat.Component;
  * @param y top coordinate in the recipe display
  * @param values item stacks, ingredients, ids, or project-owned display values
  * @param visibility how a viewer should expose this slot
+ * @param name optional slot name for lookup during category drawing
  * @param focusGroup optional focus-link group id
+ * @param background built-in slot background hint
+ * @param fluidRenderer optional fluid renderer hint
  * @param tooltips extra tooltip lines as vanilla components
  * @param <T> value type
  */
@@ -29,16 +32,22 @@ public record PiRecipeSlot<T>(
         int y,
         List<T> values,
         Visibility visibility,
+        Optional<String> name,
         Optional<String> focusGroup,
+        Background background,
+        Optional<PiRecipeFluidRenderHint> fluidRenderer,
         List<Component> tooltips
 ) {
     public PiRecipeSlot {
         Objects.requireNonNull(role, "role");
         values = List.copyOf(Objects.requireNonNull(values, "values"));
         Objects.requireNonNull(visibility, "visibility");
+        name = cleanOptionalString(name, "name");
         focusGroup = Objects.requireNonNull(focusGroup, "focusGroup")
                 .map(String::trim)
                 .filter(value -> !value.isEmpty());
+        Objects.requireNonNull(background, "background");
+        fluidRenderer = Objects.requireNonNull(fluidRenderer, "fluidRenderer");
         tooltips = List.copyOf(Objects.requireNonNull(tooltips, "tooltips"));
         if (values.isEmpty()) {
             throw new IllegalArgumentException("slot values must not be empty");
@@ -51,6 +60,28 @@ public record PiRecipeSlot<T>(
 
     public PiRecipeSlot(PiRecipeRole role, int x, int y, T value) {
         this(role, x, y, List.of(value), Visibility.VISIBLE, Optional.empty(), List.of());
+    }
+
+    public PiRecipeSlot(
+            PiRecipeRole role,
+            int x,
+            int y,
+            List<T> values,
+            Visibility visibility,
+            Optional<String> focusGroup,
+            List<Component> tooltips
+    ) {
+        this(
+                role,
+                x,
+                y,
+                values,
+                visibility,
+                Optional.empty(),
+                focusGroup,
+                Background.NONE,
+                Optional.empty(),
+                tooltips);
     }
 
     public T value() {
@@ -67,6 +98,12 @@ public record PiRecipeSlot<T>(
         RENDER_ONLY
     }
 
+    public enum Background {
+        NONE,
+        STANDARD,
+        OUTPUT
+    }
+
     public static final class Builder {
         private final PiRecipeRole role;
         private final int x;
@@ -74,7 +111,10 @@ public record PiRecipeSlot<T>(
         private final List<Object> values = new ArrayList<>();
         private final List<Component> tooltips = new ArrayList<>();
         private Visibility visibility = Visibility.VISIBLE;
+        private String name;
         private String focusGroup;
+        private Background background = Background.NONE;
+        private PiRecipeFluidRenderHint fluidRenderer;
 
         private Builder(PiRecipeRole role, int x, int y) {
             this.role = Objects.requireNonNull(role, "role");
@@ -105,8 +145,28 @@ public record PiRecipeSlot<T>(
             return this;
         }
 
+        public Builder name(String name) {
+            this.name = Objects.requireNonNull(name, "name");
+            return this;
+        }
+
         public Builder focusGroup(String focusGroup) {
             this.focusGroup = Objects.requireNonNull(focusGroup, "focusGroup");
+            return this;
+        }
+
+        public Builder standardBackground() {
+            background = Background.STANDARD;
+            return this;
+        }
+
+        public Builder outputBackground() {
+            background = Background.OUTPUT;
+            return this;
+        }
+
+        public Builder fluidRenderer(long capacity, boolean showCapacity, int width, int height) {
+            this.fluidRenderer = new PiRecipeFluidRenderHint(capacity, showCapacity, width, height);
             return this;
         }
 
@@ -122,8 +182,16 @@ public record PiRecipeSlot<T>(
                     y,
                     values,
                     visibility,
+                    Optional.ofNullable(name),
                     Optional.ofNullable(focusGroup),
+                    background,
+                    Optional.ofNullable(fluidRenderer),
                     tooltips);
         }
+    }
+
+    private static Optional<String> cleanOptionalString(Optional<String> value, String name) {
+        Objects.requireNonNull(value, name);
+        return value.map(String::trim).filter(cleaned -> !cleaned.isEmpty());
     }
 }

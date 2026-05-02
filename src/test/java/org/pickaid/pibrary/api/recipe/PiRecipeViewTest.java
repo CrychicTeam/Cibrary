@@ -85,18 +85,34 @@ class PiRecipeViewTest {
     @Test
     void recipeSlotsSupportComplexViewerHints() {
         PiRecipeSlot<?> slot = PiRecipeSlot.builder(PiRecipeRole.INPUT, 18, 18)
+                .name("alloy_input")
                 .value("copper")
                 .value("tin")
                 .focusGroup("alloy")
+                .standardBackground()
+                .fluidRenderer(1000, true, 16, 48)
                 .tooltip(PiTexts.tooltip("test", "accepts_alloy"))
                 .hiddenLookup()
                 .build();
 
+        assertEquals("alloy_input", slot.name().orElseThrow());
         assertEquals(List.of("copper", "tin"), slot.values());
         assertEquals("copper", slot.value());
         assertEquals("alloy", slot.focusGroup().orElseThrow());
+        assertEquals(PiRecipeSlot.Background.STANDARD, slot.background());
+        assertEquals(new PiRecipeFluidRenderHint(1000, true, 16, 48), slot.fluidRenderer().orElseThrow());
         assertEquals(List.of(Component.translatable("tooltip.test.accepts_alloy")), slot.tooltips());
         assertEquals(PiRecipeSlot.Visibility.HIDDEN_LOOKUP, slot.visibility());
+    }
+
+    @Test
+    void recipeSlotsRejectInvalidFluidRendererHints() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new PiRecipeFluidRenderHint(0, true, 16, 16));
+        assertThrows(IllegalArgumentException.class,
+                () -> new PiRecipeFluidRenderHint(1000, true, 0, 16));
+        assertThrows(IllegalArgumentException.class,
+                () -> new PiRecipeFluidRenderHint(1000, true, 16, 0));
     }
 
     @Test
