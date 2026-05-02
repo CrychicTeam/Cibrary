@@ -24,6 +24,17 @@
 
 这份 README 只写当前已经能直接使用的核心 API。更重的 runtime、兼容实现和玩法逻辑可以围绕这些契约扩展，不需要先塞回根模组。
 
+更细的专题文档：
+
+- [富文本与图片 Component](docs/zhCN/text-markup.md)
+- [JEI 集成结构](docs/zhCN/jei-integration.md)
+- [配置与 datapack 数据](docs/zhCN/config.md)
+- [Math 教程](docs/zhCN/math.md)
+
+## 致谢
+
+Pibrary 的配置与 Registrate 相关设计参考并学习了 lcy 在 L2 系列项目中的代码，尤其是 L2Core 和 L2Hostility。这里的实现是 Pibrary 自己写的，但“注册项和默认 datapack 配置放在一条链上”“用 config type 管理一类 JSON”“通过 datagen collector 统一写文件”等方向，来自对 L2 代码的学习。
+
 ## 现在怎么用
 
 如果你要给玩家或生物挂一份持久化状态，写一个 Facet。Facet 会被挂到实体上，可以保存、同步，也可以提供 tick、clone、显示刷新等钩子。
@@ -102,52 +113,6 @@ Optional<OreMemoryFacet> memory =
 ```
 
 你的模组初始化时调用一次 `ExampleLivingFacets.register()` / `ExampleLevelFacets.register()` / `ExampleChunkFacets.register()`，让这些静态 handle 被加载。之后业务代码只拿 typed handle，不手写 capability key，也不手动找 generated descriptor。
-
-配置先写成 `PiConfigSpec`。这不是文件格式，也不是强行替代 Forge config；它只是把 id、作用域、默认值、注释和校验放在一个稳定位置。之后无论你用 Forge config、datapack JSON、客户端本地文件，还是 Pibrary 以后自己的 loader，都能吃同一份定义。
-
-```java
-public final class ExampleConfigs {
-    public static final PiConfigEntry<Integer> MAX_ENERGY = PiConfigEntry
-            .builder(id("gameplay/max_energy"), Codec.INT, PiConfigScope.COMMON_BOOTSTRAP, 100)
-            .comment("Maximum energy stored by the counter system.")
-            .alsoValidate(PiConfigValidators.intRange(1, 10_000))
-            .build();
-
-    public static final PiConfigEntry<String> STARTER_SPELL = PiConfigEntry
-            .builder(id("gameplay/starter_spell"), Codec.STRING, PiConfigScope.COMMON_BOOTSTRAP, "example:fireball")
-            .comment("Spell id given to a new player.")
-            .alsoValidate(PiConfigValidators.notBlank("starter spell must not be blank"))
-            .alsoValidate(value -> value.contains(":")
-                    ? Optional.empty()
-                    : Optional.of("starter spell must include namespace"))
-            .build();
-
-    public static final PiConfigSpec GAMEPLAY = PiConfigSpec
-            .builder(REGISTRATE.loc("gameplay"), PiConfigScope.COMMON_BOOTSTRAP)
-            .entry(MAX_ENERGY)
-            .entry(STARTER_SPELL)
-            .build();
-
-    private ExampleConfigs() {
-    }
-
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
-    }
-}
-```
-
-`PiConfigSpec` 会在构建时检查重复 entry、作用域混用和非法默认值。这样配置写错会在启动阶段尽早暴露，不会等到某个机器、facet 或 packet 真用到时才变成奇怪的运行时问题。
-
-loader 读完文件后可以放进 `PiConfigValues`，业务代码继续用 typed entry 取值：
-
-```java
-PiConfigValues values = PiConfigValues.builder(ExampleConfigs.GAMEPLAY)
-        .set(ExampleConfigs.MAX_ENERGY, 250)
-        .build();
-
-int maxEnergy = values.get(ExampleConfigs.MAX_ENERGY);
-```
 
 方块、物品、方块实体、模型、loot、recipe 继续按 Registrate 的写法来。`tag(...)`、`properties(...)`、`simpleItem()`、`defaultLoot()`、`defaultModel()` 这些 Registrate 已经有的能力，直接写通常更清楚。Pibrary 在这条链上主要补 id 路径、创造栏 section / NBT 变体、tint 声明，以及少数确实能减少重复的组合操作。
 
@@ -281,7 +246,7 @@ private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellT
 
 `section("materials")` 使用默认创造栏；默认创造栏可以在同一个注册类里稍后声明，Pibrary 会等到注册事件真正处理内容时再解析它。多个 tab 混用时不要依赖默认值，直接写 `section(tabKey, "materials")`。
 
-如果你的项目有自己的核心概念，例如 spell、trait、machine、module，不要把这些东西塞进 Pibrary 的通用 helper。直接做一个自己的 Registrate 入口，把项目里的词写成方法：
+如果你的项目有自己的核心概念，例如 spell、school、rune、module，不要把这些东西塞进 Pibrary 的通用 helper。直接做一个自己的 Registrate 入口，把项目里的词写成方法：
 
 ```java
 public final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
@@ -365,6 +330,21 @@ REGISTRATE.tintBlock(MANA_POOL, tint -> tint
 
 `api/registry` 只保留给少数高级场景：多个模块先收集一份简单 registry 清单、提前查重复 id，或者同一份清单要被不同版本的 Forge / NeoForge adapter 消化。它不是主入口，也不是复杂方块、物品、实体的工厂。
 
+文字内容仍然以原版 `Component` 为底。普通文本用 `PiTexts.literal(...)` 和 `PiTexts.translatable(...)`；需要 tooltip、手册页、屏幕说明这类富文本时，用 `PiTexts.markup(...)` 或带翻译 key 的 `PiTexts.markupTranslatable(...)`。
+
+```java
+MutableComponent line = PiTexts.markupTranslatable(
+        "tooltip.example.spell.fireball",
+        "**{name}** ![image]({icon}#size=18x18)\\nCost: [mana]({spell})",
+        scope,
+        PiTextArgs.of()
+                .component("name", spell.getDisplayName())
+                .resource("icon", spell.icon())
+                .resource("spell", spell.id()));
+```
+
+完整写法，包括 `{name}` 参数、图片/动图、自定义 inline 规则、语言 datagen 和 renderer 注册，放在 [docs/zhCN/text-markup.md](docs/zhCN/text-markup.md)。
+
 如果机器逻辑和 recipe viewer 都要读取同一批数据，先把数据整理成 `PiRecipeView`。机器用 `PiRecipeLookupCache` 查找和缓存，viewer compat 用同一个 `PiRecipeSource` 生成显示内容。
 
 ```java
@@ -445,10 +425,54 @@ PiJeiRecipeTypeKey<CounterRecipes.CounterRecipe> type =
                 CounterRecipes.CounterRecipe.class);
 
 PiJeiCategorySpec<CounterRecipes.CounterRecipe> category =
-        new PiJeiCategorySpec<>(type, Component.literal("Counter Charging"), 116, 54, 0);
+        new PiJeiCategorySpec<>(type, Component.literal("Counter Charging"), 116, 54, 0,
+                view -> PiRecipeLayout.builder(view)
+                        .input(18, 18, view.recipe().input())
+                        .thenOutput(64, view.recipe().output())
+                        .build());
 
 PiJeiRecipeSourceSpec<CounterRecipes.CounterRecipe> source =
         new PiJeiRecipeSourceSpec<>(type, CounterRecipes.SOURCE);
+
+PiJeiBootstrap bootstrap = new PiJeiBootstrap();
+bootstrap.registerCategory(category);
+bootstrap.registerRecipeSource(source);
+
+PiJeiRecipeCatalog catalog = PiJeiRecipeCatalog.from(bootstrap);
+List<PiJeiRecipeDisplay<CounterRecipes.CounterRecipe>> displays = catalog.displays(type, level);
+```
+
+`PiJeiRecipeCatalog.from(...)` 会检查 recipe source、click area、transfer 指向的 recipe type 是否有对应 category。同一个 recipe type id 如果被两个不同 recipe class 注册，也会在这里直接报错。
+
+真正引入 JEI 的 compat 类可以把 `PiJeiRecipeDisplay` 注册成 JEI recipe object，然后在 `IRecipeCategory#setRecipe(...)` 里把 `PiRecipeSlot` 翻译成 JEI slot。完整结构见 [docs/zhCN/jei-integration.md](docs/zhCN/jei-integration.md)。
+
+复杂配方不要在这里做成大 layout engine。需要多候选输入、隐藏 lookup、输入输出联动时，用 slot hint：
+
+```java
+PiRecipeLayout.builder(view)
+        .slot(PiRecipeSlot.builder(PiRecipeRole.INPUT, 18, 18)
+                .name("input")
+                .standardBackground()
+                .values(view.recipe().acceptedInputs())
+                .focusGroup("variant")
+                .tooltip(PiTexts.literal("Any matching input"))
+                .build())
+        .slot(PiRecipeSlot.builder(PiRecipeRole.OUTPUT, 82, 18)
+                .name("output")
+                .outputBackground()
+                .values(view.recipe().possibleOutputs())
+                .focusGroup("variant")
+                .build())
+        .slot(PiRecipeSlot.builder(PiRecipeRole.INPUT, 50, 18)
+                .name("fluid")
+                .fluidRenderer(1000, true, 16, 48)
+                .value(view.recipe().fluidInput())
+                .build())
+        .slot(PiRecipeSlot.builder(PiRecipeRole.INPUT, 0, 0)
+                .values(view.recipe().lookupOnlyInputs())
+                .hiddenLookup()
+                .build())
+        .build();
 ```
 
 如果你需要通用数学 helper，直接使用 `api/math`。这部分沿用原版 `Vec3` / `AABB`，所以可以和实体、碰撞、渲染、targeting 代码直接配合：
@@ -472,6 +496,8 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 ```
 
 这类 helper 适合 targeting、projectile、HUD marker、world preview、简单动画曲线和权重选择。复杂视觉系统可以把这些函数作为底层积木继续组合。
+
+完整 Math 用法，包括 scalar/range、Vec3/AABB、curve、weight、camera projection 和 edge indicator，见 [docs/zhCN/math.md](docs/zhCN/math.md)。
 
 ## 现阶段代码状态
 
@@ -511,11 +537,11 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 9. `api/entity`
    实体生命周期与受击处理边界。
 10. `api/projectile`
-   面向性能优化的 projectile trace / impact 契约。
+    面向性能优化的 projectile trace / impact 契约。
 11. `api/menu`
-   基于原版 `ContainerData` 的菜单 int 同步桥。
+    基于原版 `ContainerData` 的菜单 int 同步桥。
 12. `api/jei`
-   JEI 中立的 recipe-viewer 契约、模块收集面与 GUI / alias / transfer 规格。
+    JEI 中立的 recipe-viewer 契约、模块收集面与 GUI / alias / transfer 规格。
 13. `api/recipe`
     机器逻辑和 recipe-viewer compat 共用的 recipe view、source、match 和 reload cache 契约。
 14. `api/math`

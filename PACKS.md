@@ -7,9 +7,10 @@ This file describes how `Pibrary` should stay organized during the split from th
 ## Permanent In This Repo
 
 As the split continues, these responsibilities stay in `Pibrary`:
+
 1. shared core contracts;
 2. service location and public base abstractions;
-3. common config, diagnostics, registry, state, targeting, and living-service boundaries;
+3. common config, diagnostics, registry, state, targeting, math-helper, and living-service boundaries;
 4. the current entity and projectile tracing contracts that are already committed in the public API;
 5. JEI-neutral recipe-viewer contracts for the optional compat layer;
 6. migration-safe root mod bootstrap.
@@ -21,6 +22,7 @@ When later shared boundaries become real committed APIs, keep only the root-side
 ## Independent Foundation Repos
 
 These stay outside `Pibrary` even if `Pibrary` depends on their concepts:
+
 1. `PiNet`
 2. `PiSerializeKit`
 3. `PiKubeJSCompat`
@@ -32,6 +34,7 @@ They are independent because they are broadly reusable and should not require th
 ## Engine Repos
 
 These belong to engine families, not the root core repo:
+
 1. camera systems;
 2. UI / HUD / animated screen systems;
 3. story / dialogue / mission systems;
@@ -44,6 +47,7 @@ The legacy monolith is preserved under:
 `restore/legacy-monolith-20260331`
 
 The active rule is:
+
 1. keep it available for migration;
 2. do not treat it as the target architecture;
 3. extract reusable parts into stable APIs before moving implementations into independent repos.

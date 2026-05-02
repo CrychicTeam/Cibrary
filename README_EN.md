@@ -10,6 +10,17 @@ The current goal is practical:
 3. moving from 1.20.1 to later versions should mostly touch compatibility layers, not gameplay code;
 4. PiNet and PiSerializeKit become convenient building blocks through Pibrary-level entry points.
 
+Detailed guides:
+
+- [Text markup and visual components](docs/enUS/text-markup.md)
+- [JEI integration shape](docs/enUS/jei-integration.md)
+- [Config and datapack data](docs/enUS/config.md)
+- [Math tutorial](docs/enUS/math.md)
+
+## Credits
+
+Pibrary's config and Registrate design was written after studying lcy's code in the L2 project family, especially L2Core and L2Hostility. The implementation here is independent, but the direction of keeping registered content, default datapack config, config-type loading, and datagen collection on one chain comes from that work.
+
 ## Use It Today
 
 If you want persistent state attached to a player or mob, write a Facet. A Facet is attached to the entity, can persist state, can sync state, and can opt into hooks such as tick, clone, and display refresh.
@@ -90,52 +101,6 @@ Optional<OreMemoryFacet> memory =
 ```
 
 Call `ExampleLevelFacets.register()` and `ExampleChunkFacets.register()` during your own mod bootstrap. After that, gameplay code uses typed handles and does not need to touch capability keys or generated descriptors directly.
-
-Define config as a `PiConfigSpec` first. This is not a file format and it does not replace Forge config by itself. It keeps ids, scope, defaults, comments, and validation in one stable place, so Forge config, datapack JSON, local client files, or a later Pibrary loader can all consume the same definition.
-
-```java
-public final class ExampleConfigs {
-    public static final PiConfigEntry<Integer> MAX_ENERGY = PiConfigEntry
-            .builder(id("gameplay/max_energy"), Codec.INT, PiConfigScope.COMMON_BOOTSTRAP, 100)
-            .comment("Maximum energy stored by the counter system.")
-            .alsoValidate(PiConfigValidators.intRange(1, 10_000))
-            .build();
-
-    public static final PiConfigEntry<String> STARTER_SPELL = PiConfigEntry
-            .builder(id("gameplay/starter_spell"), Codec.STRING, PiConfigScope.COMMON_BOOTSTRAP, "example:fireball")
-            .comment("Spell id given to a new player.")
-            .alsoValidate(PiConfigValidators.notBlank("starter spell must not be blank"))
-            .alsoValidate(value -> value.contains(":")
-                    ? Optional.empty()
-                    : Optional.of("starter spell must include namespace"))
-            .build();
-
-    public static final PiConfigSpec GAMEPLAY = PiConfigSpec
-            .builder(REGISTRATE.loc("gameplay"), PiConfigScope.COMMON_BOOTSTRAP)
-            .entry(MAX_ENERGY)
-            .entry(STARTER_SPELL)
-            .build();
-
-    private ExampleConfigs() {
-    }
-
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
-    }
-}
-```
-
-`PiConfigSpec` checks duplicate entries, mixed scopes, and invalid defaults when the spec is built. A bad config definition fails near bootstrap instead of turning into a strange runtime bug when a machine, facet, or packet eventually reads it.
-
-After a loader reads the file, put decoded values into `PiConfigValues`. Gameplay code still reads through typed entries:
-
-```java
-PiConfigValues values = PiConfigValues.builder(ExampleConfigs.GAMEPLAY)
-        .set(ExampleConfigs.MAX_ENERGY, 250)
-        .build();
-
-int maxEnergy = values.get(ExampleConfigs.MAX_ENERGY);
-```
 
 For blocks, items, block entities, models, loot, and recipes, keep the normal Registrate chain. Registrate already has clear direct methods such as `tag(...)`, `properties(...)`, `simpleItem()`, `defaultLoot()`, and `defaultModel()`. Use those directly when they read well. Pibrary mainly adds id helpers, creative-tab sections, NBT variants, tint declarations, and direct builder methods for common block/item tag cases.
 
@@ -269,7 +234,7 @@ private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellT
 
 `section("materials")` uses the default creative tab. The tab may be declared later in the same registration class; Pibrary resolves it when creative contents are registered. If a class uses several tabs, prefer `section(tabKey, "materials")`.
 
-If the project has its own first-class concepts, such as spells, traits, machines, or modules, do not put them into Pibrary's shared helpers. Give the project its own Registrate entry point:
+If the project has its own first-class concepts, such as spells, schools, runes, or modules, do not put them into Pibrary's shared helpers. Give the project its own Registrate entry point:
 
 ```java
 public final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
@@ -353,6 +318,21 @@ Do not start normal registration with `PiRegistryPlan`. Most blocks, items, soun
 
 `api/registry` stays for narrow advanced cases: several modules collecting a simple registry list before application, early duplicate-id checks, or one list being consumed by different Forge / NeoForge adapters. It is not the main entry point, and it is not a factory for complex blocks, items, or entities.
 
+Text stays close to vanilla `Component`. Use `PiTexts.literal(...)` and `PiTexts.translatable(...)` for normal text. Use `PiTexts.markup(...)` or `PiTexts.markupTranslatable(...)` when a tooltip, guide page, or screen label needs rich text.
+
+```java
+MutableComponent line = PiTexts.markupTranslatable(
+        "tooltip.example.spell.fireball",
+        "**{name}** ![image]({icon}#size=18x18)\\nCost: [mana]({spell})",
+        scope,
+        PiTextArgs.of()
+                .component("name", spell.getDisplayName())
+                .resource("icon", spell.icon())
+                .resource("spell", spell.id()));
+```
+
+The full guide, including `{name}` arguments, images, animated images, custom inline rules, language datagen, and renderer registration, lives in [docs/enUS/text-markup.md](docs/enUS/text-markup.md).
+
 When machine logic and a recipe viewer need the same data, normalize it once as `PiRecipeView`. Machine code can query and cache it with `PiRecipeLookupCache`. Viewer compat code can consume the same `PiRecipeSource`.
 
 ```java
@@ -433,10 +413,54 @@ PiJeiRecipeTypeKey<CounterRecipes.CounterRecipe> type =
                 CounterRecipes.CounterRecipe.class);
 
 PiJeiCategorySpec<CounterRecipes.CounterRecipe> category =
-        new PiJeiCategorySpec<>(type, Component.literal("Counter Charging"), 116, 54, 0);
+        new PiJeiCategorySpec<>(type, Component.literal("Counter Charging"), 116, 54, 0,
+                view -> PiRecipeLayout.builder(view)
+                        .input(18, 18, view.recipe().input())
+                        .thenOutput(64, view.recipe().output())
+                        .build());
 
 PiJeiRecipeSourceSpec<CounterRecipes.CounterRecipe> source =
         new PiJeiRecipeSourceSpec<>(type, CounterRecipes.SOURCE);
+
+PiJeiBootstrap bootstrap = new PiJeiBootstrap();
+bootstrap.registerCategory(category);
+bootstrap.registerRecipeSource(source);
+
+PiJeiRecipeCatalog catalog = PiJeiRecipeCatalog.from(bootstrap);
+List<PiJeiRecipeDisplay<CounterRecipes.CounterRecipe>> displays = catalog.displays(type, level);
+```
+
+`PiJeiRecipeCatalog.from(...)` checks that recipe sources, click areas, and transfer specs point at registered categories. If the same recipe type id is registered with two different recipe classes, it fails there instead of later in the concrete compat layer.
+
+The concrete JEI compat class can register `PiJeiRecipeDisplay` as the JEI recipe object, then translate `PiRecipeSlot` into JEI slots from `IRecipeCategory#setRecipe(...)`. See [docs/enUS/jei-integration.md](docs/enUS/jei-integration.md) for the full structure.
+
+For complex recipes, do not turn this into a large layout engine. Use slot hints for multiple candidate inputs, hidden lookup ingredients, and linked input/output variants:
+
+```java
+PiRecipeLayout.builder(view)
+        .slot(PiRecipeSlot.builder(PiRecipeRole.INPUT, 18, 18)
+                .name("input")
+                .standardBackground()
+                .values(view.recipe().acceptedInputs())
+                .focusGroup("variant")
+                .tooltip(PiTexts.literal("Any matching input"))
+                .build())
+        .slot(PiRecipeSlot.builder(PiRecipeRole.OUTPUT, 82, 18)
+                .name("output")
+                .outputBackground()
+                .values(view.recipe().possibleOutputs())
+                .focusGroup("variant")
+                .build())
+        .slot(PiRecipeSlot.builder(PiRecipeRole.INPUT, 50, 18)
+                .name("fluid")
+                .fluidRenderer(1000, true, 16, 48)
+                .value(view.recipe().fluidInput())
+                .build())
+        .slot(PiRecipeSlot.builder(PiRecipeRole.INPUT, 0, 0)
+                .values(view.recipe().lookupOnlyInputs())
+                .hiddenLookup()
+                .build())
+        .build();
 ```
 
 For shared math helpers, use `api/math` directly. The APIs use vanilla `Vec3` and `AABB`, so they fit entity, collision, render, and targeting code without conversion:
@@ -460,6 +484,8 @@ PiProjectedPoint.ScreenPoint edge = marker.edgeClamped(frame.viewport(), 8.0D, t
 ```
 
 These helpers are meant for targeting, projectile math, HUD markers, world previews, simple animation curves, and weighted choices. Larger visual systems can build on them as low-level pieces.
+
+For the complete Math guide, including scalar/range helpers, Vec3/AABB helpers, curves, weights, camera projection, and edge indicators, see [docs/enUS/math.md](docs/enUS/math.md).
 
 ## Current Code State
 
