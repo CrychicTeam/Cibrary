@@ -37,6 +37,6 @@ public final class CounterConfigs {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("pibrary", path);
+        return new ResourceLocation("pibrary", path);
     }
 }

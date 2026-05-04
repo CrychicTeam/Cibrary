@@ -106,7 +106,7 @@ public final class PiConfigResourceReloader extends SimpleJsonResourceReloadList
             if (binding == null) {
                 continue;
             }
-            ResourceLocation configId = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation configId = new ResourceLocation(
                     entry.getKey().getNamespace(),
                     path.substring(slash + 1));
             readDataType(decoded.get(folder), binding, configId, entry.getValue());

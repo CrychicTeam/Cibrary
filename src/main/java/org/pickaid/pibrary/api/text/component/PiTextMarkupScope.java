@@ -83,12 +83,12 @@ public final class PiTextMarkupScope {
             throw new IllegalArgumentException("resource target must not be blank");
         }
         if (cleaned.indexOf(':') >= 0) {
-            return ResourceLocation.parse(cleaned);
+            return new ResourceLocation(cleaned);
         }
         if (namespace == null) {
-            return ResourceLocation.parse(cleaned);
+            return new ResourceLocation(cleaned);
         }
-        return ResourceLocation.fromNamespaceAndPath(namespace, cleaned);
+        return new ResourceLocation(namespace, cleaned);
     }
 
     static String normalize(String label) {

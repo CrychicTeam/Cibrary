@@ -251,7 +251,7 @@ private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellT
 ```java
 public final class ExampleRegistrate extends PiBaseRegistrate<ExampleRegistrate> {
     private static final ResourceKey<Registry<SpellType>> SPELLS =
-            ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("example", "spells"));
+            ResourceKey.createRegistryKey(new ResourceLocation("example", "spells"));
 
     private ExampleRegistrate(String modid) {
         super(modid);

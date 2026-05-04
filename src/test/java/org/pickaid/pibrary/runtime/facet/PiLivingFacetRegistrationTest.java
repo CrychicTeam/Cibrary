@@ -18,7 +18,7 @@ import org.pickaid.pibrary.dev.example.CounterState;
 import org.pickaid.pibrary.runtime.capability.PiLivingCapabilityRegistration;
 
 class PiLivingFacetRegistrationTest {
-    private static final ResourceLocation DUPLICATE_ID = ResourceLocation.fromNamespaceAndPath("test", "duplicate");
+    private static final ResourceLocation DUPLICATE_ID = new ResourceLocation("test", "duplicate");
 
     @AfterEach
     void clearRegistry() {

@@ -77,10 +77,10 @@ class CounterSpellConfigsTest {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("pibrary", path);
+        return new ResourceLocation("pibrary", path);
     }
 
     private static ResourceLocation minecraft(String path) {
-        return ResourceLocation.fromNamespaceAndPath("minecraft", path);
+        return new ResourceLocation("minecraft", path);
     }
 }

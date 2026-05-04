@@ -55,7 +55,7 @@ public record PiRegistryFamily<T>(
      * @return registry request
      */
     public PiRegistryRequest<T> entry(String path, Supplier<? extends T> factory) {
-        return entry(ResourceLocation.fromNamespaceAndPath(namespace, path), factory, defaultPhase);
+        return entry(new ResourceLocation(namespace, path), factory, defaultPhase);
     }
 
     /**
@@ -68,7 +68,7 @@ public record PiRegistryFamily<T>(
      * @return registry request
      */
     public PiRegistryRequest<T> entry(String path, Supplier<? extends T> factory, PiRegistryPhase phase) {
-        return entry(ResourceLocation.fromNamespaceAndPath(namespace, path), factory, phase);
+        return entry(new ResourceLocation(namespace, path), factory, phase);
     }
 
     /**

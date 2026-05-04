@@ -18,10 +18,10 @@ class PiIdsTest {
     void buildsCommonResourceLocations() {
         ResourceLocation id = PiIds.id("example", "relay_core");
 
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "relay_core"), id);
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "textures/block/relay_core.png"),
+        assertEquals(new ResourceLocation("example", "relay_core"), id);
+        assertEquals(new ResourceLocation("example", "textures/block/relay_core.png"),
                 PiIds.blockTexture("example", "relay_core"));
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "relay_core_on"), PiIds.suffix(id, "_on"));
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "raw/relay_core"), PiIds.prefix(id, "raw/"));
+        assertEquals(new ResourceLocation("example", "relay_core_on"), PiIds.suffix(id, "_on"));
+        assertEquals(new ResourceLocation("example", "raw/relay_core"), PiIds.prefix(id, "raw/"));
     }
 }

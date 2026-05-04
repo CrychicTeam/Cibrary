@@ -22,7 +22,7 @@ class PiLevelFacetSavedDataTest {
         source.facet().increment();
         source.facet().increment();
         source.facet().gainEnergy(7);
-        source.facet().startTrial(ResourceLocation.fromNamespaceAndPath("pibrary", "trial"));
+        source.facet().startTrial(new ResourceLocation("pibrary", "trial"));
         source.facet().setSessionGlow(11);
 
         CompoundTag persisted = source.save(new CompoundTag());
@@ -38,7 +38,7 @@ class PiLevelFacetSavedDataTest {
         assertEquals(4, restored.facet().count());
         assertEquals(7, restored.facet().energy());
         assertEquals(0, restored.facet().sessionGlow());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "trial"), restored.facet().trial());
+        assertEquals(new ResourceLocation("pibrary", "trial"), restored.facet().trial());
     }
 
     @Test

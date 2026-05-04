@@ -80,7 +80,7 @@ class PiDataConfigTypeTest {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
+        return new ResourceLocation("example", path);
     }
 
     record SpellConfig(int mana, int cooldown) {

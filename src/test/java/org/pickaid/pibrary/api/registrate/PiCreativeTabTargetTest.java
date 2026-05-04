@@ -48,8 +48,8 @@ class PiCreativeTabTargetTest {
                     ResourceKey.class.getDeclaredConstructor(ResourceLocation.class, ResourceLocation.class);
             constructor.setAccessible(true);
             return (ResourceKey<CreativeModeTab>) constructor.newInstance(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "creative_mode_tab"),
-                    ResourceLocation.fromNamespaceAndPath("example", path));
+                    new ResourceLocation("minecraft", "creative_mode_tab"),
+                    new ResourceLocation("example", path));
         } catch (ReflectiveOperationException exception) {
             throw new AssertionError("Failed to create lightweight creative tab key for unit test", exception);
         }

@@ -109,7 +109,7 @@ class PiLivingFacetLifecycleTest {
         private final LifecycleFacet fixedFacet;
 
         private LifecycleDescriptor(LifecycleFacet fixedFacet) {
-            super(ResourceLocation.fromNamespaceAndPath("test", "lifecycle"), LifecycleFacet.class, CounterState.class);
+            super(new ResourceLocation("test", "lifecycle"), LifecycleFacet.class, CounterState.class);
             this.fixedFacet = fixedFacet;
         }
 

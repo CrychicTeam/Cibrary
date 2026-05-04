@@ -144,7 +144,7 @@ final class PiRegistrateUsageSample {
     }
 
     private static net.minecraft.resources.ResourceLocation id(String path) {
-        return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("example", path);
+        return new net.minecraft.resources.ResourceLocation("example", path);
     }
 
     private static ResourceLocation spellId(IForgeRegistry<SpellType> spells, SpellType spell) {

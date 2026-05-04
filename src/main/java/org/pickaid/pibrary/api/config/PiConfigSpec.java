@@ -115,7 +115,7 @@ public record PiConfigSpec(
             if (cleanPath.isEmpty()) {
                 throw new IllegalArgumentException("config entry path must not be blank");
             }
-            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "/" + cleanPath);
+            return new ResourceLocation(id.getNamespace(), id.getPath() + "/" + cleanPath);
         }
     }
 }

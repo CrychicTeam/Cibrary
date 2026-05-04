@@ -58,7 +58,7 @@ public record PiDataConfigType<T>(
 
     public ResourceLocation resourceId(ResourceLocation entryId) {
         Objects.requireNonNull(entryId, "entryId");
-        return ResourceLocation.fromNamespaceAndPath(entryId.getNamespace(), folder + "/" + entryId.getPath());
+        return new ResourceLocation(entryId.getNamespace(), folder + "/" + entryId.getPath());
     }
 
     public PiDataConfigEntry<T> entry(ResourceLocation id, T value) {

@@ -13,7 +13,7 @@ import org.pickaid.pibrary.api.sync.PiSyncBridge;
  */
 public final class PiNetSyncBridge implements PiSyncBridge {
     private static final PiChannelId SYNC_CHANNEL =
-            new PiChannelId(ResourceLocation.fromNamespaceAndPath("pibrary", "sync"));
+            new PiChannelId(new ResourceLocation("pibrary", "sync"));
 
     private final PiNetService netService;
 

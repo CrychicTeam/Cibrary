@@ -50,7 +50,7 @@ class PiForgeRegistryPlansTest {
 
         assertEquals(STRINGS.location(), report.registry());
         assertEquals(PiRegistryPhase.MOD_EVENT_REGISTRATION, report.phase());
-        assertEquals(List.of(ResourceLocation.fromNamespaceAndPath("example", "wand")), report.appliedIds());
+        assertEquals(List.of(new ResourceLocation("example", "wand")), report.appliedIds());
         assertEquals(List.of("materials"), report.appliedGroups());
         assertEquals(2, report.skippedRequests());
     }

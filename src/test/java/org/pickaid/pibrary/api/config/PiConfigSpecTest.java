@@ -137,7 +137,7 @@ class PiConfigSpecTest {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
+        return new ResourceLocation("example", path);
     }
 
     private enum Mode {

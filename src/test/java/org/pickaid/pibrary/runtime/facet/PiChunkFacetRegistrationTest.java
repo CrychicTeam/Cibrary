@@ -16,7 +16,7 @@ import org.pickaid.pibrary.dev.example.CounterChunkFacet;
 import org.pickaid.pibrary.dev.example.CounterState;
 
 class PiChunkFacetRegistrationTest {
-    private static final ResourceLocation DUPLICATE_ID = ResourceLocation.fromNamespaceAndPath("test", "duplicate_chunk");
+    private static final ResourceLocation DUPLICATE_ID = new ResourceLocation("test", "duplicate_chunk");
 
     @AfterEach
     void clearRegistry() {

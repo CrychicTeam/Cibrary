@@ -19,7 +19,7 @@ import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 
 class PiStateLevelFacetTest {
     private static final PibraryScopeKey<String> GREETING =
-            new PibraryScopeKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
+            new PibraryScopeKey<>(new ResourceLocation("test", "greeting"), String.class);
 
     @Test
     void persistentDataUsesPersistedProjection() {
@@ -64,7 +64,7 @@ class PiStateLevelFacetTest {
         facet.increment();
 
         PiSyncTarget target = PiSyncTarget.of(
-                ResourceLocation.fromNamespaceAndPath("pibrary", "level_facet"),
+                new ResourceLocation("pibrary", "level_facet"),
                 "counter_level/global"
         );
 
@@ -72,7 +72,7 @@ class PiStateLevelFacetTest {
 
         assertEquals(PiSyncEnvelopeKind.DELTA, envelope.kind());
         assertEquals(PiSyncRoute.GLOBAL, envelope.route());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "counter_state"), envelope.schemaId());
+        assertEquals(new ResourceLocation("pibrary", "counter_state"), envelope.schemaId());
         assertEquals(target, envelope.target());
     }
 

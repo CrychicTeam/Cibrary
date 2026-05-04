@@ -27,7 +27,7 @@ public final class CounterState {
     public UUID runId = new UUID(0L, 1L);
 
     @PiField(id = "trial", sync = PiSyncScope.TRACKING, persist = true)
-    public ResourceLocation trial = ResourceLocation.parse("pibrary:counter");
+    public ResourceLocation trial = new ResourceLocation("pibrary:counter");
 
     @PiField(id = "session_glow", sync = PiSyncScope.CHUNK, persist = false)
     public int sessionGlow;

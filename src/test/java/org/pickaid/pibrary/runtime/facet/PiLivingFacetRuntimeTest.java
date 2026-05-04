@@ -23,7 +23,7 @@ import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 
 class PiLivingFacetRuntimeTest {
     private static final PibraryScopeKey<String> GREETING =
-            new PibraryScopeKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
+            new PibraryScopeKey<>(new ResourceLocation("test", "greeting"), String.class);
     private static final PibraryScope DETACHED_SCOPE = PibraryScopes.create();
 
     private static final PiLivingFacetContainer DETACHED_CONTAINER = new PiLivingFacetContainer() {
@@ -53,7 +53,7 @@ class PiLivingFacetRuntimeTest {
                 PiLivingFacetDescriptors.requireGenerated(CounterPlayerFacet.class);
 
         assertEquals(CounterPlayerFacet.class, descriptor.facetClass());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "counter_player"), descriptor.id());
+        assertEquals(new ResourceLocation("pibrary", "counter_player"), descriptor.id());
         assertTrue(PiLivingFacetDescriptors.findGenerated(descriptor.id()).isPresent());
     }
 
@@ -102,7 +102,7 @@ class PiLivingFacetRuntimeTest {
 
         assertEquals(PiSyncEnvelopeKind.DELTA, envelope.kind());
         assertEquals(PiSyncRoute.OWNER, envelope.route());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "counter_state"), envelope.schemaId());
+        assertEquals(new ResourceLocation("pibrary", "counter_state"), envelope.schemaId());
         assertTrue(envelope.payload().contains("count"));
         assertTrue(envelope.payload().contains("energy"));
     }
@@ -113,14 +113,14 @@ class PiLivingFacetRuntimeTest {
         facet.increment();
 
         PiSyncTarget target = PiSyncTarget.of(
-                ResourceLocation.fromNamespaceAndPath("pibrary", "living_facet"),
+                new ResourceLocation("pibrary", "living_facet"),
                 "counter_player/owner"
         );
 
         PiSyncEnvelope envelope = facet.buildSyncEnvelope(PiSyncEnvelopeKind.DELTA, PiSyncRoute.OWNER, target);
 
         assertEquals(target, envelope.target());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "counter_state"), envelope.schemaId());
+        assertEquals(new ResourceLocation("pibrary", "counter_state"), envelope.schemaId());
         assertTrue(envelope.payload().contains("count"));
     }
 

@@ -25,7 +25,7 @@ class PiTextsTest {
 
     @Test
     void buildsTranslationKeysFromResourceIds() {
-        ResourceLocation fireball = ResourceLocation.fromNamespaceAndPath("example", "spell/fireball");
+        ResourceLocation fireball = new ResourceLocation("example", "spell/fireball");
 
         assertEquals("spell.example.spell.fireball", PiTexts.translationKey("spell", fireball));
         assertEquals("tooltip.example.spell.fireball", PiTexts.tooltipKey(fireball));

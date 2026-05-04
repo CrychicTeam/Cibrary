@@ -16,8 +16,8 @@ public final class PiTestRegistryKeys {
                     ResourceKey.class.getDeclaredConstructor(ResourceLocation.class, ResourceLocation.class);
             constructor.setAccessible(true);
             return (ResourceKey<Registry<T>>) constructor.newInstance(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "root"),
-                    ResourceLocation.fromNamespaceAndPath("test", path));
+                    new ResourceLocation("minecraft", "root"),
+                    new ResourceLocation("test", path));
         } catch (ReflectiveOperationException exception) {
             throw new AssertionError("Failed to create lightweight registry key for unit test", exception);
         }

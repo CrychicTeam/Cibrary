@@ -12,11 +12,11 @@ import org.pickaid.pibrary.api.config.PiConfigValues;
 class CounterConfigsTest {
     @Test
     void exampleConfigSpecHasStableIdsAndValidation() {
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "gameplay"), CounterConfigs.GAMEPLAY.id());
+        assertEquals(new ResourceLocation("pibrary", "gameplay"), CounterConfigs.GAMEPLAY.id());
         assertEquals(PiConfigScope.COMMON_BOOTSTRAP, CounterConfigs.GAMEPLAY.scope());
         assertEquals(2, CounterConfigs.GAMEPLAY.entries().size());
         assertTrue(CounterConfigs.GAMEPLAY.validateDefaults().isEmpty());
-        assertTrue(CounterConfigs.GAMEPLAY.find(ResourceLocation.fromNamespaceAndPath("pibrary", "gameplay/max_energy")).isPresent());
+        assertTrue(CounterConfigs.GAMEPLAY.find(new ResourceLocation("pibrary", "gameplay/max_energy")).isPresent());
         assertEquals(100, PiConfigValues.defaults(CounterConfigs.GAMEPLAY).get(CounterConfigs.MAX_ENERGY));
     }
 

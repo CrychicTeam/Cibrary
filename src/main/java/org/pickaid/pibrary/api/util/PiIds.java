@@ -16,7 +16,7 @@ public final class PiIds {
     }
 
     public static ResourceLocation id(String namespace, String path) {
-        return ResourceLocation.fromNamespaceAndPath(requirePart(namespace, "namespace"), requirePath(path));
+        return new ResourceLocation(requirePart(namespace, "namespace"), requirePath(path));
     }
 
     public static <T> ResourceKey<T> key(ResourceKey<? extends net.minecraft.core.Registry<T>> registry, String namespace, String path) {
@@ -52,17 +52,17 @@ public final class PiIds {
 
     public static ResourceLocation prefix(ResourceLocation id, String prefix) {
         Objects.requireNonNull(id, "id");
-        return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), requirePath(prefix + id.getPath()));
+        return new ResourceLocation(id.getNamespace(), requirePath(prefix + id.getPath()));
     }
 
     public static ResourceLocation suffix(ResourceLocation id, String suffix) {
         Objects.requireNonNull(id, "id");
-        return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), requirePath(id.getPath() + requirePart(suffix, "suffix")));
+        return new ResourceLocation(id.getNamespace(), requirePath(id.getPath() + requirePart(suffix, "suffix")));
     }
 
     public static ResourceLocation child(ResourceLocation parent, String child) {
         Objects.requireNonNull(parent, "parent");
-        return ResourceLocation.fromNamespaceAndPath(parent.getNamespace(), path(parent.getPath(), child));
+        return new ResourceLocation(parent.getNamespace(), path(parent.getPath(), child));
     }
 
     private static String requirePath(String path) {

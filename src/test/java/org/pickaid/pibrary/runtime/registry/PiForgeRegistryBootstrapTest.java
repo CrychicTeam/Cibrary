@@ -33,7 +33,7 @@ class PiForgeRegistryBootstrapTest {
         assertEquals(STRINGS.location(), report.registry());
         assertEquals(1, report.appliedRequests());
         assertEquals(java.util.List.of("materials"), report.appliedGroups());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "wand"), report.appliedIds().get(0));
+        assertEquals(new ResourceLocation("example", "wand"), report.appliedIds().get(0));
     }
 
     @Test

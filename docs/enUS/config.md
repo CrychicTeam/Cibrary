@@ -46,7 +46,7 @@ public final class ExampleConfigs {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
+        return new ResourceLocation("example", path);
     }
 }
 ```
@@ -163,7 +163,7 @@ public final class ExampleConfigGen extends PiDataConfigProvider {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
+        return new ResourceLocation("example", path);
     }
 }
 ```

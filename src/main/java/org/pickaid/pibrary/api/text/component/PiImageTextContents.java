@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
  * remains usable in narration, search, logs, simple tooltips, and tests.</p>
  */
 public class PiImageTextContents extends PiVisualTextContents {
-    public static final ResourceLocation TYPE = ResourceLocation.fromNamespaceAndPath("pibrary", "image");
+    public static final ResourceLocation TYPE = new ResourceLocation("pibrary", "image");
 
     private final ResourceLocation texture;
     private final int width;

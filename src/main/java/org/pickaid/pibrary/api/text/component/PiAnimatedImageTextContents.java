@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
  * Inline animated image content for rich text renderers.
  */
 public class PiAnimatedImageTextContents extends PiImageTextContents {
-    public static final ResourceLocation TYPE = ResourceLocation.fromNamespaceAndPath("pibrary", "animated_image");
+    public static final ResourceLocation TYPE = new ResourceLocation("pibrary", "animated_image");
 
     private final int frameCount;
     private final int ticksPerFrame;

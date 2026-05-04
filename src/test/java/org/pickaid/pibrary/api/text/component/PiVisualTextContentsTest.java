@@ -14,17 +14,17 @@ class PiVisualTextContentsTest {
     @Test
     void visualContentsAreComponentContentsWithStableValueIdentity() {
         PiImageTextContents first = new PiImageTextContents(
-                ResourceLocation.parse("example:textures/gui/spell/fireball.png"),
+                new ResourceLocation("example:textures/gui/spell/fireball.png"),
                 24,
                 12,
                 PiTexts.literal("[fireball]"));
         PiImageTextContents second = new PiImageTextContents(
-                ResourceLocation.parse("example:textures/gui/spell/fireball.png"),
+                new ResourceLocation("example:textures/gui/spell/fireball.png"),
                 24,
                 12,
                 PiTexts.literal("[fireball]"));
         PiImageTextContents different = new PiImageTextContents(
-                ResourceLocation.parse("example:textures/gui/spell/ice.png"),
+                new ResourceLocation("example:textures/gui/spell/ice.png"),
                 24,
                 12,
                 PiTexts.literal("[ice]"));
@@ -53,7 +53,7 @@ class PiVisualTextContentsTest {
     @Test
     void customVisualContentsCanRegisterTheirOwnRenderer() {
         PiVisualTextRenderers.Registry registry = new PiVisualTextRenderers.Registry();
-        ResourceLocation type = ResourceLocation.parse("example:badge");
+        ResourceLocation type = new ResourceLocation("example:badge");
 
         registry.register(type, BadgeContents.class, (context, contents) -> {
         });

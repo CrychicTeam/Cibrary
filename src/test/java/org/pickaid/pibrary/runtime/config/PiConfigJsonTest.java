@@ -93,7 +93,7 @@ class PiConfigJsonTest {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("example", path);
+        return new ResourceLocation("example", path);
     }
 
     private static Codec<Point> pointCodec() {

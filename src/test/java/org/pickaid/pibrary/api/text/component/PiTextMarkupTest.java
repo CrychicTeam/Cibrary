@@ -29,7 +29,7 @@ class PiTextMarkupTest {
 
         Component image = component.getSiblings().get(3);
         PiImageTextContents contents = assertInstanceOf(PiImageTextContents.class, image.getContents());
-        assertEquals(ResourceLocation.parse("example:textures/gui/spell/fireball.png"), contents.texture());
+        assertEquals(new ResourceLocation("example:textures/gui/spell/fireball.png"), contents.texture());
         assertEquals(24, contents.width());
         assertEquals(12, contents.height());
         assertEquals("[image]", image.getString());
@@ -83,7 +83,7 @@ class PiTextMarkupTest {
         PiImageTextContents contents = assertInstanceOf(
                 PiImageTextContents.class,
                 component.getSiblings().get(1).getContents());
-        assertEquals(ResourceLocation.parse("example:textures/gui/spell/fireball.png"), contents.texture());
+        assertEquals(new ResourceLocation("example:textures/gui/spell/fireball.png"), contents.texture());
     }
 
     @Test
@@ -134,7 +134,7 @@ class PiTextMarkupTest {
 
     @Test
     void markupTranslatableUsesFallbackNamedArgsAndScopeRules() {
-        ResourceLocation fireball = ResourceLocation.parse("example:fireball");
+        ResourceLocation fireball = new ResourceLocation("example:fireball");
         PiTextMarkupScope scope = PiTextMarkupScope.builder("example")
                 .inline("mana", (inline, localScope) -> {
                     assertEquals(fireball, localScope.resolveResource(inline.target()));
@@ -148,7 +148,7 @@ class PiTextMarkupTest {
                 scope,
                 PiTextArgs.of()
                         .text("name", "Fire*ball")
-                        .resource("icon", ResourceLocation.parse("example:textures/gui/spell/fireball.png"))
+                        .resource("icon", new ResourceLocation("example:textures/gui/spell/fireball.png"))
                         .resource("spell", fireball));
 
         assertEquals("Fire*ball [image]\nCost: 8 mana", component.getString());

@@ -17,7 +17,7 @@ import org.pickaid.pibrary.dev.example.CounterLevelFacet;
 import org.pickaid.pibrary.dev.example.CounterState;
 
 class PiLevelFacetRegistrationTest {
-    private static final ResourceLocation DUPLICATE_ID = ResourceLocation.fromNamespaceAndPath("test", "duplicate_level");
+    private static final ResourceLocation DUPLICATE_ID = new ResourceLocation("test", "duplicate_level");
 
     @AfterEach
     void clearRegistry() {

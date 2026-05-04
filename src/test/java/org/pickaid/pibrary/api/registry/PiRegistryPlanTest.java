@@ -25,7 +25,7 @@ class PiRegistryPlanTest {
         PiRegistryRequest<String> request = family.entry("wand", () -> "wand");
 
         assertEquals(STRINGS, request.registryKey());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "wand"), request.id());
+        assertEquals(new ResourceLocation("example", "wand"), request.id());
         assertEquals(PiRegistryPhase.MOD_EVENT_REGISTRATION, request.phase());
     }
 
@@ -41,11 +41,11 @@ class PiRegistryPlanTest {
         );
 
         assertEquals(2, plan.requests().size());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("example", "wand"), plan.requests().get(0).id());
+        assertEquals(new ResourceLocation("example", "wand"), plan.requests().get(0).id());
         assertEquals(1, plan.requests(PiRegistryPhase.MOD_EVENT_REGISTRATION).size());
         assertEquals(1, plan.requests(PiRegistryPhase.STATIC_BOOTSTRAP).size());
-        assertTrue(plan.contains(STRINGS.location(), ResourceLocation.fromNamespaceAndPath("example", "wand")));
-        assertTrue(plan.contains(STRINGS, ResourceLocation.fromNamespaceAndPath("example", "wand")));
+        assertTrue(plan.contains(STRINGS.location(), new ResourceLocation("example", "wand")));
+        assertTrue(plan.contains(STRINGS, new ResourceLocation("example", "wand")));
         assertEquals(1, plan.requests(STRINGS).size());
         assertEquals(1, plan.requests(OBJECTS, PiRegistryPhase.STATIC_BOOTSTRAP).size());
         assertEquals("wand", plan.requests(STRINGS).get(0).factory().get());
@@ -92,8 +92,8 @@ class PiRegistryPlanTest {
         PiRegistryPlan merged = PiRegistries.plan().merge(base).merge(extra);
 
         assertEquals(List.of(
-                ResourceLocation.fromNamespaceAndPath("example", "wand"),
-                ResourceLocation.fromNamespaceAndPath("example", "staff")
+                new ResourceLocation("example", "wand"),
+                new ResourceLocation("example", "staff")
         ), merged.requests().stream().map(PiRegistryRequest::id).toList());
         assertThrows(IllegalStateException.class, () -> merged.merge(base));
     }
@@ -108,7 +108,7 @@ class PiRegistryPlanTest {
         );
 
         assertThrows(IllegalStateException.class, () -> target.merge(incoming));
-        assertEquals(List.of(ResourceLocation.fromNamespaceAndPath("example", "wand")),
+        assertEquals(List.of(new ResourceLocation("example", "wand")),
                 target.requests().stream().map(PiRegistryRequest::id).toList());
     }
 
@@ -140,7 +140,7 @@ class PiRegistryPlanTest {
         );
 
         assertEquals(List.of("machines", "materials"), plan.groups());
-        assertEquals(List.of(ResourceLocation.fromNamespaceAndPath("example", "relay")),
+        assertEquals(List.of(new ResourceLocation("example", "relay")),
                 plan.requestsInGroup("machines").stream().map(PiRegistryRequest::id).toList());
         assertEquals(1, plan.summary().countGroup("machines"));
         assertThrows(IllegalStateException.class, () -> plan.register(materials.entry("relay", () -> "duplicate")));

@@ -138,20 +138,20 @@ class PiSyncFlushPlanTest {
         state.active = false;
         state.ownerName = "alice";
         state.runId = UUID.fromString("123e4567-e89b-12d3-a456-426614174010");
-        state.trial = ResourceLocation.parse("pibrary:trial");
+        state.trial = new ResourceLocation("pibrary:trial");
 
         CompoundTag full = CounterState_PiSchema.saveFull(state);
         CounterState restored = new CounterState();
         restored.active = true;
         restored.ownerName = "fallback";
         restored.runId = UUID.fromString("123e4567-e89b-12d3-a456-426614174011");
-        restored.trial = ResourceLocation.parse("pibrary:fallback");
+        restored.trial = new ResourceLocation("pibrary:fallback");
         CounterState_PiSchema.loadFull(restored, full, PiDecodeContext.strict());
 
         assertFalse(restored.active);
         assertEquals("alice", restored.ownerName);
         assertEquals(UUID.fromString("123e4567-e89b-12d3-a456-426614174010"), restored.runId);
-        assertEquals(ResourceLocation.parse("pibrary:trial"), restored.trial);
+        assertEquals(new ResourceLocation("pibrary:trial"), restored.trial);
 
         CompoundTag delta = CounterState_PiSchema.writeDelta(
                 state,

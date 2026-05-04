@@ -19,7 +19,7 @@ import org.pickaid.piserializekit.api.schema.PiDecodeContext;
 
 class PiStateChunkFacetTest {
     private static final PibraryScopeKey<String> GREETING =
-            new PibraryScopeKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
+            new PibraryScopeKey<>(new ResourceLocation("test", "greeting"), String.class);
 
     @Test
     void persistentDataUsesPersistedProjection() {
@@ -64,7 +64,7 @@ class PiStateChunkFacetTest {
         facet.increment();
 
         PiSyncTarget target = PiSyncTarget.of(
-                ResourceLocation.fromNamespaceAndPath("pibrary", "chunk_facet"),
+                new ResourceLocation("pibrary", "chunk_facet"),
                 "0,0"
         );
 
@@ -72,7 +72,7 @@ class PiStateChunkFacetTest {
 
         assertEquals(PiSyncEnvelopeKind.DELTA, envelope.kind());
         assertEquals(PiSyncRoute.TRACKING, envelope.route());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("pibrary", "counter_state"), envelope.schemaId());
+        assertEquals(new ResourceLocation("pibrary", "counter_state"), envelope.schemaId());
         assertEquals(target, envelope.target());
     }
 

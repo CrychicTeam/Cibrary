@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class PibraryScopesTest {
     private static final PibraryScopeKey<String> GREETING =
-            new PibraryScopeKey<>(ResourceLocation.fromNamespaceAndPath("test", "greeting"), String.class);
+            new PibraryScopeKey<>(new ResourceLocation("test", "greeting"), String.class);
 
     @Test
     void childContextOverridesWithoutPollutingParent() {
