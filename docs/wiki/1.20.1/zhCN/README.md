@@ -7,6 +7,7 @@ Pibrary 的 1.20.1 文档按基础能力拆分：
 - [配置与 datapack 数据](../../../zhCN/config.md)
 - [Recipe / JEI 中立契约](../../../zhCN/jei-integration.md)
 - [Recipe runtime](recipe.md)
+- [Entity damage helper](entity-damage.md)
 - [Projectile trace](projectile.md)
 - [Tint 染色](tint.md)
 - [Math 教程](../../../zhCN/math.md)
@@ -26,4 +27,5 @@ Pibrary 的 1.20.1 文档按基础能力拆分：
 - `api/config`：配置条目、分组 spec、作用域、注释与默认值校验。
 - `api/recipe` 和 `api/jei`：机器逻辑和 recipe-viewer compat 共用的中立契约。
 - `api/math`：基于原版 `Vec3` / `AABB` 的数学、曲线、权重、视口投影和几何 helper。
+- `api/entity`：实体生命周期、空间查询、hurt 事件辅助和原版兼容伤害计算。
 - `api/projectile`：面向性能优化的 projectile trace / impact 契约。

@@ -7,6 +7,7 @@ Pibrary 1.20.1 docs are split by foundation area:
 - [Config and datapack data](../../../enUS/config.md)
 - [Recipe / JEI neutral contracts](../../../enUS/jei-integration.md)
 - [Recipe runtime](recipe.md)
+- [Entity damage helpers](entity-damage.md)
 - [Projectile trace](projectile.md)
 - [Tint helpers](tint.md)
 - [Math tutorial](../../../enUS/math.md)
