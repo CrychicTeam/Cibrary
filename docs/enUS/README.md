@@ -7,3 +7,4 @@ when you need complete examples.
 - [JEI integration shape](jei-integration.md)
 - [Config and datapack data](config.md)
 - [Math tutorial](math.md)
+- [Runtime Contracts](runtime-contracts.md)

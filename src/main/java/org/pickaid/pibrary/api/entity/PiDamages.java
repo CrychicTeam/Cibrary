@@ -91,6 +91,20 @@ public final class PiDamages {
     }
 
     /**
+     * Calculates the pre-armor amount to write during Forge's
+     * {@link LivingHurtEvent} stage when the desired result is vanilla's armor
+     * pass applied with reduced effective armor.
+     */
+    public static float calculatePiercingCompensation(
+            float amount,
+            float armor,
+            float toughness,
+            PiArmorPenetration penetration
+    ) {
+        return beforeArmorForArmorPenetration(amount, armor, toughness, penetration);
+    }
+
+    /**
      * Applies armor penetration during {@link LivingHurtEvent} by writing a
      * compensated pre-armor amount back to the event.
      */

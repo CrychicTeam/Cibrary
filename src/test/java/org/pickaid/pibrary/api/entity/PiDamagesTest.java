@@ -68,4 +68,19 @@ class PiDamagesTest {
                 CombatRules.getDamageAfterAbsorb(event.getAmount(), armor, toughness),
                 0.0001F);
     }
+
+    @Test
+    void calculatePiercingCompensationReturnsPreArmorAmountForVanillaArmorPass() {
+        float amount = 16.0F;
+        float armor = 24.0F;
+        float toughness = 8.0F;
+        PiArmorPenetration penetration = PiArmorPenetration.of(2.0F, 0.25F);
+        float compensatedAmount = PiDamages.calculatePiercingCompensation(amount, armor, toughness, penetration);
+        float expectedFinalDamage = PiDamages.afterArmorPenetration(amount, armor, toughness, penetration);
+
+        assertEquals(
+                expectedFinalDamage,
+                CombatRules.getDamageAfterAbsorb(compensatedAmount, armor, toughness),
+                0.0001F);
+    }
 }

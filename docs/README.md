@@ -11,4 +11,5 @@ Current topics:
 - `config.md`
 - `jei-integration.md`
 - `math.md`
+- `runtime-contracts.md`
 - `text-markup.md`
